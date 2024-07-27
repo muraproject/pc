@@ -79,11 +79,7 @@ main {
 </head>
 <body class="d-flex flex-column h-100">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    
         <div class="container">
-        <a class="navbar-brand" href="#">
-        <img src="https://i.pinimg.com/originals/92/61/b3/9261b3445438ca96b8ecec445171704b.gif" alt="..." height="75">
-        </a>
             <a class="navbar-brand" href="#">Admin Panel</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>

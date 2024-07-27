@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 23 Jul 2024 pada 10.26
+-- Waktu pembuatan: 21 Jul 2024 pada 23.37
 -- Versi server: 10.4.32-MariaDB
--- Versi PHP: 8.0.30
+-- Versi PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -58,8 +58,7 @@ CREATE TABLE `confirmed_orders` (
 --
 
 INSERT INTO `confirmed_orders` (`id`, `order_id`, `confirmed_at`) VALUES
-(4, 19, '2024-07-21 12:48:55'),
-(6, 23, '2024-07-23 07:46:57');
+(4, 19, '2024-07-21 12:48:55');
 
 -- --------------------------------------------------------
 
@@ -71,7 +70,6 @@ CREATE TABLE `orders` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `whatsapp` varchar(20) NOT NULL,
-  `address` text DEFAULT NULL,
   `longitude` decimal(20,8) DEFAULT NULL,
   `latitude` decimal(10,8) DEFAULT NULL,
   `refill_quantity` int(11) NOT NULL,
@@ -85,10 +83,8 @@ CREATE TABLE `orders` (
 -- Dumping data untuk tabel `orders`
 --
 
-INSERT INTO `orders` (`id`, `name`, `whatsapp`, `address`, `longitude`, `latitude`, `refill_quantity`, `original_quantity`, `total`, `status`, `created_at`) VALUES
-(19, 'code', '085746301407', NULL, 111.46000000, -7.87550000, 1, 1, 65000.00, 'confirmed', '2024-07-21 12:37:09'),
-(22, 'tugas2', '0876774464', NULL, 111.48427963, -7.88208658, 1, 1, 65000.00, 'pending', '2024-07-22 00:51:33'),
-(23, 'tugas2', '08087977', 'alamat saya ini', 111.35536194, -7.87562503, 1, 1, 65000.00, 'confirmed', '2024-07-23 07:36:31');
+INSERT INTO `orders` (`id`, `name`, `whatsapp`, `longitude`, `latitude`, `refill_quantity`, `original_quantity`, `total`, `status`, `created_at`) VALUES
+(19, 'code', '085746301407', 111.46000000, -7.87550000, 1, 1, 65000.00, 'confirmed', '2024-07-21 12:37:09');
 
 --
 -- Indexes for dumped tables
@@ -128,13 +124,13 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT untuk tabel `confirmed_orders`
 --
 ALTER TABLE `confirmed_orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

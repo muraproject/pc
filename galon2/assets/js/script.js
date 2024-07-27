@@ -1,6 +1,6 @@
 const prices = {
-    refill: 6000,
-    original: 18000
+    refill: 15000,
+    original: 50000
 };
 
 let quantities = {
@@ -71,7 +71,6 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     const orderData = {
         name: document.getElementById('name').value,
         whatsapp: document.getElementById('whatsapp').value,
-        address: document.getElementById('address').value,
         longitude: document.getElementById('longitude').value,
         latitude: document.getElementById('latitude').value,
         refillQuantity: quantities.refill,

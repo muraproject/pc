@@ -9,10 +9,10 @@ $conn = $db->getConnection();
 
 try {
     // Ambil pesanan yang sudah dikonfirmasi
-    $sql = "SELECT o.id, o.name, o.whatsapp, o.address, o.latitude, o.longitude, o.total 
-        FROM orders o 
-        JOIN confirmed_orders co ON o.id = co.order_id 
-        ORDER BY co.confirmed_at";
+    $sql = "SELECT o.id, o.name, o.whatsapp, o.latitude, o.longitude, o.total 
+            FROM orders o 
+            JOIN confirmed_orders co ON o.id = co.order_id 
+            ORDER BY co.confirmed_at";
     
     $result = $conn->query($sql);
     
@@ -36,9 +36,7 @@ try {
             "lat" => (float)$row['latitude'],
             "lng" => (float)$row['longitude'],
             "type" => "destination",
-            "details" => "{$row['name']}, {$row['whatsapp']}, " . 
-                         ($row['address'] ? "Alamat: {$row['address']}, " : "") . 
-                         "Rp " . number_format($row['total'], 0, ',', '.')
+            "details" => "{$row['name']}, {$row['whatsapp']}, Rp " . number_format($row['total'], 0, ',', '.')
         ];
         $letterIndex++;
     }

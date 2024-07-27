@@ -6,21 +6,7 @@
     <title>Rute Pengiriman</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-        #calculateRoute {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
+        #map { height: 600px; }
     </style>
 </head>
 <body>
@@ -132,7 +118,7 @@
                 });
 
                 markers.push(L.marker([dest.lat, dest.lng], {icon: icon}).addTo(map)
-    .bindPopup(dest.name + (dest.details ? '<br>' + dest.details : '')));
+                    .bindPopup(dest.name + (dest.details ? '<br>' + dest.details : '')));
             });
         }
 

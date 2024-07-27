@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesanan Galon</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Pesanan Galon</h1>
+        <div class="product">
+            <h2>Galon Isi Ulang</h2>
+            <p>Harga: Rp. 15,000</p>
+            <input type="number" id="quantity1" min="0" value="0">
+        </div>
+        <div class="product">
+            <h2>Galon Asli</h2>
+            <p>Harga: Rp. 40,000</p>
+            <input type="number" id="quantity2" min="0" value="0">
+        </div>
+        <p>Total: Rp. <span id="total">0</span></p>
+
+        <h3>Informasi Pemesan</h3>
+        <input type="text" id="name" placeholder="Nama">
+        <input type="text" id="whatsapp" placeholder="Nomor WhatsApp">
+        <button id="submit">Kirim</button>
+    </div>
+
+    <form id="orderForm" action="php/process_order.php" method="POST" style="display:none;">
+        <input type="hidden" id="hiddenName" name="name">
+        <input type="hidden" id="hiddenWhatsapp" name="whatsapp">
+        <input type="hidden" id="quantity1hidden" name="quantity1">
+        <input type="hidden" id="quantity2hidden" name="quantity2">
+        <input type="hidden" id="totalhidden" name="total">
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.0.0/jsencrypt.min.js"></script>
+    <script src="js/scripts.js"></script>
+</body>
+</html>

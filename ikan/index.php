@@ -1,17 +1,3 @@
-<?php
-require_once 'includes/db_connect.php';
-
-// Query untuk mengambil data penyakit
-$query = "SELECT * FROM penyakit";
-$result = $conn->query($query);
-
-$penyakit_data = [];
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $penyakit_data[] = $row;
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -115,7 +101,7 @@ if ($result->num_rows > 0) {
 </header>
 
 <main>
-  <section id="home" class="d-flex align-items-center position-relative vh-100 cover hero" style="background-image:url(https://dayaternak.com/wp-content/uploads/2019/10/ikan-nila-kolam-tanah.jpg);">
+  <section id="home" class="d-flex align-items-center position-relative vh-100 cover hero" style="background-image:url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/cappadocia.jpg);">
     <div class="container-fluid container-fluid-max">
       <div class="row">
         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
@@ -158,26 +144,14 @@ if ($result->num_rows > 0) {
 
   <section id="info" class="info bg-lightblue py-5">
     <div class="container-fluid container-fluid-max">
-        <div class="row">
-            <div class="col-12 pb-4">
-                <h2 class="text-blue text-center">Informasi Penyakit Ikan Nila</h2>
-            </div>
-            <?php foreach ($penyakit_data as $penyakit): ?>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title text-blue"><?php echo htmlspecialchars($penyakit['nama']); ?></h5>
-                        <h6 class="card-subtitle mb-2 text-muted">Penyebab:</h6>
-                        <p class="card-text"><?php echo htmlspecialchars($penyakit['penyebab']); ?></p>
-                        <h6 class="card-subtitle mb-2 text-muted">Pengendalian:</h6>
-                        <p class="card-text"><?php echo nl2br(htmlspecialchars($penyakit['pengendalian'])); ?></p>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
+      <div class="row text-center">
+        <div class="col-12 pb-4">
+          <h2 class="text-blue">Informasi Penyakit Ikan Nila</h2>
         </div>
+        <!-- Tambahkan informasi penyakit ikan nila di sini -->
+      </div>
     </div>
-</section>
+  </section>
 </main>
 
 <footer class="py-5 page-footer">

@@ -30,11 +30,11 @@ $db = new Database();
 $conn = $db->getConnection();
 
 // Masukkan data ke database
-$sql = "INSERT INTO orders (name, whatsapp, address, longitude, latitude, refill_quantity, original_quantity, total)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO orders (name, whatsapp, longitude, latitude, refill_quantity, original_quantity, total)
+VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sssddiid", $orderData['name'], $orderData['whatsapp'], $orderData['address'], $orderData['longitude'], $orderData['latitude'], $orderData['refillQuantity'], $orderData['originalQuantity'], $orderData['total']);
+$stmt->bind_param("ssddiid", $orderData['name'], $orderData['whatsapp'], $orderData['longitude'], $orderData['latitude'], $orderData['refillQuantity'], $orderData['originalQuantity'], $orderData['total']);
 
 if ($stmt->execute()) {
     echo json_encode(['success' => true]);

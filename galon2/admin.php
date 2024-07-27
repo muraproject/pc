@@ -93,7 +93,6 @@ $confirmedOrders = getOrders('confirmed');
                                     <th>Longitude</th>
                                     <th>Latitude</th>
                                     <th>Tanggal</th>
-                                    <th>Alamat</th>
                                     <th>Aksi</th>
                                     <th>Hapus</th>
                                 </tr>
@@ -110,7 +109,6 @@ $confirmedOrders = getOrders('confirmed');
                                     <td><?php echo $order['longitude']; ?></td>
                                     <td><?php echo $order['latitude']; ?></td>
                                     <td><?php echo $order['created_at']; ?></td>
-                                    <td><?php echo htmlspecialchars($order['address']); ?></td>
                                     <td>
                                         <button class="btn btn-sm btn-primary confirm-btn" data-id="<?php echo $order['id']; ?>">Konfirmasi</button>
                                     </td>
