@@ -76,17 +76,17 @@
 <header class="fixed-top page-header">
   <div class="container-fluid container-fluid-max">
     <nav id="navbar" class="navbar navbar-expand-lg navbar-dark">
-      <a class="navbar-brand" href="#home">NilaCare</a>
+      <a class="navbar-brand" id="homeku" href="#home">NilaCare</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse justify-content-lg-between" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="#diagnosis">Diagnosa</a>
+            <a class="nav-link" id="diagnosisku" href="#diagnosis">Diagnosa</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#info">Info</a>
+            <a class="nav-link" id="infoku" href="#info">Info</a>
           </li>
         </ul>
         <div class="text-white">
@@ -101,21 +101,21 @@
 </header>
 
 <main>
-  <section id="home" class="d-flex align-items-center position-relative vh-100 cover hero" style="background-image:url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/cappadocia.jpg);">
-    <div class="container-fluid container-fluid-max">
+<section id="home" class="d-flex align-items-center position-relative cover hero" style="background-image:url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/cappadocia.jpg);">
+    <div class="container-fluid container-fluid-max" id="ho">
       <div class="row">
         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
           <h1 class="text-white">Diagnosa Penyakit Ikan Nila dengan Mudah!</h1>
           <div class="mt-3">
-            <a class="btn bg-white text-blue mr-2" href="#diagnosis" role="button">Mulai Diagnosa</a>
-            <a class="btn bg-white text-blue" href="#info" role="button">Pelajari Lebih Lanjut</a>
+            <button class="btn bg-white text-blue mr-2" id="diagnosisBtn">Mulai Diagnosa</button>
+            <button class="btn bg-white text-blue" id="infoBtn">Pelajari Lebih Lanjut</button>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="diagnosis" class="diagnosis py-5">
+  <section id="diagnosis" class="diagnosis py-5 mt-lg-5">
     <div class="container-fluid container-fluid-max">
       <div class="row">
         <div class="col-12 pb-4">
@@ -142,7 +142,7 @@
     </div>
   </section>
 
-  <section id="info" class="info bg-lightblue py-5">
+  <section id="info" class="info bg-lightblue py-5 mt-lg-5">
     <div class="container-fluid container-fluid-max">
       <div class="row text-center">
         <div class="col-12 pb-4">
@@ -208,7 +208,85 @@ $(document).ready(function() {
     }
 
     // Memuat gejala saat halaman dimuat
-    loadGejala();
+    // loadGejala();
+    $('#diagnosis').hide();
+    $('#info').hide();
+    $('#home').hide();
+    // $('#ho').hide();
+    $('#home').addClass('vh-100');
+
+    $('#diagnosisBtn').on('click', function() {
+        $('#home').hide();
+        $('#diagnosis').show();
+        $('#info').hide();
+        $('#diagnosisku').click();
+        $('#home').removeClass('vh-100');
+        $('#ho').hide();
+        loadGejala(); // Load gejala saat tombol diklik
+    });
+
+    
+    $('#infoBtn').on('click', function() {
+        $('#home').hide();
+        $('#diagnosis').hide();
+        $('#info').show();
+        $('#infoku').click();
+        $('#home').removeClass('vh-100');
+        $('#ho').hide();
+        loadInfoPenyakit(); // Fungsi baru untuk memuat info penyakit
+    });
+
+    $('#diagnosisku').on('click', function() {
+        $('#home').hide();
+        $('#diagnosis').show();
+        $('#info').hide();
+        $('#home').removeClass('vh-100');
+        $('#ho').hide();
+        loadGejala(); // Load gejala saat tombol diklik
+    });
+
+    $('#infoku').on('click', function() {
+        $('#home').hide();
+        $('#diagnosis').hide();
+        $('#info').show();
+        $('#home').removeClass('vh-100');
+        $('#ho').hide();
+        loadInfoPenyakit(); // Fungsi baru untuk memuat info penyakit
+    });
+
+    $('#homeku').on('click', function() {
+        $('#home').show();
+        $('#diagnosis').hide();
+        $('#info').hide();
+        $('#home').addClass('vh-100');
+        $('#ho').show();
+        // loadGejala(); // Load gejala saat tombol diklik
+    });
+
+
+    function loadInfoPenyakit() {
+        $.getJSON('get_penyakit.php', function(data) {
+            var infoContainer = $('#info .row');
+            infoContainer.empty(); // Bersihkan konten sebelumnya
+            infoContainer.append('<div class="col-12 pb-4"><h2 class="text-blue">Informasi Penyakit Ikan Nila</h2></div>');
+            
+            $.each(data, function(index, penyakit) {
+                infoContainer.append(`
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-blue">${penyakit.nama}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">Penyebab:</h6>
+                                <p class="card-text">${penyakit.penyebab}</p>
+                                <h6 class="card-subtitle mb-2 text-muted">Pengendalian:</h6>
+                                <p class="card-text">${penyakit.pengendalian}</p>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+        });
+    }
 
     // Handler untuk form submit
     $('#diagnosisForm').on('submit', function(e) {

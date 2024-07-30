@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase CRUD Example</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        // Inisialisasi Supabase
+        const supabaseUrl = 'https://nyqwbmhidnmmuveyziif.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55cXdibWhpZG5tbXV2ZXl6aWlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjIzMjIxOTIsImV4cCI6MjAzNzg5ODE5Mn0.LppyjDyUPx4pcpM6NrId0ZY-WYzqwakdToxOJE32c_8';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Fungsi untuk mengambil data dari tabel
+        async function fetchData() {
+            const { data, error } = await supabase
+                .from('sensors') // Nama tabel Anda
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching data:', error);
+                return;
+            }
+
+            const tbody = document.getElementById('data-tbody');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.created_at}</td>
+                    <td>${item.sensor1}</td>
+                    <td>${item.sensor2}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editData(${item.id}, ${item.sensor1}, ${item.sensor2})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteData(${item.id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Fungsi untuk menambah data ke tabel
+        async function addData() {
+            const sensor1 = document.getElementById('sensor1').value;
+            const sensor2 = document.getElementById('sensor2').value;
+
+            const { data, error } = await supabase
+                .from('sensors')
+                .insert([
+                    { sensor1: sensor1, sensor2: sensor2 }
+                ]);
+
+            if (error) {
+                console.error('Error adding data:', error);
+                return;
+            }
+
+            fetchData();
+        }
+
+        // Fungsi untuk menghapus data dari tabel
+        async function deleteData(id) {
+            const { data, error } = await supabase
+                .from('sensors')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                console.error('Error deleting data:', error);
+                return;
+            }
+
+            fetchData();
+        }
+
+        // Fungsi untuk memperbarui data di tabel
+        async function updateData() {
+            const id = document.getElementById('sensorId').value;
+            const sensor1 = document.getElementById('sensor1').value;
+            const sensor2 = document.getElementById('sensor2').value;
+
+            const { data, error } = await supabase
+                .from('sensors')
+                .update({ sensor1: sensor1, sensor2: sensor2 })
+                .eq('id', id);
+
+            if (error) {
+                console.error('Error updating data:', error);
+                return;
+            }
+
+            document.getElementById('sensorId').value = '';
+            fetchData();
+        }
+
+        // Fungsi untuk mengisi form dengan data yang akan diedit
+        function editData(id, sensor1, sensor2) {
+            document.getElementById('sensorId').value = id;
+            document.getElementById('sensor1').value = sensor1;
+            document.getElementById('sensor2').value = sensor2;
+        }
+
+        // Panggil fungsi fetchData ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', fetchData);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Supabase CRUD Example</h1>
+
+        <form id="dataForm" onsubmit="event.preventDefault(); document.getElementById('sensorId').value ? updateData() : addData();">
+            <input type="hidden" id="sensorId">
+            <div class="form-group">
+                <label for="sensor1">Sensor 1:</label>
+                <input type="number" class="form-control" id="sensor1" required>
+            </div>
+            <div class="form-group">
+                <label for="sensor2">Sensor 2:</label>
+                <input type="number" class="form-control" id="sensor2" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+        <table class="table table-bordered table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Created At</th>
+                    <th>Sensor 1</th>
+                    <th>Sensor 2</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="data-tbody">
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
