@@ -11,21 +11,8 @@ function getMahasiswaById($pdo, $id) {
 }
 
 function addMahasiswa($pdo, $data) {
-    $sql = "INSERT INTO mahasiswa (nama, ipk, penghasilan_ayah, penghasilan_ibu, angkatan) 
-            VALUES (?, ?, ?, ?, ?)";
-    $stmt = $pdo->prepare($sql);
-    return $stmt->execute([
-        $data['nama'], 
-        $data['ipk'], 
-        $data['penghasilan_ayah'], 
-        $data['penghasilan_ibu'], 
-        $data['angkatan']
-    ]);
-}
-
-function updateMahasiswa($pdo, $id, $data) {
-    $sql = "UPDATE mahasiswa SET nama = ?, ipk = ?, penghasilan_ayah = ?, penghasilan_ibu = ?, 
-            angkatan = ? WHERE id = ?";
+    $sql = "INSERT INTO mahasiswa (nama, ipk, penghasilan_ayah, penghasilan_ibu, angkatan, jumlah_tanggungan) 
+            VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     return $stmt->execute([
         $data['nama'], 
@@ -33,6 +20,21 @@ function updateMahasiswa($pdo, $id, $data) {
         $data['penghasilan_ayah'], 
         $data['penghasilan_ibu'], 
         $data['angkatan'],
+        $data['jumlah_tanggungan']
+    ]);
+}
+
+function updateMahasiswa($pdo, $id, $data) {
+    $sql = "UPDATE mahasiswa SET nama = ?, ipk = ?, penghasilan_ayah = ?, penghasilan_ibu = ?, 
+            angkatan = ?, jumlah_tanggungan = ? WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute([
+        $data['nama'], 
+        $data['ipk'], 
+        $data['penghasilan_ayah'], 
+        $data['penghasilan_ibu'], 
+        $data['angkatan'],
+        $data['jumlah_tanggungan'],
         $id
     ]);
 }

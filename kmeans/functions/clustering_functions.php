@@ -18,8 +18,16 @@ function performClustering($pdo) {
 }
 
 function getAllMahasiswaForClustering($pdo) {
-    $stmt = $pdo->query("SELECT id, nama, ipk, penghasilan_ayah, angkatan FROM mahasiswa");
+    $stmt = $pdo->query("SELECT id, nama, ipk, penghasilan_ayah, penghasilan_ibu, angkatan, jumlah_tanggungan FROM mahasiswa");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function calculateScore($mhs) {
+    $ipkScore = $mhs['ipk'] * 25; // IPK 4.0 akan mendapat skor 100
+    $penghasilanAyahScore = (6 - convertPenghasilanToNumber($mhs['penghasilan_ayah'])) * 10; // Maksimum 50
+    $penghasilanIbuScore = (6 - convertPenghasilanToNumber($mhs['penghasilan_ibu'])) * 10; // Maksimum 50
+    $tanggunganScore = min($mhs['jumlah_tanggungan'], 5) * 4; // Maksimum 20 (untuk 5 tanggungan atau lebih)
+    return $ipkScore + $penghasilanAyahScore + $penghasilanIbuScore + $tanggunganScore; // Total maksimum 220
 }
 
 function initializeCentroids($mahasiswa) {
@@ -34,19 +42,19 @@ function initializeCentroids($mahasiswa) {
 }
 
 
-function calculateScore($mhs) {
-    $ipkScore = $mhs['ipk'] * 25; // IPK 4.0 akan mendapat skor 100
-    $penghasilanScore = convertPenghasilanToNumber($mhs['penghasilan_ayah']) * 25; // Maksimum 100
-    return $ipkScore + $penghasilanScore; // Total maksimum 200
-}
+// function calculateScore($mhs) {
+//     $ipkScore = $mhs['ipk'] * 25; // IPK 4.0 akan mendapat skor 100
+//     $penghasilanScore = convertPenghasilanToNumber($mhs['penghasilan_ayah']) * 25; // Maksimum 100
+//     return $ipkScore + $penghasilanScore; // Total maksimum 200
+// }
 
 function assignToClusters($mahasiswa, $centroids) {
     $clusters = [[], [], []];
     foreach ($mahasiswa as $mhs) {
         $score = calculateScore($mhs);
-        if ($score >= 150) {
+        if ($score >= 170) {
             $clusterIndex = 0; // Layak
-        } elseif ($score >= 100) {
+        } elseif ($score >= 120) {
             $clusterIndex = 1; // Dipertimbangkan
         } else {
             $clusterIndex = 2; // Tidak Layak
@@ -55,7 +63,9 @@ function assignToClusters($mahasiswa, $centroids) {
         
         // Logging untuk debugging
         error_log("Mahasiswa: " . $mhs['nama'] . " | IPK: " . $mhs['ipk'] . 
-                  " | Penghasilan: " . $mhs['penghasilan_ayah'] . 
+                  " | Penghasilan Ayah: " . $mhs['penghasilan_ayah'] . 
+                  " | Penghasilan Ibu: " . $mhs['penghasilan_ibu'] . 
+                  " | Tanggungan: " . $mhs['jumlah_tanggungan'] .
                   " | Score: " . $score . " | Cluster: " . ($clusterIndex + 1));
     }
     return $clusters;
@@ -101,10 +111,11 @@ function calculateDistance($mhs, $centroid) {
 
 function convertPenghasilanToNumber($penghasilan) {
     switch ($penghasilan) {
-        case '0 - 500.000': return 250000;
-        case '500.000 - 999.999': return 750000;
-        case '1.000.000 - 1.999.999': return 1500000;
-        case '2.000.000+': return 2500000;
+        case '0 - 500.000': return 1;
+        case '500.000 - 999.999': return 2;
+        case '1.000.000 - 1.999.999': return 3;
+        case '2.000.000 - 4.999.999': return 4;
+        case '> 5.000.000': return 5;
         default: return 0;
     }
 }
@@ -130,13 +141,19 @@ function saveClusteringResults($pdo, $clusters) {
 }
 
 function getClusteringResults($pdo) {
-    $sql = "SELECT m.id, m.nama, m.ipk, m.penghasilan_ayah, m.penghasilan_ibu, m.angkatan, c.nama as cluster_nama, c.keterangan
+    $sql = "SELECT m.id, m.nama, m.ipk, m.penghasilan_ayah, m.penghasilan_ibu, m.angkatan, m.jumlah_tanggungan, c.nama as cluster_nama, c.keterangan
             FROM mahasiswa m
             JOIN hasil_clustering hc ON m.id = hc.mahasiswa_id
             JOIN cluster c ON hc.cluster_id = c.id
             ORDER BY c.id, m.ipk DESC";
     $stmt = $pdo->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Debug: Tampilkan query SQL dan hasil
+    // echo "SQL Query: " . $sql . "<br>";
+    // var_dump($results[0]);
+    
+    return $results;
 }
 
 function getLastClusteringDate($pdo) {

@@ -14,6 +14,11 @@ $cluster_summary = getClusterSummary($pdo);
 $last_clustering_date = getLastClusteringDate($pdo);
 ?>
 
+<?php
+// $hasil_clustering = getClusteringResults($pdo);
+//var_dump($hasil_clustering[0]); // Tampilkan satu baris data sebagai contoh
+?>
+
 <div class="container mt-4">
     <h2>Hasil Clustering</h2>
     
@@ -46,31 +51,38 @@ $last_clustering_date = getLastClusteringDate($pdo);
 
     <h3>Detail Hasil Clustering</h3>
     <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Nama</th>
-                <th>IPK</th>
-                <th>Penghasilan Ayah</th>
-                <th>Penghasilan Ibu</th>
-                <th>Angkatan</th>
-                <th>Cluster</th>
-                <th>Keterangan</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($hasil_clustering as $hasil): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($hasil['nama']); ?></td>
-                <td><?php echo number_format($hasil['ipk'], 2); ?></td>
-                <td><?php echo htmlspecialchars($hasil['penghasilan_ayah']); ?></td>
-                <td><?php echo htmlspecialchars($hasil['penghasilan_ibu']); ?></td>
-                <td><?php echo htmlspecialchars($hasil['angkatan']); ?></td>
-                <td><?php echo htmlspecialchars($hasil['cluster_nama']); ?></td>
-                <td><?php echo htmlspecialchars($hasil['keterangan']); ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>IPK</th>
+            <th>Penghasilan Ayah</th>
+            <th>Penghasilan Ibu</th>
+            <th>Angkatan</th>
+            <th>Jumlah Tanggungan</th>
+            <th>Cluster</th>
+            <th>Keterangan</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+        $no = 1; // Inisialisasi nomor urut
+        foreach ($hasil_clustering as $hasil): 
+        ?>
+        <tr>
+            <td><?php echo $no++; ?></td>
+            <td><?php echo htmlspecialchars($hasil['nama'] ?? ''); ?></td>
+            <td><?php echo number_format($hasil['ipk'] ?? 0, 2); ?></td>
+            <td><?php echo htmlspecialchars($hasil['penghasilan_ayah'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($hasil['penghasilan_ibu'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($hasil['angkatan'] ?? ''); ?></td>
+            <td><?php echo $hasil['jumlah_tanggungan'] ?? 'N/A'; ?></td>
+            <td><?php echo htmlspecialchars($hasil['cluster_nama'] ?? ''); ?></td>
+            <td><?php echo htmlspecialchars($hasil['keterangan'] ?? ''); ?></td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
 </div>
 
 <?php include 'includes/footer.php'; ?>

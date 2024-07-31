@@ -24,24 +24,29 @@ $mahasiswa = getAllMahasiswa($pdo);
     <table class="table table-striped">
     <thead>
         <tr>
-            <th>ID</th>
+            <th>No</th>
             <th>Nama</th>
             <th>IPK</th>
             <th>Penghasilan Ayah</th>
             <th>Penghasilan Ibu</th>
             <th>Angkatan</th>
+            <th>Jumlah Tanggungan</th>
             <th>Aksi</th>
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($mahasiswa as $mhs): ?>
+        <?php 
+        $no = 1; // Inisialisasi nomor urut
+        foreach ($mahasiswa as $mhs): 
+        ?>
         <tr>
-            <td><?php echo $mhs['id']; ?></td>
+            <td><?php echo $no++; ?></td>
             <td><?php echo htmlspecialchars($mhs['nama']); ?></td>
-            <td><?php echo $mhs['ipk']; ?></td>
-            <td><?php echo $mhs['penghasilan_ayah']; ?></td>
-            <td><?php echo $mhs['penghasilan_ibu']; ?></td>
-            <td><?php echo $mhs['angkatan']; ?></td>
+            <td><?php echo number_format($mhs['ipk'], 2); ?></td>
+            <td><?php echo htmlspecialchars($mhs['penghasilan_ayah']); ?></td>
+            <td><?php echo htmlspecialchars($mhs['penghasilan_ibu']); ?></td>
+            <td><?php echo htmlspecialchars($mhs['angkatan']); ?></td>
+            <td><?php echo $mhs['jumlah_tanggungan']; ?></td>
             <td>
                 <a href="edit_mahasiswa.php?id=<?php echo $mhs['id']; ?>" class="btn btn-sm btn-warning">Edit</a>
                 <a href="?delete=<?php echo $mhs['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">Hapus</a>

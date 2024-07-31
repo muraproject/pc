@@ -4,6 +4,11 @@ include 'includes/header.php';
 
 $message = '';
 
+function validatePenghasilan($penghasilan) {
+    $valid_options = ['0 - 500.000', '500.000 - 999.999', '1.000.000 - 1.999.999', '2.000.000 - 4.999.999', '> 5.000.000'];
+    return in_array($penghasilan, $valid_options) ? $penghasilan : '0 - 500.000';
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_FILES["csvFile"]) && $_FILES["csvFile"]["error"] == 0) {
         $fileName = $_FILES["csvFile"]["tmp_name"];
@@ -16,15 +21,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                     $nama = $data[0];
-                    $ipk = $data[1];
-                    $penghasilan_ayah = $data[2];
-                    $penghasilan_ibu = $data[3] ?? '0 - 500.000'; // Default value if not provided
+                    $ipk = floatval($data[1]);
+                    $penghasilan_ayah = validatePenghasilan($data[2]);
+                    $penghasilan_ibu = validatePenghasilan($data[3]);
                     $angkatan = $data[4];
+                    $jumlah_tanggungan = intval($data[5]);
 
-                    $sql = "INSERT INTO mahasiswa (nama, ipk, penghasilan_ayah, penghasilan_ibu, angkatan) 
-                            VALUES (?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO mahasiswa (nama, ipk, penghasilan_ayah, penghasilan_ibu, angkatan, jumlah_tanggungan) 
+                            VALUES (?, ?, ?, ?, ?, ?)";
                     $stmt = $pdo->prepare($sql);
-                    $stmt->execute([$nama, $ipk, $penghasilan_ayah, $penghasilan_ibu, $angkatan]);
+                    $stmt->execute([$nama, $ipk, $penghasilan_ayah, $penghasilan_ibu, $angkatan, $jumlah_tanggungan]);
                 }
                 
                 $pdo->commit();
@@ -60,9 +66,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <div class="mt-4">
         <h4>Format CSV yang diharapkan:</h4>
-        <p>Nama, IPK, Penghasilan Ayah, Penghasilan Ibu, Angkatan</p>
+        <p>Nama, IPK, Penghasilan Ayah, Penghasilan Ibu, Angkatan, Jumlah Tanggungan</p>
         <p>Contoh:</p>
-        <pre>John Doe, 3.75, 500.000 - 999.999, 0 - 500.000, 2022/2023</pre>
+        <pre>John Doe, 3.75, 1.000.000 - 1.999.999, 500.000 - 999.999, 2022/2023, 2</pre>
+        <p>Opsi penghasilan yang valid:</p>
+        <ul>
+            <li>0 - 500.000</li>
+            <li>500.000 - 999.999</li>
+            <li>1.000.000 - 1.999.999</li>
+            <li>2.000.000 - 4.999.999</li>
+            <li>> 5.000.000</li>
+        </ul>
     </div>
 </div>
 

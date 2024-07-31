@@ -39,27 +39,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="number" step="0.01" class="form-control" id="ipk" name="ipk" required>
     </div>
     <div class="mb-3">
-        <label for="penghasilan_ayah" class="form-label">Penghasilan Ayah</label>
-        <select class="form-select" id="penghasilan_ayah" name="penghasilan_ayah" required>
-            <option value="0 - 500.000">0 - 500.000</option>
-            <option value="500.000 - 999.999">500.000 - 999.999</option>
-            <option value="1.000.000 - 1.999.999">1.000.000 - 1.999.999</option>
-            <option value="2.000.000+">2.000.000+</option>
-        </select>
-    </div>
-    <div class="mb-3">
-        <label for="penghasilan_ibu" class="form-label">Penghasilan Ibu</label>
-        <select class="form-select" id="penghasilan_ibu" name="penghasilan_ibu" required>
-            <option value="0 - 500.000">0 - 500.000</option>
-            <option value="500.000 - 999.999">500.000 - 999.999</option>
-            <option value="1.000.000 - 1.999.999">1.000.000 - 1.999.999</option>
-            <option value="2.000.000+">2.000.000+</option>
-        </select>
-    </div>
+    <label for="penghasilan_ayah" class="form-label">Penghasilan Ayah</label>
+    <select class="form-select" id="penghasilan_ayah" name="penghasilan_ayah" required>
+        <option value="0 - 500.000">0 - 500.000</option>
+        <option value="500.000 - 999.999">500.000 - 999.999</option>
+        <option value="1.000.000 - 1.999.999">1.000.000 - 1.999.999</option>
+        <option value="2.000.000 - 4.999.999">2.000.000 - 4.999.999</option>
+        <option value="> 5.000.000">> 5.000.000</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label for="penghasilan_ibu" class="form-label">Penghasilan Ibu</label>
+    <select class="form-select" id="penghasilan_ibu" name="penghasilan_ibu" required>
+        <option value="0 - 500.000">0 - 500.000</option>
+        <option value="500.000 - 999.999">500.000 - 999.999</option>
+        <option value="1.000.000 - 1.999.999">1.000.000 - 1.999.999</option>
+        <option value="2.000.000 - 4.999.999">2.000.000 - 4.999.999</option>
+        <option value="> 5.000.000">> 5.000.000</option>
+    </select>
+</div>
     <div class="mb-3">
         <label for="angkatan" class="form-label">Angkatan</label>
         <input type="text" class="form-control" id="angkatan" name="angkatan" required>
     </div>
+    <div class="mb-3">
+    <label for="jumlah_tanggungan" class="form-label">Jumlah Tanggungan</label>
+    <input type="number" class="form-control" id="jumlah_tanggungan" name="jumlah_tanggungan" required min="0" max="10">
+</div>
     <button type="submit" class="btn btn-primary">Simpan</button>
 </form>
 
