@@ -29,6 +29,7 @@ $mahasiswa = getAllMahasiswa($pdo);
             <th>IPK</th>
             <th>Penghasilan Ayah</th>
             <th>Penghasilan Ibu</th>
+            
             <th>Angkatan</th>
             <th>Jumlah Tanggungan</th>
             <th>Aksi</th>

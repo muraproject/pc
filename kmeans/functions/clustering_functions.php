@@ -2,89 +2,116 @@
 
 function performClustering($pdo) {
     $mahasiswa = getAllMahasiswaForClustering($pdo);
-    $centroids = initializeCentroids($mahasiswa);
-    $maxIterations = 100;
+    $poData = calculatePO($mahasiswa);
+    $normalizedData = normalizeData($mahasiswa, $poData);
+    $centroids = initializeFixedCentroids();
+    
+    $maxIterations = 1000; // Meningkatkan jumlah iterasi maksimum
     $iteration = 0;
     $previousCentroids = [];
 
     do {
-        $clusters = assignToClusters($mahasiswa, $centroids);
+        $clusters = assignToClusters($normalizedData, $centroids);
         $previousCentroids = $centroids;
         $centroids = updateCentroids($clusters);
         $iteration++;
     } while (!centroidsConverged($centroids, $previousCentroids) && $iteration < $maxIterations);
 
-    saveClusteringResults($pdo, $clusters);
+    saveClusteringResults($pdo, $clusters, $mahasiswa);
 }
 
 function getAllMahasiswaForClustering($pdo) {
-    $stmt = $pdo->query("SELECT id, nama, ipk, penghasilan_ayah, penghasilan_ibu, angkatan, jumlah_tanggungan FROM mahasiswa");
+    $stmt = $pdo->query("SELECT id, nama, ipk, penghasilan_ayah, penghasilan_ibu, jumlah_tanggungan FROM mahasiswa");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function calculateScore($mhs) {
-    $ipkScore = $mhs['ipk'] * 25; // IPK 4.0 akan mendapat skor 100
-    $penghasilanAyahScore = (6 - convertPenghasilanToNumber($mhs['penghasilan_ayah'])) * 10; // Maksimum 50
-    $penghasilanIbuScore = (6 - convertPenghasilanToNumber($mhs['penghasilan_ibu'])) * 10; // Maksimum 50
-    $tanggunganScore = min($mhs['jumlah_tanggungan'], 5) * 4; // Maksimum 20 (untuk 5 tanggungan atau lebih)
-    return $ipkScore + $penghasilanAyahScore + $penghasilanIbuScore + $tanggunganScore; // Total maksimum 220
-}
-
-function initializeCentroids($mahasiswa) {
-    $centroids = array_rand($mahasiswa, 3);
-    return array_map(function($index) use ($mahasiswa) {
-        return [
-            'ipk' => $mahasiswa[$index]['ipk'],
-            'penghasilan' => isset($mahasiswa[$index]['penghasilan_ayah']) ? 
-                convertPenghasilanToNumber($mahasiswa[$index]['penghasilan_ayah']) : 0
-        ];
-    }, $centroids);
-}
-
-
-// function calculateScore($mhs) {
-//     $ipkScore = $mhs['ipk'] * 25; // IPK 4.0 akan mendapat skor 100
-//     $penghasilanScore = convertPenghasilanToNumber($mhs['penghasilan_ayah']) * 25; // Maksimum 100
-//     return $ipkScore + $penghasilanScore; // Total maksimum 200
-// }
-
-function assignToClusters($mahasiswa, $centroids) {
-    $clusters = [[], [], []];
+function calculatePO($mahasiswa) {
+    $poData = [];
     foreach ($mahasiswa as $mhs) {
-        $score = calculateScore($mhs);
-        if ($score >= 170) {
-            $clusterIndex = 0; // Layak
-        } elseif ($score >= 120) {
-            $clusterIndex = 1; // Dipertimbangkan
-        } else {
-            $clusterIndex = 2; // Tidak Layak
+        $totalPenghasilan = convertPenghasilanToNumber($mhs['penghasilan_ayah']) + convertPenghasilanToNumber($mhs['penghasilan_ibu']);
+        $po = $mhs['jumlah_tanggungan'] > 0 ? $totalPenghasilan / $mhs['jumlah_tanggungan'] : $totalPenghasilan;
+        $poData[] = $po;
+    }
+    return $poData;
+}
+
+function normalizeData($mahasiswa, $poData) {
+    $normalizedData = [];
+    $avgPO = array_sum($poData) / count($poData);
+    $stdDevPO = calculateStandardDeviation($poData);
+    
+    foreach ($mahasiswa as $index => $mhs) {
+        $normalizedData[] = [
+            'id' => $mhs['id'],
+            'ipk' => $mhs['ipk'],
+            'po_category' => categorizePO($poData[$index], $avgPO, $stdDevPO)
+        ];
+    }
+    return $normalizedData;
+}
+
+function calculateStandardDeviation($data) {
+    $mean = array_sum($data) / count($data);
+    $variance = array_sum(array_map(function($x) use ($mean) {
+        return pow($x - $mean, 2);
+    }, $data)) / count($data);
+    return sqrt($variance);
+}
+
+function categorizePO($po, $avg, $stdDev) {
+    if ($po <= $avg - $stdDev) return 4; // Penghasilan sangat rendah
+    if ($po < $avg) return 3; // Penghasilan rendah
+    if ($po < $avg + $stdDev) return 2; // Penghasilan sedang
+    return 1; // Penghasilan tinggi
+}
+
+function initializeFixedCentroids() {
+    return [
+        ['ipk' => 3.5, 'po_category' => 4], // Layak (IPK tinggi, penghasilan sangat rendah)
+        ['ipk' => 3.0, 'po_category' => 3], // Dipertimbangkan
+        ['ipk' => 2.5, 'po_category' => 1]  // Tidak Layak (IPK rendah, penghasilan tinggi)
+    ];
+}
+
+function assignToClusters($normalizedData, $centroids) {
+    $clusters = [[], [], []];
+    foreach ($normalizedData as $data) {
+        $minDistance = PHP_FLOAT_MAX;
+        $clusterIndex = 0;
+        for ($i = 0; $i < 3; $i++) {
+            $distance = calculateDistance($data, $centroids[$i]);
+            if ($distance < $minDistance) {
+                $minDistance = $distance;
+                $clusterIndex = $i;
+            }
         }
-        $clusters[$clusterIndex][] = $mhs;
-        
-        // Logging untuk debugging
-        error_log("Mahasiswa: " . $mhs['nama'] . " | IPK: " . $mhs['ipk'] . 
-                  " | Penghasilan Ayah: " . $mhs['penghasilan_ayah'] . 
-                  " | Penghasilan Ibu: " . $mhs['penghasilan_ibu'] . 
-                  " | Tanggungan: " . $mhs['jumlah_tanggungan'] .
-                  " | Score: " . $score . " | Cluster: " . ($clusterIndex + 1));
+        $clusters[$clusterIndex][] = $data;
     }
     return $clusters;
+}
+
+function calculateDistance($data1, $data2) {
+    $ipkDiff = ($data1['ipk'] - $data2['ipk']) / 4; // Normalisasi IPK
+    $poDiff = ($data1['po_category'] - $data2['po_category']) / 4; // Normalisasi PO kategori
+    return sqrt($ipkDiff*$ipkDiff + $poDiff*$poDiff);
 }
 
 function updateCentroids($clusters) {
     $newCentroids = [];
     foreach ($clusters as $cluster) {
-        if (empty($cluster)) continue;
-        $sumIPK = $sumPenghasilan = 0;
-        foreach ($cluster as $mhs) {
-            $sumIPK += $mhs['ipk'];
-            $sumPenghasilan += isset($mhs['penghasilan_ayah']) ? 
-                convertPenghasilanToNumber($mhs['penghasilan_ayah']) : 0;
+        if (empty($cluster)) {
+            $newCentroids[] = ['ipk' => 0, 'po_category' => 0];
+            continue;
+        }
+        $sumIPK = $sumPO = 0;
+        foreach ($cluster as $data) {
+            $sumIPK += $data['ipk'];
+            $sumPO += $data['po_category'];
         }
         $count = count($cluster);
         $newCentroids[] = [
             'ipk' => $sumIPK / $count,
-            'penghasilan' => $sumPenghasilan / $count
+            'po_category' => $sumPO / $count
         ];
     }
     return $newCentroids;
@@ -101,36 +128,16 @@ function centroidsConverged($centroids, $previousCentroids) {
     return true;
 }
 
-function calculateDistance($mhs, $centroid) {
-    $ipkDiff = $mhs['ipk'] - $centroid['ipk'];
-    $penghasilan = isset($mhs['penghasilan_ayah']) ? 
-        convertPenghasilanToNumber($mhs['penghasilan_ayah']) : 0;
-    $penghasilanDiff = $penghasilan - $centroid['penghasilan'];
-    return sqrt($ipkDiff*$ipkDiff + $penghasilanDiff*$penghasilanDiff);
-}
-
-function convertPenghasilanToNumber($penghasilan) {
-    switch ($penghasilan) {
-        case '0 - 500.000': return 1;
-        case '500.000 - 999.999': return 2;
-        case '1.000.000 - 1.999.999': return 3;
-        case '2.000.000 - 4.999.999': return 4;
-        case '> 5.000.000': return 5;
-        default: return 0;
-    }
-}
-
-function saveClusteringResults($pdo, $clusters) {
+function saveClusteringResults($pdo, $clusters, $originalData) {
     $pdo->beginTransaction();
     try {
-        // Hapus hasil clustering sebelumnya
         $pdo->exec("DELETE FROM hasil_clustering");
         
         foreach ($clusters as $clusterIndex => $cluster) {
-            foreach ($cluster as $mhs) {
+            foreach ($cluster as $data) {
                 $sql = "INSERT INTO hasil_clustering (mahasiswa_id, cluster_id) VALUES (?, ?)";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([$mhs['id'], $clusterIndex + 1]); // +1 karena cluster_id dimulai dari 1
+                $stmt->execute([$data['id'], $clusterIndex + 1]);
             }
         }
         $pdo->commit();
@@ -140,20 +147,26 @@ function saveClusteringResults($pdo, $clusters) {
     }
 }
 
+function convertPenghasilanToNumber($penghasilan) {
+    switch ($penghasilan) {
+        case '0 - 500.000': return 300000;
+        case '500.000 - 999.999': return 600000;
+        case '1.000.000 - 1.999.999': return 1500000;
+        case '2.000.000 - 4.999.999': return 3000000;
+        case '> 5.000.000': return 5000000;
+        default: return 0;
+    }
+}
+
 function getClusteringResults($pdo) {
-    $sql = "SELECT m.id, m.nama, m.ipk, m.penghasilan_ayah, m.penghasilan_ibu, m.angkatan, m.jumlah_tanggungan, c.nama as cluster_nama, c.keterangan
+    $sql = "SELECT m.id, m.nama, m.ipk, m.penghasilan_ayah, m.penghasilan_ibu, m.jumlah_tanggungan, 
+            c.nama as cluster_nama, c.keterangan
             FROM mahasiswa m
             JOIN hasil_clustering hc ON m.id = hc.mahasiswa_id
             JOIN cluster c ON hc.cluster_id = c.id
             ORDER BY c.id, m.ipk DESC";
     $stmt = $pdo->query($sql);
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Debug: Tampilkan query SQL dan hasil
-    // echo "SQL Query: " . $sql . "<br>";
-    // var_dump($results[0]);
-    
-    return $results;
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function getLastClusteringDate($pdo) {

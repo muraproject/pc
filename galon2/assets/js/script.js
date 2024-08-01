@@ -54,11 +54,14 @@ function validateForm() {
 
 function encryptData(data, publicKey, n) {
     let encrypted = [];
+    console.log(data);
+    
     for (let i = 0; i < data.length; i++) {
         let charCode = data.charCodeAt(i);
         let encryptedChar = BigInt(charCode) ** BigInt(publicKey) % BigInt(n);
         encrypted.push(encryptedChar.toString());
     }
+    console.log(encrypted);
     return encrypted;
 }
 
