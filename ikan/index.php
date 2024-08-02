@@ -242,7 +242,7 @@ $(document).ready(function() {
         $('#info').hide();
         $('#home').removeClass('vh-100');
         $('#ho').hide();
-        loadGejala(); // Load gejala saat tombol diklik
+        // loadGejala(); // Load gejala saat tombol diklik
     });
 
     $('#infoku').on('click', function() {
