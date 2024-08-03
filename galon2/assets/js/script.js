@@ -52,19 +52,22 @@ function validateForm() {
     return true;
 }
 
+// ... (kode lainnya tetap sama)
+
 function encryptData(data, publicKey, n) {
-    let encrypted = [];
-    console.log(data);
-    
-    for (let i = 0; i < data.length; i++) {
-        let charCode = data.charCodeAt(i);
-        let encryptedChar = BigInt(charCode) ** BigInt(publicKey) % BigInt(n);
-        encrypted.push(encryptedChar.toString());
+    let encrypted = {};
+    for (let key in data) {
+        let encryptedValue = [];
+        let value = data[key].toString();
+        for (let i = 0; i < value.length; i++) {
+            let charCode = value.charCodeAt(i);
+            let encryptedChar = BigInt(charCode) ** BigInt(publicKey) % BigInt(n);
+            encryptedValue.push(encryptedChar.toString());
+        }
+        encrypted[key] = encryptedValue.join(',');
     }
-    console.log(encrypted);
     return encrypted;
 }
-
 
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -74,6 +77,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     const orderData = {
         name: document.getElementById('name').value,
         whatsapp: document.getElementById('whatsapp').value,
+        address: document.getElementById('address').value,
         longitude: document.getElementById('longitude').value,
         latitude: document.getElementById('latitude').value,
         refillQuantity: quantities.refill,
@@ -84,7 +88,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     // Enkripsi data
     const publicKey = 7; // Sesuai dengan nilai e yang telah ditentukan
     const n = 187; // Hasil dari p * q (17 * 11)
-    const encryptedData = encryptData(JSON.stringify(orderData), publicKey, n);
+    const encryptedData = encryptData(orderData, publicKey, n);
 
     // Kirim data terenkripsi ke server
     fetch('process_order.php', {
@@ -92,7 +96,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ encryptedData: encryptedData })
+        body: JSON.stringify(encryptedData)
     })
     .then(response => response.json())
     .then(data => {

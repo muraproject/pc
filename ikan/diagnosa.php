@@ -48,11 +48,33 @@ arsort($hasilCF);
 $penyakitTerdiagnosa = key($hasilCF);
 $persentaseKeyakinan = current($hasilCF) * 100;
 
+if (is_array($penyakit) && isset($penyakit[$penyakitTerdiagnosa])) {
+    $nama_penyakit = $penyakit[$penyakitTerdiagnosa]['nama'];
+    $penyebab = $penyakit[$penyakitTerdiagnosa]['penyebab'];
+    $pengendalian = $penyakit[$penyakitTerdiagnosa]['pengendalian'];
+} else {
+    $nama_penyakit = "Tidak dapat menentukan penyakit";
+    $penyebab = "Tidak ada informasi penyebab";
+    $pengendalian = "Tidak ada informasi pengendalian";
+}
+
+// Simpan hasil diagnosa ke database
+$nama = $_POST['nama'];
+$alamat = $_POST['alamat'];
+$waktu = date('Y-m-d H:i:s');
+$persentase = number_format($persentaseKeyakinan, 2);
+
+$stmt = $conn->prepare("INSERT INTO hasil_diagnosa (nama, alamat, waktu, penyakit, persentase, penyebab, pengendalian) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("sssssss", $nama, $alamat, $waktu, $nama_penyakit, $persentase, $penyebab, $pengendalian);
+$stmt->execute();
+$id_diagnosa = $stmt->insert_id;
+
 $response = [
-    'penyakit' => $penyakit[$penyakitTerdiagnosa]['nama'],
-    'persentase' => number_format($persentaseKeyakinan, 2),
-    'penyebab' => $penyakit[$penyakitTerdiagnosa]['penyebab'],
-    'pengendalian' => $penyakit[$penyakitTerdiagnosa]['pengendalian'],
+    'id' => $id_diagnosa,
+    'penyakit' => $nama_penyakit,
+    'persentase' => $persentase,
+    'penyebab' => $penyebab,
+    'pengendalian' => $pengendalian,
     'langkah_perhitungan' => $langkahPerhitungan,
     'rumus' => [
         'CF(H,E) = CF(E) * CF(rule) = CF(user) * CF(pakar)',

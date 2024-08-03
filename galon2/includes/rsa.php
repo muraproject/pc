@@ -32,13 +32,13 @@ class RSA {
         return $ciphertext;
     }
 
-    public function decrypt($ciphertext) {
-        $plaintext = '';
-        foreach ($ciphertext as $c) {
+    public function decrypt($encryptedArray) {
+        $decrypted = '';
+        foreach ($encryptedArray as $c) {
             $m = bcpowmod($c, $this->d, $this->n);
-            $plaintext .= chr($m);
+            $decrypted .= chr($m);
         }
-        return $plaintext;
+        return $decrypted;
     }
 
     public function getPublicKey() {

@@ -101,7 +101,7 @@
 </header>
 
 <main>
-<section id="home" class="d-flex align-items-center position-relative cover hero" style="background-image:url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/cappadocia.jpg);">
+<section id="home" class="d-flex align-items-center position-relative cover hero" style="background-image:url(https://dayaternak.com/wp-content/uploads/2019/10/ikan-nila-kolam-tanah.jpg);">
     <div class="container-fluid container-fluid-max" id="ho">
       <div class="row">
         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
@@ -114,17 +114,25 @@
       </div>
     </div>
   </section>
-
-  <section id="diagnosis" class="diagnosis py-5 mt-lg-5">
-    <div class="container-fluid container-fluid-max">
-      <div class="row">
-        <div class="col-12 pb-4">
-          <h2 class="text-blue">Diagnosa Penyakit Ikan Nila</h2>
-        </div>
-        <div class="col-12">
-          <form id="diagnosisForm">
-            <table id="gejalaTable" class="table table-striped">
-              <thead>
+  <section id="diagnosis" class="diagnosis py-5" style="display: none;">
+  <div class="container-fluid container-fluid-max">
+    <div class="row">
+      <div class="col-12 pb-4">
+        <h2 class="text-blue">Diagnosa Penyakit Ikan Nila</h2>
+      </div>
+      <div class="col-12">
+        <form id="diagnosisForm">
+          <div class="mb-3">
+            <label for="nama" class="form-label">Nama</label>
+            <input type="text" class="form-control" id="nama" name="nama" required>
+          </div>
+          <div class="mb-3">
+            <label for="alamat" class="form-label">Alamat</label>
+            <textarea class="form-control" id="alamat" name="alamat" required></textarea>
+          </div>
+          <table id="gejalaTable" class="table table-striped">
+            <!-- ... (kode table tetap sama) ... -->
+            <thead>
                 <tr>
                   <th>Gejala</th>
                   <th>Ya</th>
@@ -134,13 +142,14 @@
               <tbody>
                 <!-- Gejala akan dimasukkan di sini oleh JavaScript -->
               </tbody>
-            </table>
-            <button type="submit" class="btn bg-blue text-white mt-3">Cek Diagnosa</button>
-          </form>
-        </div>
+          </table>
+          <button type="submit" class="btn bg-blue text-white mt-3">Cek Diagnosa</button>
+        </form>
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
 
   <section id="info" class="info bg-lightblue py-5 mt-lg-5">
     <div class="container-fluid container-fluid-max">
@@ -174,6 +183,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="hasilModalLabel">Hasil Diagnosa</h5>
+        <button id="cetakPDF" class="btn btn-outline-primary ml-1">Cetak PDF</button>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="hasilDiagnosa">
@@ -291,10 +301,13 @@ $(document).ready(function() {
     // Handler untuk form submit
     $('#diagnosisForm').on('submit', function(e) {
         e.preventDefault();
-        var data = {};
-        $('#gejalaTable input:radio:checked').each(function() {
-            data[$(this).attr('name')] = $(this).val();
-        });
+        var data = {
+        nama: $('#nama').val(),
+        alamat: $('#alamat').val()
+    };
+    $('#gejalaTable input:radio:checked').each(function() {
+        data[$(this).attr('name')] = $(this).val();
+    });
 
         $.ajax({
             url: 'diagnosa.php',
@@ -337,6 +350,16 @@ $(document).ready(function() {
                 $('#hasilDiagnosa').html(hasil);
                 var myModal = new bootstrap.Modal(document.getElementById('hasilModal'));
                 myModal.show();
+                // hasil += '<button id="cetakPDF" class="btn bg-blue text-white mt-3">Cetak PDF</button>';
+
+                $('#hasilDiagnosa').html(hasil);
+                var myModal = new bootstrap.Modal(document.getElementById('hasilModal'));
+                myModal.show();
+
+                // Event listener untuk tombol cetak PDF
+                $('#cetakPDF').on('click', function() {
+                    window.open('cetak_pdf.php?id=' + response.id, '_blank');
+                });
             },
             error: function(xhr, status, error) {
                 console.error("Error: " + error);
