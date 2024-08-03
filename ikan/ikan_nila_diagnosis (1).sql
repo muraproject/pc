@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 22 Jul 2024 pada 10.33
+-- Waktu pembuatan: 03 Agu 2024 pada 06.58
 -- Versi server: 10.4.32-MariaDB
--- Versi PHP: 8.0.30
+-- Versi PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -113,6 +113,39 @@ INSERT INTO `gejala` (`id`, `deskripsi`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Struktur dari tabel `hasil_diagnosa`
+--
+
+CREATE TABLE `hasil_diagnosa` (
+  `id` int(11) NOT NULL,
+  `nama` varchar(255) NOT NULL,
+  `alamat` text NOT NULL,
+  `waktu` datetime NOT NULL,
+  `penyakit` varchar(255) NOT NULL,
+  `persentase` decimal(5,2) NOT NULL,
+  `penyebab` text NOT NULL,
+  `pengendalian` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `hasil_diagnosa`
+--
+
+INSERT INTO `hasil_diagnosa` (`id`, `nama`, `alamat`, `waktu`, `penyakit`, `persentase`, `penyebab`, `pengendalian`) VALUES
+(1, 'aa', 'bb', '2024-08-03 03:19:47', 'Dactylograsis', 99.65, 'Cacing Dactylograsis, Kepadatan ikan', '1. Memberikan obat Praziquantel dengan dosis 2-5 mg/L dan direndam selama 24 jam\n2. Merendam menggunakan formalin dengan konsentrasi 25-50 ppm selama 1 jam dan dilakukan selama 2-3 hari selama beberapa minggu tergantung tingkat keparahan'),
+(2, 'aa', 'bb', '2024-08-03 03:20:19', 'Dactylograsis', 99.65, 'Cacing Dactylograsis, Kepadatan ikan', '1. Memberikan obat Praziquantel dengan dosis 2-5 mg/L dan direndam selama 24 jam\n2. Merendam menggunakan formalin dengan konsentrasi 25-50 ppm selama 1 jam dan dilakukan selama 2-3 hari selama beberapa minggu tergantung tingkat keparahan'),
+(3, 'aa', 'bb', '2024-08-03 03:28:41', 'White Spot', 98.80, 'Parasit Protozoa Ichthyophthirius Multifiliis, Stres pada ikan', '1. Mengisolasi ikan yang terinfeksi\n2. Memberikan obat antibiotik seperti formalin, malachite green, dan praziquantel sesuai dengan dosis yang umum digunakan\n3. Menambahkan garam non-iodin dengan dosis 2-3 sendok teh per liter air'),
+(4, 'aa', 'bb', '2024-08-03 03:33:55', 'White Spot', 99.76, 'Parasit Protozoa Ichthyophthirius Multifiliis, Stres pada ikan', '1. Mengisolasi ikan yang terinfeksi\n2. Memberikan obat antibiotik seperti formalin, malachite green, dan praziquantel sesuai dengan dosis yang umum digunakan\n3. Menambahkan garam non-iodin dengan dosis 2-3 sendok teh per liter air'),
+(5, 'aa', 'bb', '2024-08-03 03:36:40', 'Dactylograsis', 98.60, 'Cacing Dactylograsis, Kepadatan ikan', '1. Memberikan obat Praziquantel dengan dosis 2-5 mg/L dan direndam selama 24 jam\n2. Merendam menggunakan formalin dengan konsentrasi 25-50 ppm selama 1 jam dan dilakukan selama 2-3 hari selama beberapa minggu tergantung tingkat keparahan'),
+(6, 'aa', 'bb', '2024-08-03 03:42:40', 'White Spot', 98.80, 'Parasit Protozoa Ichthyophthirius Multifiliis, Stres pada ikan', '1. Mengisolasi ikan yang terinfeksi\n2. Memberikan obat antibiotik seperti formalin, malachite green, dan praziquantel sesuai dengan dosis yang umum digunakan\n3. Menambahkan garam non-iodin dengan dosis 2-3 sendok teh per liter air'),
+(7, 'aa', 'bb', '2024-08-03 04:03:56', 'Streptococcus', 94.00, 'Bakteri Streptococcus agalactiae, S.Iniae', '1. Ikan diangkat dan dikarantina, wadah/kolam dibersihkan 2. Ikan rendam dengan air garam dengan dosis 10 ppm selama 10 menit 3. Lalu Rendam selam 30 menit dengan dengan vaksin vaprivac dosis 30 ppm 4. Untuk indukan suntik dengan vaksin vaprivac'),
+(8, 'aa', 'bb', '2024-08-03 04:09:21', 'Streptococcus', 94.00, 'Bakteri Streptococcus agalactiae, S.Iniae', '1. Ikan diangkat dan dikarantina, wadah/kolam dibersihkan 2. Ikan rendam dengan air garam dengan dosis 10 ppm selama 10 menit 3. Lalu Rendam selam 30 menit dengan dengan vaksin vaprivac dosis 30 ppm 4. Untuk indukan suntik dengan vaksin vaprivac'),
+(9, 'aa', 'bb', '2024-08-03 04:47:12', 'Dactylograsis', 99.86, 'Cacing Dactylograsis, Kepadatan ikan', '1. Memberikan obat Praziquantel dengan dosis 2-5 mg/L dan direndam selama 24 jam\n2. Merendam menggunakan formalin dengan konsentrasi 25-50 ppm selama 1 jam dan dilakukan selama 2-3 hari selama beberapa minggu tergantung tingkat keparahan'),
+(10, 'budi', 'ponorogo', '2024-08-03 06:43:26', 'White Spot', 97.60, 'Parasit Protozoa Ichthyophthirius Multifiliis, Stres pada ikan', '1. Mengisolasi ikan yang terinfeksi\n2. Memberikan obat antibiotik seperti formalin, malachite green, dan praziquantel sesuai dengan dosis yang umum digunakan\n3. Menambahkan garam non-iodin dengan dosis 2-3 sendok teh per liter air');
+
+-- --------------------------------------------------------
+
+--
 -- Struktur dari tabel `keterangan`
 --
 
@@ -178,6 +211,12 @@ ALTER TABLE `gejala`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indeks untuk tabel `hasil_diagnosa`
+--
+ALTER TABLE `hasil_diagnosa`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indeks untuk tabel `keterangan`
 --
 ALTER TABLE `keterangan`
@@ -204,6 +243,12 @@ ALTER TABLE `admin`
 --
 ALTER TABLE `cf_pakar`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT untuk tabel `hasil_diagnosa`
+--
+ALTER TABLE `hasil_diagnosa`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
