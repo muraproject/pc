@@ -65,6 +65,9 @@ $waktu = date('Y-m-d H:i:s');
 $persentase = number_format($persentaseKeyakinan, 2);
 
 $stmt = $conn->prepare("INSERT INTO hasil_diagnosa (nama, alamat, waktu, penyakit, persentase, penyebab, pengendalian) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$query = "INSERT INTO hasil_diagnosa (nama, alamat, waktu, penyakit, persentase, penyebab, pengendalian) VALUES ('$nama', '$alamat', '$waktu', '$nama_penyakit', '$persentase', '$penyebab', '$pengendalian')";
+echo $query; // Cetak query untuk diperiksa
+die(); // Hentikan eksekusi setelah mencetak query
 $stmt->bind_param("sssssss", $nama, $alamat, $waktu, $nama_penyakit, $persentase, $penyebab, $pengendalian);
 $stmt->execute();
 $id_diagnosa = $stmt->insert_id;
