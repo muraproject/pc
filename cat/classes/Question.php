@@ -48,12 +48,20 @@ class Question {
     }
 
     public function getQuestionsForTest($test_id) {
+        error_log("Getting questions for test ID: $test_id");
+        
         $query = "SELECT q.* FROM questions q
                   JOIN test_packages tp ON q.package_id = tp.package_id
                   WHERE tp.test_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([$test_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        error_log("Query executed. Number of questions retrieved: " . count($result));
+        error_log("Questions for test $test_id: " . print_r($result, true));
+        
+        return $result;
     }
+
 }
 ?>

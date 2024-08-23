@@ -22,31 +22,30 @@ $package = new QuestionPackage($db);
 // Get available packages
 $available_packages = $package->getAllPackages();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['start_test'])) {
-    $package_id = $_POST['package_id'];
-    $test_id = $test->startTest($_SESSION['user_id']);
-    $test->assignPackageToTest($test_id, $package_id);
-    $questions = $question->getQuestionsByPackage($package_id);
-    // Redirect to actual test page
-    header("Location: test_page.php?test_id=" . $test_id);
-    exit();
-}
-
 include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
 ?>
 
-<h1>Pilih Paket Soal</h1>
-
-<form method="POST">
-    <div class="mb-3">
-        <label for="package_id" class="form-label">Pilih Paket Soal</label>
-        <select class="form-select" id="package_id" name="package_id" required>
-            <?php foreach ($available_packages as $pkg): ?>
-                <option value="<?php echo $pkg['id']; ?>"><?php echo htmlspecialchars($pkg['name']); ?></option>
-            <?php endforeach; ?>
-        </select>
+<div class="container mt-5">
+    <h1 class="mb-4">Pilih Paket Soal</h1>
+    <div class="row">
+        <?php foreach ($available_packages as $pkg): ?>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="https://fahum.umsu.ac.id/blog/wp-content/uploads/2024/08/cpns-2024-hal-yang-harus-dipersiapkan-dan-diperhatikan-1.webp" class="card-img-top" alt="<?php echo htmlspecialchars($pkg['name']); ?>">
+                    <div class="card-body">
+                        <h5 class="card-title"><?php echo htmlspecialchars($pkg['name']); ?></h5>
+                        <p class="card-text"><?php echo htmlspecialchars($pkg['description']); ?></p>
+                    </div>
+                    <div class="card-footer">
+                        <form method="POST" action="start_test.php">
+                            <input type="hidden" name="package_id" value="<?php echo $pkg['id']; ?>">
+                            <button type="submit" name="start_test" class="btn btn-primary w-100">Mulai Tes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
-    <button type="submit" name="start_test" class="btn btn-primary">Mulai Tes</button>
-</form>
+</div>
 
 <?php include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/footer.php'; ?>

@@ -6,8 +6,38 @@
     <title>Simulasi CAT CPNS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/pc/cat/assets/css/custom.css" rel="stylesheet">
+    <style>
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
+<div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/pc/cat/">Simulasi CAT CPNS</a>
@@ -54,3 +84,40 @@
         </div>
     </nav>
     <div class="container mt-4">
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    let loadingTimer;
+
+    function showLoading() {
+        loadingOverlay.style.display = 'flex';
+        loadingTimer = setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+        }, 3000); // Minimal 3 detik
+    }
+
+    function hideLoading() {
+        if (loadingTimer) {
+            clearTimeout(loadingTimer);
+        }
+        setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+        }, 3000); // Pastikan loading ditampilkan setidaknya 3 detik
+    }
+
+    // Tampilkan loading overlay saat link diklik
+    document.addEventListener('click', function(e) {
+        if (e.target.tagName === 'A' && !e.target.getAttribute('target')) {
+            showLoading();
+        }
+    });
+
+    // Tampilkan loading overlay saat form disubmit
+    document.addEventListener('submit', function(e) {
+        showLoading();
+    });
+
+    // Sembunyikan loading overlay saat halaman selesai dimuat
+    window.addEventListener('load', hideLoading);
+});
+</script>

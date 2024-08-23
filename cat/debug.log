@@ -1,0 +1,194 @@
+[2024-08-23 08:52:03] Script started
+[2024-08-23 08:52:03] Submitting test ID: 24
+[2024-08-23 08:52:03] Answers received: Array
+(
+    [8] => A
+    [9] => C
+)
+
+[2024-08-23 08:52:03] Test data: Array
+(
+    [id] => 24
+    [user_id] => 4
+    [start_time] => 2024-08-23 13:44:19
+    [end_time] => 
+    [score] => 
+    [is_cancelled] => 0
+)
+
+[2024-08-23 08:52:04] Saving answer for question 8: Success
+[2024-08-23 08:52:04] Saving answer for question 9: Success
+[2024-08-23 08:52:04] Questions retrieved: Array
+(
+    [0] => Array
+        (
+            [id] => 8
+            [question] => aaa
+            [option_a] => aaa
+            [option_b] => aaasdad
+            [option_c] => adad
+            [option_d] => adada
+            [correct_answer] => B
+            [category] => 
+            [created_at] => 2024-08-22 16:35:29
+            [package_id] => 2
+            [question_type] => TWK
+        )
+
+    [1] => Array
+        (
+            [id] => 9
+            [question] => asada
+            [option_a] => fdgdfgh
+            [option_b] => fhfhfh
+            [option_c] => fhfh
+            [option_d] => fhfh
+            [correct_answer] => D
+            [category] => 
+            [created_at] => 2024-08-22 16:35:39
+            [package_id] => 2
+            [question_type] => TWK
+        )
+
+)
+
+[2024-08-23 08:52:04] Total questions: 2
+[2024-08-23 08:52:04] Checking question ID: 8
+[2024-08-23 08:52:04] User answer: A
+[2024-08-23 08:52:04] Correct answer: B
+[2024-08-23 08:52:04] Checking question ID: 9
+[2024-08-23 08:52:04] User answer: C
+[2024-08-23 08:52:04] Correct answer: D
+[2024-08-23 08:52:04] Correct answers: 0
+[2024-08-23 08:52:04] Calculated score: 0
+[2024-08-23 08:52:04] Updating test score: Success
+[2024-08-23 08:52:04] Finishing test: Success
+[2024-08-23 08:52:04] Redirecting to test result page
+[2024-08-23 08:53:56] Script started
+[2024-08-23 08:53:56] Submitting test ID: 22
+[2024-08-23 08:53:56] Answers received: Array
+(
+)
+
+[2024-08-23 08:53:56] Test data: Array
+(
+    [id] => 22
+    [user_id] => 4
+    [start_time] => 2024-08-22 16:33:00
+    [end_time] => 2024-08-22 16:33:04
+    [score] => 
+    [is_cancelled] => 0
+)
+
+[2024-08-23 08:53:56] Questions retrieved: Array
+(
+    [0] => Array
+        (
+            [id] => 7
+            [question] => tanggal lahir panca sila
+            [option_a] => 1 juni
+            [option_b] => 1 mei
+            [option_c] => 17 agustus
+            [option_d] => 1 juli
+            [correct_answer] => A
+            [category] => 
+            [created_at] => 2024-08-22 16:16:01
+            [package_id] => 1
+            [question_type] => TWK
+        )
+
+    [1] => Array
+        (
+            [id] => 10
+            [question] => adas
+            [option_a] => srrytry
+            [option_b] => fhfh
+            [option_c] => h5y5
+            [option_d] => ryh5y4
+            [correct_answer] => D
+            [category] => 
+            [created_at] => 2024-08-22 16:36:08
+            [package_id] => 1
+            [question_type] => TWK
+        )
+
+)
+
+[2024-08-23 08:53:56] Total questions: 2
+[2024-08-23 08:53:56] Checking question ID: 7
+[2024-08-23 08:53:56] User answer: Not answered
+[2024-08-23 08:53:56] Correct answer: A
+[2024-08-23 08:53:56] Checking question ID: 10
+[2024-08-23 08:53:56] User answer: Not answered
+[2024-08-23 08:53:56] Correct answer: D
+[2024-08-23 08:53:56] Correct answers: 0
+[2024-08-23 08:53:56] Calculated score: 0
+[2024-08-23 08:53:56] Updating test score: Success
+[2024-08-23 08:53:56] Finishing test: Success
+[2024-08-23 08:53:56] Redirecting to test result page
+[2024-08-23 09:33:58] Script started
+[2024-08-23 09:33:58] Submitting test ID: 25
+[2024-08-23 09:33:58] Answers received: Array
+(
+    [8] => C
+    [9] => A
+)
+
+[2024-08-23 09:33:58] Test data: Array
+(
+    [id] => 25
+    [user_id] => 4
+    [start_time] => 2024-08-23 14:33:47
+    [end_time] => 
+    [score] => 
+    [is_cancelled] => 0
+)
+
+[2024-08-23 09:33:58] Saving answer for question 8: Success
+[2024-08-23 09:33:58] Saving answer for question 9: Success
+[2024-08-23 09:33:58] Questions retrieved: Array
+(
+    [0] => Array
+        (
+            [id] => 8
+            [question] => aaa
+            [option_a] => aaa
+            [option_b] => aaasdad
+            [option_c] => adad
+            [option_d] => adada
+            [correct_answer] => B
+            [category] => 
+            [created_at] => 2024-08-22 16:35:29
+            [package_id] => 2
+            [question_type] => TWK
+        )
+
+    [1] => Array
+        (
+            [id] => 9
+            [question] => asada
+            [option_a] => fdgdfgh
+            [option_b] => fhfhfh
+            [option_c] => fhfh
+            [option_d] => fhfh
+            [correct_answer] => D
+            [category] => 
+            [created_at] => 2024-08-22 16:35:39
+            [package_id] => 2
+            [question_type] => TWK
+        )
+
+)
+
+[2024-08-23 09:33:58] Total questions: 2
+[2024-08-23 09:33:58] Checking question ID: 8
+[2024-08-23 09:33:58] User answer: C
+[2024-08-23 09:33:58] Correct answer: B
+[2024-08-23 09:33:58] Checking question ID: 9
+[2024-08-23 09:33:58] User answer: A
+[2024-08-23 09:33:58] Correct answer: D
+[2024-08-23 09:33:58] Correct answers: 0
+[2024-08-23 09:33:58] Calculated score: 0
+[2024-08-23 09:33:58] Updating test score: Success
+[2024-08-23 09:33:58] Finishing test: Success
+[2024-08-23 09:33:58] Redirecting to test result page

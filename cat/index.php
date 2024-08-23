@@ -2,16 +2,16 @@
 session_start();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/config/database.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/classes/User.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/classes/Question.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/classes/QuestionPackage.php';
 
 $database = new Database();
 $db = $database->getConnection();
 
 $user = new User($db);
-$question = new Question($db);
+$package = new QuestionPackage($db);
 
 $total_users = $user->getTotalUsers();
-$total_questions = $question->getTotalQuestions();
+$total_packages = $package->getTotalPackages();
 
 include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
 ?>
@@ -20,9 +20,9 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
     <h1 class="display-4">Selamat Datang di Simulasi CAT CPNS</h1>
     <p class="lead">Latih kemampuan Anda dan persiapkan diri untuk tes CPNS dengan simulasi CAT kami.</p>
     <?php if (!isset($_SESSION['user_id'])): ?>
-        <a class="btn btn-primary btn-lg" href="/pc/cat/register.php" role="button">Daftar Sekarang</a>
+        <a class="btn btn-primary btn-lg" href="register.php" role="button">Daftar Sekarang</a>
     <?php else: ?>
-        <a class="btn btn-primary btn-lg" href="/pc/cat/user/take_test.php" role="button">Mulai Tes</a>
+        <a class="btn btn-primary btn-lg" href="user/take_test.php" role="button">Mulai Tes</a>
     <?php endif; ?>
 </div>
 
@@ -38,8 +38,8 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Total Pertanyaan</h5>
-                <p class="card-text display-4"><?php echo $total_questions; ?></p>
+                <h5 class="card-title">Total Paket Soal</h5>
+                <p class="card-text display-4"><?php echo $total_packages; ?></p>
             </div>
         </div>
     </div>

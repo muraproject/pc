@@ -19,31 +19,31 @@ class Test {
         return $stmt->execute([$score, $test_id]);
     }
 
-    public function saveAnswer($test_id, $question_id, $answer) {
-        // Periksa struktur tabel terlebih dahulu
-        $checkQuery = "DESCRIBE user_answers";
-        $stmt = $this->conn->prepare($checkQuery);
-        $stmt->execute();
-        $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    // public function saveAnswer($test_id, $question_id, $answer) {
+    //     // Periksa struktur tabel terlebih dahulu
+    //     $checkQuery = "DESCRIBE user_answers";
+    //     $stmt = $this->conn->prepare($checkQuery);
+    //     $stmt->execute();
+    //     $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
-        // Log kolom yang ada
-        error_log("Columns in user_answers table: " . implode(", ", $columns));
+    //     // Log kolom yang ada
+    //     error_log("Columns in user_answers table: " . implode(", ", $columns));
 
-        // Tentukan nama kolom yang benar
-        $testIdColumn = in_array('test_id', $columns) ? 'test_id' : 'user_test_id';
+    //     // Tentukan nama kolom yang benar
+    //     $testIdColumn = in_array('test_id', $columns) ? 'test_id' : 'user_test_id';
 
-        $query = "INSERT INTO user_answers ($testIdColumn, question_id, user_answer) 
-                  VALUES (?, ?, ?) 
-                  ON DUPLICATE KEY UPDATE user_answer = ?";
-        $stmt = $this->conn->prepare($query);
-        $result = $stmt->execute([$test_id, $question_id, $answer, $answer]);
+    //     $query = "INSERT INTO user_answers ($testIdColumn, question_id, user_answer) 
+    //               VALUES (?, ?, ?) 
+    //               ON DUPLICATE KEY UPDATE user_answer = ?";
+    //     $stmt = $this->conn->prepare($query);
+    //     $result = $stmt->execute([$test_id, $question_id, $answer, $answer]);
         
-        if (!$result) {
-            error_log("Error in saveAnswer: " . implode(", ", $stmt->errorInfo()));
-        }
+    //     if (!$result) {
+    //         error_log("Error in saveAnswer: " . implode(", ", $stmt->errorInfo()));
+    //     }
         
-        return $result;
-    }
+    //     return $result;
+    // }
 
     public function getTestResults($test_id) {
         $query = "SELECT ut.*, u.username, COUNT(ua.id) as total_questions, SUM(ua.is_correct) as correct_answers
@@ -154,6 +154,26 @@ class Test {
     }
 
     // Modifikasi getTestAnswers() yang sudah ada untuk mencakup informasi pertanyaan
+
+    public function saveAnswer($test_id, $question_id, $answer) {
+        $query = "INSERT INTO user_answers (user_test_id, question_id, user_answer) 
+                  VALUES (?, ?, ?) 
+                  ON DUPLICATE KEY UPDATE user_answer = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$test_id, $question_id, $answer, $answer]);
+    }
+
+    public function updateTestScore($test_id, $score) {
+        $query = "UPDATE user_tests SET score = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$score, $test_id]);
+    }
+
+    public function finishTest($test_id) {
+        $query = "UPDATE user_tests SET end_time = CURRENT_TIMESTAMP WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$test_id]);
+    }
     public function getTestAnswers($test_id) {
         $query = "SELECT question_id, user_answer FROM user_answers WHERE user_test_id = ?";
         $stmt = $this->conn->prepare($query);
@@ -167,11 +187,11 @@ class Test {
         return $answers;
     }
 
-    public function updateTestScore($test_id, $score) {
-        $query = "UPDATE user_tests SET score = ? WHERE id = ?";
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute([$score, $test_id]);
-    }
+    // public function updateTestScore($test_id, $score) {
+    //     $query = "UPDATE user_tests SET score = ? WHERE id = ?";
+    //     $stmt = $this->conn->prepare($query);
+    //     return $stmt->execute([$score, $test_id]);
+    // }
 
 
     public function startTest($user_id) {
@@ -210,10 +230,10 @@ class Test {
     //     return $stmt->execute([$test_id, $question_id, $answer, $answer]);
     // }
 
-    public function finishTest($test_id) {
-        $query = "UPDATE user_tests SET end_time = CURRENT_TIMESTAMP WHERE id = ?";
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute([$test_id]);
-    }
+    // public function finishTest($test_id) {
+    //     $query = "UPDATE user_tests SET end_time = CURRENT_TIMESTAMP WHERE id = ?";
+    //     $stmt = $this->conn->prepare($query);
+    //     return $stmt->execute([$test_id]);
+    // }
 }
 ?>

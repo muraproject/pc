@@ -37,5 +37,13 @@ class QuestionPackage {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([$id]);
     }
+
+    public function getTotalPackages() {
+        $query = "SELECT COUNT(*) as total FROM question_packages";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'];
+    }
 }
 ?>

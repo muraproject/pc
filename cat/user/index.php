@@ -2,73 +2,58 @@
 session_start();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/config/database.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/classes/User.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/classes/Test.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: /pc/cat/login.php");
-    exit();
-}
+require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/classes/QuestionPackage.php';
 
 $database = new Database();
 $db = $database->getConnection();
 
 $user = new User($db);
-$test = new Test($db);
+$package = new QuestionPackage($db);
 
-$user_data = $user->getUserById($_SESSION['user_id']);
-$test_history = $test->getUserTestHistory($_SESSION['user_id']);
+$total_users = $user->getTotalUsers();
+$total_packages = $package->getTotalPackages();
 
 include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
 ?>
 
-<h1>Selamat datang, <?php echo htmlspecialchars($user_data['username']); ?>!</h1>
+<div class="jumbotron">
+    <h1 class="display-4">Selamat Datang di Simulasi CAT CPNS</h1>
+    <p class="lead">Latih kemampuan Anda dan persiapkan diri untuk tes CPNS dengan simulasi CAT kami.</p>
+    <?php if (!isset($_SESSION['user_id'])): ?>
+        <a class="btn btn-primary btn-lg" href="register.php" role="button">Daftar Sekarang</a>
+    <?php else: ?>
+        <a class="btn btn-primary btn-lg" href="user/take_test.php" role="button">Mulai Tes</a>
+    <?php endif; ?>
+</div>
 
 <div class="row mt-4">
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Profil Anda</h5>
-                <p>Username: <?php echo htmlspecialchars($user_data['username']); ?></p>
-                <p>Email: <?php echo htmlspecialchars($user_data['email']); ?></p>
-                <a href="profile.php" class="btn btn-primary">Edit Profil</a>
+                <h5 class="card-title">Total Pengguna</h5>
+                <p class="card-text display-4"><?php echo $total_users; ?></p>
             </div>
         </div>
     </div>
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Mulai Tes Baru</h5>
-                <p>Siap untuk mengambil tes CAT CPNS?</p>
-                <a href="take_test.php" class="btn btn-success">Mulai Tes</a>
+                <h5 class="card-title">Total Paket Soal</h5>
+                <p class="card-text display-4"><?php echo $total_packages; ?></p>
             </div>
         </div>
     </div>
 </div>
 
-<h2 class="mt-4">Riwayat Tes</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Tanggal</th>
-            <th>Skor</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($test_history as $test): ?>
-        <tr>
-            <td><?php echo htmlspecialchars($test['start_time']); ?></td>
-            <td><?php echo isset($test['score']) ? htmlspecialchars($test['score']) : 'Belum selesai'; ?></td>
-            <td>
-                <?php if (isset($test['score'])): ?>
-                    <a href="view_result.php?id=<?php echo $test['id']; ?>" class="btn btn-sm btn-info">Lihat Hasil</a>
-                <?php else: ?>
-                    <a href="continue_test.php?id=<?php echo $test['id']; ?>" class="btn btn-sm btn-warning">Lanjutkan</a>
-                <?php endif; ?>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<div class="mt-4">
+    <h2>Tentang CAT CPNS</h2>
+    <p>Computer Assisted Test (CAT) adalah metode ujian dengan menggunakan komputer dalam pelaksanaan seleksi CPNS. Sistem ini memungkinkan proses seleksi yang lebih efisien, transparan, dan akurat.</p>
+    <p>Dengan menggunakan simulasi CAT kami, Anda dapat:</p>
+    <ul>
+        <li>Membiasakan diri dengan format ujian CAT</li>
+        <li>Melatih kemampuan menjawab soal dengan batasan waktu</li>
+        <li>Mengevaluasi kesiapan Anda untuk ujian CPNS yang sebenarnya</li>
+    </ul>
+</div>
 
 <?php include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/footer.php'; ?>
