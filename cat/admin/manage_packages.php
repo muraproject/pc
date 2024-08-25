@@ -16,6 +16,13 @@ $package = new QuestionPackage($db);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['add_package'])) {
         $package->addPackage($_POST['name'], $_POST['description']);
+    } elseif (isset($_POST['delete_package'])) {
+        $delete_id = intval($_POST['delete_package']);
+        if ($package->deletePackage($delete_id)) {
+            $success_message = "Paket soal berhasil dihapus.";
+        } else {
+            $error_message = "Gagal menghapus paket soal.";
+        }
     }
 }
 
@@ -25,6 +32,14 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
 ?>
 
 <h1>Kelola Paket Soal</h1>
+
+<?php if (isset($success_message)): ?>
+    <div class="alert alert-success"><?php echo $success_message; ?></div>
+<?php endif; ?>
+
+<?php if (isset($error_message)): ?>
+    <div class="alert alert-danger"><?php echo $error_message; ?></div>
+<?php endif; ?>
 
 <form method="POST" class="mb-4">
     <h2>Tambah Paket Soal Baru</h2>
@@ -36,6 +51,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
         <label for="description" class="form-label">Deskripsi</label>
         <textarea class="form-control" id="description" name="description"></textarea>
     </div>
+    <a href="import_questions.php" class="btn btn-success">Impor Soal dari CSV</a>
     <button type="submit" name="add_package" class="btn btn-primary">Tambah Paket</button>
 </form>
 
@@ -58,6 +74,10 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
             <td>
                 <a href="edit_package.php?id=<?php echo $p['id']; ?>" class="btn btn-sm btn-primary">Edit</a>
                 <a href="manage_package_questions.php?id=<?php echo $p['id']; ?>" class="btn btn-sm btn-info">Kelola Soal</a>
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="delete_package" value="<?php echo $p['id']; ?>">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus paket soal ini?');">Hapus</button>
+                </form>
             </td>
         </tr>
         <?php endforeach; ?>

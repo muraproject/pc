@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST['option_b'],
             $_POST['option_c'],
             $_POST['option_d'],
+            $_POST['option_e'],
             $_POST['correct_answer']
         );
     }
@@ -75,12 +76,17 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
         <input type="text" class="form-control" id="option_d" name="option_d" required>
     </div>
     <div class="mb-3">
+        <label for="option_e" class="form-label">Opsi E</label>
+        <input type="text" class="form-control" id="option_e" name="option_e" required>
+    </div>
+    <div class="mb-3">
         <label for="correct_answer" class="form-label">Jawaban Benar</label>
         <select class="form-select" id="correct_answer" name="correct_answer" required>
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
             <option value="D">D</option>
+            <option value="E">E</option>
         </select>
     </div>
     <button type="submit" name="add_question" class="btn btn-primary">Tambah Soal</button>

@@ -63,20 +63,24 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
                             <h5 class="card-title">Pertanyaan <?php echo $index + 1; ?></h5>
                             <p><?php echo htmlspecialchars($q['question']); ?></p>
                             <?php
-                            $options = ['A', 'B', 'C', 'D'];
+                            $options = ['A', 'B', 'C', 'D', 'E'];
                             foreach ($options as $option):
                                 $option_value = 'option_' . strtolower($option);
+                                if (isset($q[$option_value]) && !empty($q[$option_value])):
                             ?>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="answers[<?php echo $q['id']; ?>]" 
-                                           id="answer<?php echo $q['id']; ?>_<?php echo strtolower($option); ?>" 
-                                           value="<?php echo $option; ?>"
-                                           <?php echo (isset($user_answers[$q['id']]) && $user_answers[$q['id']] == $option) ? 'checked' : ''; ?>>
+                                        id="answer<?php echo $q['id']; ?>_<?php echo strtolower($option); ?>" 
+                                        value="<?php echo $option; ?>"
+                                        <?php echo (isset($user_answers[$q['id']]) && $user_answers[$q['id']] == $option) ? 'checked' : ''; ?>>
                                     <label class="form-check-label" for="answer<?php echo $q['id']; ?>_<?php echo strtolower($option); ?>">
                                         <?php echo htmlspecialchars($q[$option_value]); ?>
                                     </label>
                                 </div>
-                            <?php endforeach; ?>
+                            <?php
+                                endif;
+                            endforeach;
+                            ?>
                             <div class="mt-3">
                                 <button type="button" class="btn btn-warning btn-sm clear-answer">Hapus Jawaban</button>
                                 <button type="button" class="btn btn-info btn-sm skip-question">Lewati</button>

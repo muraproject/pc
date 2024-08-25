@@ -33,9 +33,33 @@ class QuestionPackage {
     }
 
     public function deletePackage($id) {
-        $query = "DELETE FROM question_packages WHERE id = ?";
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute([$id]);
+        try {
+            $this->conn->beginTransaction();
+
+            // Hapus jawaban terkait
+            $query = "DELETE ua FROM user_answers ua
+                      JOIN questions q ON ua.question_id = q.id
+                      WHERE q.package_id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$id]);
+
+            // Hapus pertanyaan dalam paket
+            $query = "DELETE FROM questions WHERE package_id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$id]);
+
+            // Hapus paket
+            $query = "DELETE FROM question_packages WHERE id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$id]);
+
+            $this->conn->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->conn->rollBack();
+            error_log("Error deleting package: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function getTotalPackages() {

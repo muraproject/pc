@@ -22,7 +22,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
     <?php if (!isset($_SESSION['user_id'])): ?>
         <a class="btn btn-primary btn-lg" href="register.php" role="button">Daftar Sekarang</a>
     <?php else: ?>
-        <a class="btn btn-primary btn-lg" href="user/take_test.php" role="button">Mulai Tes</a>
+        <a class="btn btn-primary btn-lg" href="take_test.php" role="button">Mulai Tes</a>
     <?php endif; ?>
 </div>
 

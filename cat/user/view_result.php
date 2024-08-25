@@ -21,8 +21,7 @@ $test_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $test_data = $test->getTestById($test_id);
 
 if (!$test_data || $test_data['user_id'] != $_SESSION['user_id']) {
-    header("Location: /pc/cat/user/history.php");
-    exit();
+    die("Tes tidak ditemukan atau Anda tidak memiliki akses.");
 }
 
 $user_data = $user->getUserById($_SESSION['user_id']);
@@ -39,45 +38,53 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
         <h5 class="card-title">Informasi Tes</h5>
         <p><strong>Nama:</strong> <?php echo htmlspecialchars($user_data['username']); ?></p>
         <p><strong>Tanggal Tes:</strong> <?php echo date('d-m-Y H:i', strtotime($test_data['start_time'])); ?></p>
-        <p><strong>Durasi:</strong> <?php 
-            $start = new DateTime($test_data['start_time']);
-            $end = new DateTime($test_data['end_time']);
-            $duration = $start->diff($end);
-            echo $duration->format('%H jam %i menit %s detik');
-        ?></p>
         <p><strong>Skor:</strong> <?php echo $test_data['score']; ?> / 100</p>
     </div>
 </div>
 
 <h2>Detail Jawaban</h2>
 
-<?php foreach ($test_questions as $q): ?>
+<?php foreach ($test_questions as $index => $q): ?>
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">Pertanyaan <?php echo $q['id']; ?></h5>
+            <h5 class="card-title">Pertanyaan <?php echo $index + 1; ?></h5>
             <p><?php echo htmlspecialchars($q['question']); ?></p>
             
             <?php
-            $options = ['A', 'B', 'C', 'D'];
+            $user_answer = isset($user_answers[$q['id']]) ? $user_answers[$q['id']] : 'Tidak dijawab';
+            $is_correct = ($user_answer == $q['correct_answer']);
+            ?>
+            
+            <p>Jawaban Anda: 
+                <span class="<?php echo $is_correct ? 'text-success' : 'text-danger'; ?>">
+                    <?php echo htmlspecialchars($user_answer); ?>
+                </span>
+            </p>
+            <p>Jawaban Benar: <?php echo htmlspecialchars($q['correct_answer']); ?></p>
+            
+            <?php
+            $options = ['A', 'B', 'C', 'D', 'E'];
             foreach ($options as $option):
-                $option_value = 'option_' . strtolower($option);
-                $is_user_answer = ($user_answers[$q['id']] == $option);
-                $is_correct_answer = ($q['correct_answer'] == $option);
+                $option_key = 'option_' . strtolower($option);
+                if (isset($q[$option_key]) && !empty($q[$option_key])):
             ?>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" disabled
-                           <?php echo $is_user_answer ? 'checked' : ''; ?>
-                           <?php echo $is_correct_answer ? 'style="accent-color: green;"' : ''; ?>>
-                    <label class="form-check-label <?php echo $is_correct_answer ? 'text-success' : ''; ?>">
-                        <?php echo htmlspecialchars($q[$option_value]); ?>
-                        <?php if ($is_user_answer && !$is_correct_answer): ?>
+                        <?php echo $user_answer === $option ? 'checked' : ''; ?>
+                        <?php echo $q['correct_answer'] === $option ? 'style="accent-color: green;"' : ''; ?>>
+                    <label class="form-check-label <?php echo $q['correct_answer'] === $option ? 'text-success' : ''; ?>">
+                        <?php echo htmlspecialchars($q[$option_key]); ?>
+                        <?php if ($user_answer === $option && $option !== $q['correct_answer']): ?>
                             <span class="text-danger">(Jawaban Anda)</span>
-                        <?php elseif ($is_correct_answer): ?>
+                        <?php elseif ($option === $q['correct_answer']): ?>
                             <span class="text-success">(Jawaban Benar)</span>
                         <?php endif; ?>
                     </label>
                 </div>
-            <?php endforeach; ?>
+            <?php
+                endif;
+            endforeach;
+            ?>
         </div>
     </div>
 <?php endforeach; ?>

@@ -1,3 +1,11 @@
+<?php
+// Tambahkan variabel ini di awal file header.php
+$hide_back_button = false;
+if (basename($_SERVER['PHP_SELF']) == 'index.php' || 
+    basename($_SERVER['PHP_SELF']) == 'dashboard.php') {
+    $hide_back_button = true;
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -5,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulasi CAT CPNS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link href="/pc/cat/assets/css/custom.css" rel="stylesheet">
     <style>
         #loading-overlay {
@@ -35,11 +44,16 @@
     </style>
 </head>
 <body>
-<div id="loading-overlay">
+    <div id="loading-overlay">
         <div class="spinner"></div>
     </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
+        <?php if (!$hide_back_button): ?>
+            <a class="navbar-brand" href="#" id="backButton">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <?php endif; ?>
             <a class="navbar-brand" href="/pc/cat/">Simulasi CAT CPNS</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -55,7 +69,7 @@
                                 <a class="nav-link" href="/pc/cat/admin/manage_users.php">Kelola Pengguna</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/pc/cat/admin/manage_questions.php">Kelola Pertanyaan</a>
+                                <a class="nav-link" href="/pc/cat/admin/manage_packages.php">Kelola Paket Soal</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="/pc/cat/admin/view_results.php">Lihat Hasil</a>
@@ -84,26 +98,28 @@
         </div>
     </nav>
     <div class="container mt-4">
-    <script>
+   
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('loading-overlay');
+    const backButton = document.getElementById('backButton');
+
+    // const loadingOverlay = document.getElementById('loading-overlay');
     let loadingTimer;
 
     function showLoading() {
         loadingOverlay.style.display = 'flex';
-        loadingTimer = setTimeout(() => {
-            loadingOverlay.style.display = 'none';
-        }, 3000); // Minimal 3 detik
+        clearTimeout(loadingTimer);
+        loadingTimer = setTimeout(hideLoading, 1000); // Memaksa loading muncul minimal 2 detik
     }
 
     function hideLoading() {
-        if (loadingTimer) {
-            clearTimeout(loadingTimer);
-        }
-        setTimeout(() => {
-            loadingOverlay.style.display = 'none';
-        }, 3000); // Pastikan loading ditampilkan setidaknya 3 detik
+        loadingOverlay.style.display = 'none';
     }
+
+    // Tampilkan loading saat halaman dimuat
+    showLoading();
 
     // Tampilkan loading overlay saat link diklik
     document.addEventListener('click', function(e) {
@@ -118,6 +134,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Sembunyikan loading overlay saat halaman selesai dimuat
-    window.addEventListener('load', hideLoading);
+    window.addEventListener('load', function() {
+        // Loading akan tetap muncul minimal 2 detik karena kita menggunakan setTimeout di showLoading
+    });
+
+    
 });
 </script>

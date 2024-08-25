@@ -6,12 +6,31 @@ class Question {
         $this->conn = $db;
     }
 
-    public function addQuestion($package_id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $correct_answer) {
-        $query = "INSERT INTO questions (package_id, question_type, question, option_a, option_b, option_c, option_d, correct_answer) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    public function updatePackage($id, $name, $description) {
+        $query = "UPDATE question_packages SET name = ?, description = ? WHERE id = ?";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([$package_id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $correct_answer]);
+        return $stmt->execute([$name, $description, $id]);
     }
+
+    public function addQuestion($package_id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $option_e, $correct_answer) {
+        $query = "INSERT INTO questions (package_id, question_type, question, option_a, option_b, option_c, option_d, option_e, correct_answer) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$package_id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $option_e, $correct_answer]);
+    }
+
+    public function updateQuestion($id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $option_e, $correct_answer) {
+        $query = "UPDATE questions SET question_type = ?, question = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, option_e = ?, correct_answer = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$question_type, $question, $option_a, $option_b, $option_c, $option_d, $option_e, $correct_answer, $id]);
+    }
+
+    // public function addQuestion($package_id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $correct_answer) {
+    //     $query = "INSERT INTO questions (package_id, question_type, question, option_a, option_b, option_c, option_d, correct_answer) 
+    //               VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    //     $stmt = $this->conn->prepare($query);
+    //     return $stmt->execute([$package_id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $correct_answer]);
+    // }
 
     public function getQuestionsByPackage($package_id) {
         $query = "SELECT * FROM questions WHERE package_id = ?";
@@ -34,18 +53,35 @@ class Question {
     // }
 
     public function deleteQuestion($id) {
-        $query = "DELETE FROM questions WHERE id = ?";
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute([$id]);
+        try {
+            $this->conn->beginTransaction();
+
+            // Hapus jawaban terkait terlebih dahulu
+            $query = "DELETE FROM user_answers WHERE question_id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$id]);
+
+            // Kemudian hapus pertanyaan
+            $query = "DELETE FROM questions WHERE id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$id]);
+
+            $this->conn->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->conn->rollBack();
+            error_log("Error deleting question: " . $e->getMessage());
+            return false;
+        }
     }
 
-    public function updateQuestion($id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $correct_answer) {
-        $query = "UPDATE questions 
-                  SET question_type = ?, question = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, correct_answer = ? 
-                  WHERE id = ?";
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute([$question_type, $question, $option_a, $option_b, $option_c, $option_d, $correct_answer, $id]);
-    }
+    // public function updateQuestion($id, $question_type, $question, $option_a, $option_b, $option_c, $option_d, $correct_answer) {
+    //     $query = "UPDATE questions 
+    //               SET question_type = ?, question = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, correct_answer = ? 
+    //               WHERE id = ?";
+    //     $stmt = $this->conn->prepare($query);
+    //     return $stmt->execute([$question_type, $question, $option_a, $option_b, $option_c, $option_d, $correct_answer, $id]);
+    // }
 
     public function getQuestionsForTest($test_id) {
         error_log("Getting questions for test ID: $test_id");

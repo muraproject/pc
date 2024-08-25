@@ -77,5 +77,14 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
 <?php endforeach; ?>
 
 <a href="/pc/cat/user/history.php" class="btn btn-primary">Kembali ke Riwayat Tes</a>
-
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mengubah perilaku tombol kembali
+    history.pushState(null, '', location.href);
+    window.onpopstate = function () {
+        history.go(1);
+        window.location.href = '/pc/cat/user/take_test.php';
+    };
+});
+</script>
 <?php include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/footer.php'; ?>

@@ -192,3 +192,202 @@
 [2024-08-23 09:33:58] Updating test score: Success
 [2024-08-23 09:33:58] Finishing test: Success
 [2024-08-23 09:33:58] Redirecting to test result page
+[2024-08-25 10:18:35] Script started
+[2024-08-25 10:18:35] Submitting test ID: 24
+[2024-08-25 10:18:35] Answers received: Array
+(
+    [7] => C
+    [10] => A
+)
+
+[2024-08-25 10:18:35] Test data: Array
+(
+    [id] => 24
+    [user_id] => 4
+    [start_time] => 2024-08-25 15:18:20
+    [end_time] => 
+    [score] => 
+    [is_cancelled] => 0
+)
+
+[2024-08-25 10:18:35] Saving answer for question 7: Success
+[2024-08-25 10:18:35] Saving answer for question 10: Success
+[2024-08-25 10:18:35] Questions retrieved: Array
+(
+    [0] => Array
+        (
+            [id] => 7
+            [question] => tanggal lahir panca sila
+            [option_a] => 1 juni
+            [option_b] => 1 mei
+            [option_c] => 17 agustus
+            [option_d] => 1 juli
+            [option_e] => 
+            [correct_answer] => A
+            [category] => 
+            [created_at] => 2024-08-22 16:16:01
+            [package_id] => 1
+            [question_type] => TWK
+        )
+
+    [1] => Array
+        (
+            [id] => 10
+            [question] => adas
+            [option_a] => srrytry
+            [option_b] => fhfh
+            [option_c] => h5y5
+            [option_d] => ryh5y4
+            [option_e] => 
+            [correct_answer] => D
+            [category] => 
+            [created_at] => 2024-08-22 16:36:08
+            [package_id] => 1
+            [question_type] => TWK
+        )
+
+)
+
+[2024-08-25 10:18:35] Total questions: 2
+[2024-08-25 10:18:35] Checking question ID: 7
+[2024-08-25 10:18:35] User answer: C
+[2024-08-25 10:18:35] Correct answer: A
+[2024-08-25 10:18:35] Checking question ID: 10
+[2024-08-25 10:18:35] User answer: A
+[2024-08-25 10:18:35] Correct answer: D
+[2024-08-25 10:18:35] Correct answers: 0
+[2024-08-25 10:18:35] Calculated score: 0
+[2024-08-25 10:18:35] Updating test score: Success
+[2024-08-25 10:18:35] Finishing test: Success
+[2024-08-25 10:18:35] Redirecting to test result page
+[2024-08-25 10:23:55] Script started
+[2024-08-25 10:23:55] Submitting test ID: 25
+[2024-08-25 10:23:55] Answers received: Array
+(
+    [11] => C
+    [12] => A
+    [13] => E
+    [14] => A
+    [15] => B
+)
+
+[2024-08-25 10:23:55] Test data: Array
+(
+    [id] => 25
+    [user_id] => 4
+    [start_time] => 2024-08-25 15:22:50
+    [end_time] => 
+    [score] => 
+    [is_cancelled] => 0
+)
+
+[2024-08-25 10:23:55] Saving answer for question 11: Success
+[2024-08-25 10:23:55] Saving answer for question 12: Success
+[2024-08-25 10:23:55] Saving answer for question 13: Success
+[2024-08-25 10:23:55] Saving answer for question 14: Success
+[2024-08-25 10:23:55] Saving answer for question 15: Success
+[2024-08-25 10:23:55] Questions retrieved: Array
+(
+    [0] => Array
+        (
+            [id] => 11
+            [question] => Pancasila sebagai dasar negara Indonesia disahkan pada tanggal...
+            [option_a] => 17 Agustus 1945
+            [option_b] => 18 Agustus 1945
+            [option_c] => 1 Juni 1945
+            [option_d] => 22 Juni 1945
+            [option_e] => 1 Oktober 1945
+            [correct_answer] => C
+            [category] => 
+            [created_at] => 2024-08-25 15:22:22
+            [package_id] => 3
+            [question_type] => TWK
+        )
+
+    [1] => Array
+        (
+            [id] => 12
+            [question] => Jika 2x + 3y = 20 dan x - y = 4, maka nilai x adalah...
+            [option_a] => 7
+            [option_b] => 8
+            [option_c] => 9
+            [option_d] => 10
+            [option_e] => 11
+            [correct_answer] => B
+            [category] => 
+            [created_at] => 2024-08-25 15:22:22
+            [package_id] => 3
+            [question_type] => TIU
+        )
+
+    [2] => Array
+        (
+            [id] => 13
+            [question] => Anda adalah seorang pegawai baru di sebuah instansi pemerintah. Anda melihat rekan kerja senior Anda melakukan tindakan korupsi. Apa yang akan Anda lakukan?
+            [option_a] => Melaporkan langsung ke atasan
+            [option_b] => Mendiskusikan dengan rekan kerja lain
+            [option_c] => Menegur rekan tersebut secara langsung
+            [option_d] => Mengabaikannya karena Anda masih baru
+            [option_e] => Mengumpulkan bukti terlebih dahulu sebelum melaporkan
+            [correct_answer] => 
+            [category] => 
+            [created_at] => 2024-08-25 15:22:22
+            [package_id] => 3
+            [question_type] => TKP
+        )
+
+    [3] => Array
+        (
+            [id] => 14
+            [question] => Siapakah proklamator kemerdekaan Indonesia?
+            [option_a] => Soekarno dan Hatta
+            [option_b] => Soeharto dan Habibie
+            [option_c] => Soekarno dan Soeharto
+            [option_d] => Hatta dan Habibie
+            [option_e] => Soekarno dan Sjahrir
+            [correct_answer] => A
+            [category] => 
+            [created_at] => 2024-08-25 15:22:22
+            [package_id] => 3
+            [question_type] => TWK
+        )
+
+    [4] => Array
+        (
+            [id] => 15
+            [question] => Sebuah deret aritmatika memiliki suku pertama 3 dan suku kelima 15. Berapakah suku kesepuluh dari deret tersebut?
+            [option_a] => 27
+            [option_b] => 30
+            [option_c] => 33
+            [option_d] => 36
+            [option_e] => 39
+            [correct_answer] => C
+            [category] => 
+            [created_at] => 2024-08-25 15:22:22
+            [package_id] => 3
+            [question_type] => TIU
+        )
+
+)
+
+[2024-08-25 10:23:55] Total questions: 5
+[2024-08-25 10:23:55] Checking question ID: 11
+[2024-08-25 10:23:55] User answer: C
+[2024-08-25 10:23:55] Correct answer: C
+[2024-08-25 10:23:55] Checking question ID: 12
+[2024-08-25 10:23:55] User answer: A
+[2024-08-25 10:23:55] Correct answer: B
+[2024-08-25 10:23:55] Checking question ID: 13
+[2024-08-25 10:23:55] User answer: E
+[2024-08-25 10:23:55] Correct answer: 
+[2024-08-25 10:23:55] Checking question ID: 14
+[2024-08-25 10:23:55] User answer: A
+[2024-08-25 10:23:55] Correct answer: A
+[2024-08-25 10:23:55] Checking question ID: 15
+[2024-08-25 10:23:55] User answer: B
+[2024-08-25 10:23:55] Correct answer: C
+[2024-08-25 10:23:55] Correct answers: 2
+[2024-08-25 10:23:55] Calculated score: 40
+[2024-08-25 10:23:55] Updating test score: Success
+[2024-08-25 10:23:55] Finishing test: Success
+[2024-08-25 10:23:55] Redirecting to test result page
