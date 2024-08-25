@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 22 Agu 2024 pada 11.37
+-- Waktu pembuatan: 25 Agu 2024 pada 17.17
 -- Versi server: 10.4.32-MariaDB
--- Versi PHP: 8.0.30
+-- Versi PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -34,6 +34,7 @@ CREATE TABLE `questions` (
   `option_b` text NOT NULL,
   `option_c` text NOT NULL,
   `option_d` text NOT NULL,
+  `option_e` text DEFAULT NULL,
   `correct_answer` enum('A','B','C','D') NOT NULL,
   `category` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -45,16 +46,34 @@ CREATE TABLE `questions` (
 -- Dumping data untuk tabel `questions`
 --
 
-INSERT INTO `questions` (`id`, `question`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_answer`, `category`, `created_at`, `package_id`, `question_type`) VALUES
-(1, 'Apa singkatan dari UUD 1945?', 'Undang-Undang Dasar 1945', 'Undangan Undangan Dasar 1945', 'Undang-Undang Daerah 1945', 'Undangan Undangan Daerah 1945', 'A', 'Kewarganegaraan', '2024-08-22 07:23:39', NULL, 'TWK'),
-(2, 'Siapa presiden pertama Indonesia?', 'Soekarno', 'Soeharto', 'B.J. Habibie', 'Megawati', 'A', 'Sejarah', '2024-08-22 07:23:39', NULL, 'TWK'),
-(3, 'Berapakah hasil dari 7 x 8?', '54', '56', '58', '60', 'B', 'Matematika', '2024-08-22 07:23:39', NULL, 'TWK'),
-(4, 'Apa ibukota Indonesia?', 'Jakarta', 'Surabaya', 'Bandung', 'Yogyakarta', 'A', 'Pengetahuan Umum', '2024-08-22 07:23:39', NULL, 'TWK'),
-(5, 'Manakah yang bukan merupakan sila Pancasila?', 'Ketuhanan Yang Maha Esa', 'Keadilan Sosial', 'Persatuan Indonesia', 'Kemakmuran Rakyat', 'D', 'Kewarganegaraan', '2024-08-22 07:23:39', NULL, 'TWK'),
-(7, 'tanggal lahir panca sila', '1 juni', '1 mei', '17 agustus', '1 juli', 'A', '', '2024-08-22 09:16:01', 1, 'TWK'),
-(8, 'aaa', 'aaa', 'aaasdad', 'adad', 'adada', 'B', '', '2024-08-22 09:35:29', 2, 'TWK'),
-(9, 'asada', 'fdgdfgh', 'fhfhfh', 'fhfh', 'fhfh', 'D', '', '2024-08-22 09:35:39', 2, 'TWK'),
-(10, 'adas', 'srrytry', 'fhfh', 'h5y5', 'ryh5y4', 'D', '', '2024-08-22 09:36:08', 1, 'TWK');
+INSERT INTO `questions` (`id`, `question`, `option_a`, `option_b`, `option_c`, `option_d`, `option_e`, `correct_answer`, `category`, `created_at`, `package_id`, `question_type`) VALUES
+(1, 'Apa singkatan dari UUD 1945?', 'Undang-Undang Dasar 1945', 'Undangan Undangan Dasar 1945', 'Undang-Undang Daerah 1945', 'Undangan Undangan Daerah 1945', NULL, 'A', 'Kewarganegaraan', '2024-08-22 07:23:39', NULL, 'TWK'),
+(2, 'Siapa presiden pertama Indonesia?', 'Soekarno', 'Soeharto', 'B.J. Habibie', 'Megawati', NULL, 'A', 'Sejarah', '2024-08-22 07:23:39', NULL, 'TWK'),
+(3, 'Berapakah hasil dari 7 x 8?', '54', '56', '58', '60', NULL, 'B', 'Matematika', '2024-08-22 07:23:39', NULL, 'TWK'),
+(4, 'Apa ibukota Indonesia?', 'Jakarta', 'Surabaya', 'Bandung', 'Yogyakarta', NULL, 'A', 'Pengetahuan Umum', '2024-08-22 07:23:39', NULL, 'TWK'),
+(5, 'Manakah yang bukan merupakan sila Pancasila?', 'Ketuhanan Yang Maha Esa', 'Keadilan Sosial', 'Persatuan Indonesia', 'Kemakmuran Rakyat', NULL, 'D', 'Kewarganegaraan', '2024-08-22 07:23:39', NULL, 'TWK'),
+(7, 'tanggal lahir panca sila', '1 juni', '1 mei', '17 agustus', '1 juli', NULL, 'A', '', '2024-08-22 09:16:01', 1, 'TWK'),
+(10, 'adas', 'srrytry', 'fhfh', 'h5y5', 'ryh5y4', NULL, 'D', '', '2024-08-22 09:36:08', 1, 'TWK'),
+(11, 'Pancasila sebagai dasar negara Indonesia disahkan pada tanggal...', '17 Agustus 1945', '18 Agustus 1945', '1 Juni 1945', '22 Juni 1945', '1 Oktober 1945', 'C', '', '2024-08-25 08:22:22', 3, 'TWK'),
+(12, 'Jika 2x + 3y = 20 dan x - y = 4, maka nilai x adalah...', '7', '8', '9', '10', '11', 'B', '', '2024-08-25 08:22:22', 3, 'TIU'),
+(13, 'Anda adalah seorang pegawai baru di sebuah instansi pemerintah. Anda melihat rekan kerja senior Anda melakukan tindakan korupsi. Apa yang akan Anda lakukan?', 'Melaporkan langsung ke atasan', 'Mendiskusikan dengan rekan kerja lain', 'Menegur rekan tersebut secara langsung', 'Mengabaikannya karena Anda masih baru', 'Mengumpulkan bukti terlebih dahulu sebelum melaporkan', '', '', '2024-08-25 08:22:22', 3, 'TKP'),
+(14, 'Siapakah proklamator kemerdekaan Indonesia?', 'Soekarno dan Hatta', 'Soeharto dan Habibie', 'Soekarno dan Soeharto', 'Hatta dan Habibie', 'Soekarno dan Sjahrir', 'A', '', '2024-08-25 08:22:22', 3, 'TWK'),
+(15, 'Sebuah deret aritmatika memiliki suku pertama 3 dan suku kelima 15. Berapakah suku kesepuluh dari deret tersebut?', '27', '30', '33', '36', '39', 'C', '', '2024-08-25 08:22:22', 3, 'TIU'),
+(16, 'Pancasila sebagai dasar negara Indonesia disahkan pada tanggal...', '17 Agustus 1945', '18 Agustus 1945', '1 Juni 1945', '22 Juni 1945', '1 Oktober 1945', 'C', '', '2024-08-25 09:02:03', 4, 'TWK'),
+(17, 'Jika 2x + 3y = 20 dan x - y = 4, maka nilai x adalah...', '7', '8', '9', '10', '11', 'B', '', '2024-08-25 09:02:03', 4, 'TIU'),
+(18, 'Anda melihat rekan kerja melakukan tindakan korupsi. Apa yang akan Anda lakukan?', 'Melaporkan langsung ke atasan', 'Mendiskusikan dengan rekan lain', 'Menegur rekan tersebut langsung', 'Mengabaikannya', 'Mengumpulkan bukti dahulu', '', '', '2024-08-25 09:02:03', 4, 'TKP'),
+(19, 'Siapakah proklamator kemerdekaan Indonesia?', 'Soekarno dan Hatta', 'Soeharto dan Habibie', 'Soekarno dan Soeharto', 'Hatta dan Habibie', 'Soekarno dan Sjahrir', 'A', '', '2024-08-25 09:02:03', 4, 'TWK'),
+(20, 'Berapa hasil dari 15% dari 80?', '10', '12', '14', '16', '18', 'B', '', '2024-08-25 09:02:03', 4, 'TIU'),
+(21, 'UUD 1945 telah mengalami berapa kali amandemen?', '1 kali', '2 kali', '3 kali', '4 kali', '5 kali', 'D', '', '2024-08-25 09:02:03', 4, 'TWK'),
+(22, 'Pola bilangan: 2, 6, 12, 20, 30, ... Bilangan selanjutnya adalah...', '40', '41', '42', '43', '44', 'B', '', '2024-08-25 09:02:03', 4, 'TIU'),
+(23, 'Jika Anda diberi tugas mendadak saat akan pulang kantor, apa yang Anda lakukan?', 'Menolak dengan sopan', 'Menerima tapi dikerjakan besok', 'Menerima dan lembur', 'Meminta rekan lain menggantikan', 'Pura-pura tidak mendengar', 'C', '', '2024-08-25 09:02:03', 4, 'TKP'),
+(24, 'Apa kepanjangan dari BPUPKI?', 'Badan Penyelidik Usaha Persiapan Kemerdekaan Indonesia', 'Badan Pengurus Urusan Persiapan Kemerdekaan Indonesia', 'Badan Pelaksana Upaya Persiapan Kemerdekaan Indonesia', 'Badan Pembantu Usaha Persiapan Kemerdekaan Indonesia', 'Badan Pengelola Urusan Persiapan Kemerdekaan Indonesia', 'A', '', '2024-08-25 09:02:03', 4, 'TWK'),
+(25, 'Jika sebuah mobil melaju dengan kecepatan 60 km/jam, berapa jam waktu yang dibutuhkan untuk menempuh jarak 270 km?', '3 jam', '3,5 jam', '4 jam', '4,5 jam', '5 jam', 'C', '', '2024-08-25 09:02:03', 4, 'TIU'),
+(26, 'Anda menemukan dompet berisi uang dan identitas pemilik di jalan. Apa yang Anda lakukan?', 'Mengambil uangnya saja', 'Mengembalikan ke polisi', 'Mencoba menghubungi pemiliknya', 'Mengabaikannya', 'Memasang pengumuman di media sosial', 'C', '', '2024-08-25 09:02:03', 4, 'TKP'),
+(27, 'Siapakah pencipta lagu Indonesia Raya?', 'Kusbini', 'W.R. Supratman', 'Ismail Marzuki', 'C. Simanjuntak', 'Ibu Sud', 'B', '', '2024-08-25 09:02:03', 4, 'TWK'),
+(28, 'Jika A + B = C, A + C = 10, dan B + C = 13, maka nilai A adalah...', '3', '4', '5', '6', '7', 'C', '', '2024-08-25 09:02:03', 4, 'TIU'),
+(29, 'Atasan Anda memberi tugas yang menurut Anda tidak sesuai dengan job desc. Apa yang Anda lakukan?', 'Menolak tugas tersebut', 'Menerima tapi tidak mengerjakannya', 'Menerima dan mendiskusikannya', 'Menerima tapi mengeluh ke rekan', 'Menyuruh bawahan mengerjakan', 'C', '', '2024-08-25 09:02:03', 4, 'TKP'),
+(30, 'Pada masa Orde Baru, pemilu pertama kali diadakan pada tahun...', '1965', '1970', '1971', '1975', '1980', 'C', '', '2024-08-25 09:02:03', 4, 'TWK');
 
 -- --------------------------------------------------------
 
@@ -75,7 +94,8 @@ CREATE TABLE `question_packages` (
 
 INSERT INTO `question_packages` (`id`, `name`, `description`, `created_at`) VALUES
 (1, 'try out 1', 'uji coba', '2024-08-22 09:09:27'),
-(2, 'try out 2', '2', '2024-08-22 09:35:15');
+(3, 'Paket Latihan CPNS 2024', 'Paket soal latihan untuk persiapan tes CPNS tahun 2024', '2024-08-25 08:22:22'),
+(4, 'baru', 'baru banget', '2024-08-25 08:57:14');
 
 -- --------------------------------------------------------
 
@@ -99,7 +119,10 @@ INSERT INTO `test_packages` (`id`, `test_id`, `package_id`) VALUES
 (3, 20, 1),
 (4, 21, 1),
 (5, 22, 1),
-(6, 23, 1);
+(6, 23, 1),
+(7, 24, 1),
+(8, 25, 3),
+(9, 26, 4);
 
 -- --------------------------------------------------------
 
@@ -113,18 +136,19 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('admin','user') NOT NULL DEFAULT 'user',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `remember_token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data untuk tabel `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `created_at`) VALUES
-(1, 'admin', 'admin@example.com', '$2y$10$xQB/tgaIGfBqvXjf8bfB9Oli7YKZ8V1QAMt2BdwgEUVXNfdx3SqUe', 'admin', '2024-08-22 07:23:38'),
-(2, 'user1', 'user1@example.com', 'password1', 'user', '2024-08-22 07:23:38'),
-(3, 'user2', 'user2@example.com', 'password2', 'user', '2024-08-22 07:23:38'),
-(4, 'userku', 'userku@gmail.com', '$2y$10$xQB/tgaIGfBqvXjf8bfB9Oli7YKZ8V1QAMt2BdwgEUVXNfdx3SqUe', 'user', '2024-08-22 07:48:36');
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `created_at`, `remember_token`) VALUES
+(1, 'admin', 'admin@example.com', '$2y$10$xQB/tgaIGfBqvXjf8bfB9Oli7YKZ8V1QAMt2BdwgEUVXNfdx3SqUe', 'admin', '2024-08-22 07:23:38', NULL),
+(2, 'user1', 'user1@example.com', 'password1', 'user', '2024-08-22 07:23:38', NULL),
+(3, 'user2', 'user2@example.com', 'password2', 'user', '2024-08-22 07:23:38', NULL),
+(4, 'userku', 'userku@gmail.com', '$2y$10$xQB/tgaIGfBqvXjf8bfB9Oli7YKZ8V1QAMt2BdwgEUVXNfdx3SqUe', 'user', '2024-08-22 07:48:36', '443401cdb8577c9cb189a7875cd3e674');
 
 -- --------------------------------------------------------
 
@@ -171,7 +195,14 @@ INSERT INTO `user_answers` (`id`, `user_test_id`, `question_id`, `user_answer`, 
 (24, 15, 5, 'D', 1),
 (25, 15, 2, 'A', 1),
 (26, 22, 7, 'A', 0),
-(27, 23, 7, 'A', 0);
+(27, 23, 7, 'A', 0),
+(28, 24, 7, 'C', 0),
+(29, 24, 10, 'A', 0),
+(30, 25, 11, 'C', 0),
+(31, 25, 12, 'A', 0),
+(32, 25, 13, '', 0),
+(33, 25, 14, 'A', 0),
+(34, 25, 15, 'B', 0);
 
 -- --------------------------------------------------------
 
@@ -206,7 +237,10 @@ INSERT INTO `user_tests` (`id`, `user_id`, `start_time`, `end_time`, `score`, `i
 (20, 4, '2024-08-22 09:24:10', NULL, NULL, 1),
 (21, 4, '2024-08-22 09:30:28', NULL, NULL, 1),
 (22, 4, '2024-08-22 09:33:00', '2024-08-22 09:33:04', NULL, 0),
-(23, 4, '2024-08-22 09:34:43', '2024-08-22 09:34:50', 100, 0);
+(23, 4, '2024-08-22 09:34:43', '2024-08-22 09:34:50', 100, 0),
+(24, 4, '2024-08-25 08:18:20', '2024-08-25 08:18:35', 0, 0),
+(25, 4, '2024-08-25 08:22:50', '2024-08-25 08:23:55', 40, 0),
+(26, 4, '2024-08-25 15:14:42', NULL, NULL, 0);
 
 --
 -- Indexes for dumped tables
@@ -264,19 +298,19 @@ ALTER TABLE `user_tests`
 -- AUTO_INCREMENT untuk tabel `questions`
 --
 ALTER TABLE `questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT untuk tabel `question_packages`
 --
 ALTER TABLE `question_packages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `test_packages`
 --
 ALTER TABLE `test_packages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
@@ -288,13 +322,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `user_answers`
 --
 ALTER TABLE `user_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT untuk tabel `user_tests`
 --
 ALTER TABLE `user_tests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

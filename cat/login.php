@@ -1,19 +1,11 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 session_start();
-require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/config/database.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/classes/User.php';
+require_once 'config/database.php';
+require_once 'classes/User.php';
 
-$database = new Database();
-$db = $database->getConnection();
-
-$user = new User($db);
-
-// Fungsi untuk mengalihkan berdasarkan peran
-function redirectBasedOnRole($role) {
-    if ($role === 'admin') {
+// Redirect jika sudah login
+if (isset($_SESSION['user_id'])) {
+    if ($_SESSION['role'] === 'admin') {
         header("Location: /pc/cat/admin/dashboard.php");
     } else {
         header("Location: /pc/cat/user/index.php");
@@ -21,36 +13,62 @@ function redirectBasedOnRole($role) {
     exit();
 }
 
-// Debug: Tampilkan isi session sebelum login
-echo "<pre>Session before login: "; print_r($_SESSION); echo "</pre>";
+$database = new Database();
+$db = $database->getConnection();
+$user = new User($db);
 
-// Proses login
+// Cek cookie untuk "Remember Me"
+if (isset($_COOKIE['remember_me'])) {
+    $token = $_COOKIE['remember_me'];
+    $userData = $user->getUserByRememberToken($token);
+    if ($userData) {
+        $_SESSION['user_id'] = $userData['id'];
+        $_SESSION['username'] = $userData['username'];
+        $_SESSION['role'] = $userData['role'];
+        
+        // Redirect sesuai role
+        if ($_SESSION['role'] === 'admin') {
+            header("Location: /pc/cat/admin/dashboard.php");
+        } else {
+            header("Location: /pc/cat/user/index.php");
+        }
+        exit();
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
+    $remember = isset($_POST['remember']) ? $_POST['remember'] : '';
 
     $logged_in_user = $user->login($username, $password);
-
-    // Debug: Tampilkan hasil login
-    echo "<pre>Login result: "; print_r($logged_in_user); echo "</pre>";
 
     if ($logged_in_user) {
         $_SESSION['user_id'] = $logged_in_user['id'];
         $_SESSION['username'] = $logged_in_user['username'];
         $_SESSION['role'] = $logged_in_user['role'];
 
-        // Debug: Tampilkan isi session setelah login
-        echo "<pre>Session after login: "; print_r($_SESSION); echo "</pre>";
+        if ($remember == 'on') {
+            $token = bin2hex(random_bytes(16));
+            $user->storeRememberToken($logged_in_user['id'], $token);
+            setcookie('remember_me', $token, time() + (30 * 24 * 60 * 60), '/', '', true, true);
+        }
 
-        redirectBasedOnRole($logged_in_user['role']);
+        // Redirect sesuai role
+        if ($_SESSION['role'] === 'admin') {
+            header("Location: /pc/cat/admin/dashboard.php");
+        } else {
+            header("Location: /pc/cat/user/index.php");
+        }
+        exit();
     } else {
         $error_message = "Username atau password salah.";
     }
 }
 
-include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
+// HTML form login di sini
+include 'includes/header.php';
 ?>
-
 
 <h2>Login</h2>
 
@@ -67,7 +85,11 @@ include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/header.php';
         <label for="password" class="form-label">Password</label>
         <input type="password" class="form-control" id="password" name="password" required>
     </div>
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="remember" name="remember">
+        <label class="form-check-label" for="remember">Remember Me</label>
+    </div>
     <button type="submit" class="btn btn-primary">Login</button>
 </form>
 
-<?php include $_SERVER['DOCUMENT_ROOT'] . '/pc/cat/includes/footer.php'; ?>
+<?php include 'includes/footer.php'; ?>

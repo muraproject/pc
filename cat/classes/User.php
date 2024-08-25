@@ -7,6 +7,19 @@ class User {
         $this->conn = $db;
     }
 
+    public function storeRememberToken($user_id, $token) {
+        $query = "UPDATE users SET remember_token = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$token, $user_id]);
+    }
+
+    public function getUserByRememberToken($token) {
+        $query = "SELECT * FROM users WHERE remember_token = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$token]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function register($username, $email, $password) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
