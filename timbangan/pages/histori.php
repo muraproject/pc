@@ -1,73 +1,61 @@
 <?php
-require_once '../includes/config.php';
-require_once '../includes/functions.php';
+// $conn dan $base_url sudah tersedia dari index.php
+
+// Query untuk mengambil data kwitansi
+$sql = "SELECT DISTINCT id_kwitansi, waktu, nama FROM timbangan ORDER BY waktu DESC";
+$result = $conn->query($sql);
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histori - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Histori Timbang</h1>
-        <table id="history-table">
-            <thead>
-                <tr>
-                    <th>Waktu</th>
-                    <th>Nama</th>
-                    <th>Produk</th>
-                    <th>Nilai Timbang</th>
-                    <th>Harga</th>
-                    <th>Total</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data akan diisi oleh JavaScript -->
-            </tbody>
-        </table>
+
+<div class="container">
+    <!-- <h2>Histori Kwitansi</h2> -->
+    <table id="kwitansi-table" class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID Kwitansi</th>
+                <th>Waktu</th>
+                <th>Nama</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    echo "<tr>";
+                    echo "<td>" . $row["id_kwitansi"] . "</td>";
+                    echo "<td>" . $row["waktu"] . "</td>";
+                    echo "<td>" . $row["nama"] . "</td>";
+                    echo "<td><button class='btn btn-primary btn-sm' onclick='showDetail(\"" . $row["id_kwitansi"] . "\", \"" . $row["nama"] . "\")'>Detail</button></td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='4'>Tidak ada data kwitansi</td></tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Detail Kwitansi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Detail kwitansi akan diisi oleh JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
     </div>
-    <?php include 'navbar.php'; ?>
-    <script src="../assets/js/main.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            loadHistoryData();
-        });
+</div>
 
-        function loadHistoryData() {
-            fetch('../api/histori.php?action=getHistory')
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.querySelector('#history-table tbody');
-                tableBody.innerHTML = '';
-                data.forEach(item => {
-                    const row = `
-                        <tr>
-                            <td>${formatDate(item.waktu)}</td>
-                            <td>${item.nama}</td>
-                            <td>${item.produk}</td>
-                            <td>${item.nilai_timbang} kg</td>
-                            <td>Rp ${item.harga}</td>
-                            <td>Rp ${item.total}</td>
-                            <td>
-                                <button onclick="editHistoryData(${item.id})">Edit</button>
-                                <button onclick="deleteHistoryData(${item.id})">Hapus</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return new Date(dateString).toLocaleDateString('id-ID', options);
-        }
-    </script>
-</body>
-</html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="<?php echo $base_url; ?>/assets/js/histori.js"></script>

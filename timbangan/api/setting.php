@@ -1,9 +1,9 @@
 <?php
 header("Content-Type: application/json");
-require_once "../includes/db.php";
+require_once "../includes/config.php";
 require_once "../includes/functions.php";
 
-$action = isset($_POST['action']) ? $_POST['action'] : '';
+$action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : '');
 
 switch ($action) {
     case 'addProduct':
@@ -55,6 +55,9 @@ function removeProduct($id_produk) {
 function getProducts() {
     global $conn;
     $result = $conn->query("SELECT * FROM produk ORDER BY nama");
+    if ($result === false) {
+        return ["error" => "Database query error: " . $conn->error];
+    }
     $data = [];
     while ($row = $result->fetch_assoc()) {
         $data[] = $row;
