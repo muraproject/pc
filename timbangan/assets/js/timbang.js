@@ -1,9 +1,5 @@
 let weighingData = [];
 
-function updateScale(input) {
-    // const randomWeight = Math.random() * 100;
-    document.getElementById('scale-value').textContent = input;
-}
 
 
 function addWeighingData() {

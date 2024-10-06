@@ -41,14 +41,15 @@ function getPageTitle($page) {
     <title><?php echo getPageTitle($page); ?> - Aplikasi Timbangan</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="<?php echo $base_url; ?>/assets/css/styles.css">
     <style>
-        body {
-            padding-top: 56px; /* Adjust this value based on your header height */
-            padding-bottom: 70px; /* Adjust this value based on your navbar height */
+          body {
+            padding-top: 56px;
+            padding-bottom: 70px;
         }
         .android-header {
-            background-color: #33330f;
+            background-color: #333333; /* Sesuaikan dengan warna footer Anda */
             color: white;
             position: fixed;
             top: 0;
@@ -58,6 +59,7 @@ function getPageTitle($page) {
             height: 56px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 16px;
             box-shadow: 0 2px 4px rgba(0,0,0,.1);
         }
@@ -68,11 +70,34 @@ function getPageTitle($page) {
         .content-wrapper {
             margin-top: 20px;
         }
+        .bluetooth-status {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .bluetooth-status i {
+            margin-right: 5px;
+        }
+        .bluetooth-toggle {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+            background-color: #ffffff;
+            color: #333333; /* Sesuaikan dengan warna header */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <header class="android-header">
         <h1><?php echo getPageTitle($page); ?></h1>
+        <div class="bluetooth-status">
+            <i class="fa fa-bluetooth"></i>
+            <span id="bluetoothStatus">Not Connected</span>
+            <button id="bluetoothToggle" class="bluetooth-toggle">Connect</button>
+        </div>
     </header>
 
     <div class="container content-wrapper">
@@ -86,6 +111,39 @@ function getPageTitle($page) {
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        let isBluetoothConnected = false;
+
+        function bluetoothConnected() {
+            isBluetoothConnected = true;
+            document.getElementById('bluetoothStatus').textContent = 'Connected';
+            document.querySelector('.bluetooth-status i').style.color = '#4CAF50';
+            document.getElementById('bluetoothToggle').textContent = 'Disconnect';
+        }
+
+        function bluetoothNotConnected() {
+            isBluetoothConnected = false;
+            document.getElementById('bluetoothStatus').textContent = 'Not Connected';
+            document.querySelector('.bluetooth-status i').style.color = '#F44336';
+            document.getElementById('bluetoothToggle').textContent = 'Connect';
+        }
+
+        document.getElementById('bluetoothToggle').addEventListener('click', function() {
+            if (isBluetoothConnected) {
+                console.log('Disconnecting Bluetooth...');
+                // bluetoothNotConnected();
+            } else {
+                console.log('Connecting Bluetooth...');
+                // bluetoothConnected();
+            }
+        });
+
+        function updateScale(input) {
+            // const randomWeight = Math.random() * 100;
+            document.getElementById('scale-value').textContent = input.replace("ww", "");;
+        }
+
+    </script>
 </body>
 </html>
 <?php $conn->close(); ?>
