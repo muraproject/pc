@@ -71,6 +71,7 @@ function showDetail(idKwitansi, nama) {
             if (data.success) {
                 let modalContent = `
                     <h4>${nama}</h4>
+                    <p>Id Kwitansi: ${idKwitansi}</p>
                     <p>Tanggal: ${formatDate(data.tanggal)}</p>
                     <p>Barang:</p>
                     <table class="table table-bordered">
@@ -117,7 +118,7 @@ function showDetail(idKwitansi, nama) {
                     });
                     modalContent += `
                         <tr>
-                            <td colspan="4" style="text-align: right;"><strong>Total ${jenis}:</strong></td>
+                            <td colspan="4" style="text-align: left;"><strong>Total ${jenis}:</strong></td>
                             <td><strong>Rp ${subtotal.toLocaleString()}</strong></td>
                         </tr>
                     `;
@@ -127,7 +128,7 @@ function showDetail(idKwitansi, nama) {
 
                 modalContent += `
                         <tr>
-                            <td colspan="4" style="text-align: right;"><strong>Total ${nama}:</strong></td>
+                            <td colspan="4" style="text-align: left;"><strong>Total ${nama}:</strong></td>
                             <td><strong>Rp ${totalKeseluruhan.toLocaleString()}</strong></td>
                         </tr>
                     </tbody>
