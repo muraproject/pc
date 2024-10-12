@@ -4,6 +4,7 @@ $base_url = '/pc/timbangan';
 
 // Definisikan halaman yang valid
 $valid_pages = ['timbang', 'histori', 'setting', 'harga'];
+$user_type = isset($_GET['user_type']) ? $_GET['user_type'] : 'user';
 
 // Ambil halaman dari parameter GET, default ke 'timbang' jika tidak ada
 $page = isset($_GET['page']) && in_array($_GET['page'], $valid_pages) ? $_GET['page'] : 'timbang';
@@ -97,6 +98,8 @@ function getPageTitle($page) {
             <i class="fa fa-bluetooth"></i>
             <span id="bluetoothStatus">Not Connected</span>
             <button id="bluetoothToggle" class="bluetooth-toggle">Connect</button>
+            <!-- <h1 class="h4 m-0"><?php echo ucfirst($page); ?></h1> -->
+            <button id="logoutBtn" class="btn btn-outline-light btn-sm">Logout</button>
         </div>
     </header>
 
@@ -113,6 +116,7 @@ function getPageTitle($page) {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         let isBluetoothConnected = false;
+        var userType = '<?php echo $user_type; ?>';
 
         function bluetoothConnected() {
             isBluetoothConnected = true;
@@ -142,6 +146,15 @@ function getPageTitle($page) {
             // const randomWeight = Math.random() * 100;
             document.getElementById('scale-value').textContent = input.replace("ww", "");;
         }
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            console.log('sayalogout');
+            // Di sini Anda bisa menambahkan logika logout sebenarnya
+            // Misalnya, mengarahkan ke halaman login
+            setTimeout(function() {
+                window.location.href = 'login.html';
+            }, 1000);
+        });
 
     </script>
 </body>

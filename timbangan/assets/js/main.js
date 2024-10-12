@@ -69,6 +69,19 @@ function addProduct() {
     });
 }
 
+// Tambahkan ini di awal file
+function checkAccess() {
+    if (typeof userType !== 'undefined' && userType !== 'admin' && window.location.href.includes('page=harga')) {
+        alert('Anda tidak memiliki akses ke halaman ini');
+        window.location.href = 'index.php?page=timbang&user_type=' + userType;
+    }
+}
+
+// Panggil fungsi ini saat halaman dimuat
+document.addEventListener('DOMContentLoaded', checkAccess);
+
+// ... (kode lainnya tetap sama)
+
 // Fungsi untuk memuat produk
 function loadProducts() {
     fetch('api/setting.php?action=getProducts')
