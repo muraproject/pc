@@ -15,6 +15,11 @@ function setupEventListeners() {
     }
 }
 
+////////////////////////////////////////////////////
+
+let kwitansiData = [];
+let currentSort = { column: '', direction: '' };
+
 function loadKwitansiList() {
     fetch(`${BASE_URL}/api/get_kwitansi_list.php`)
         .then(response => {
@@ -25,23 +30,9 @@ function loadKwitansiList() {
         })
         .then(data => {
             if (data.success) {
-                const tableBody = document.querySelector('#kwitansi-table tbody');
-                tableBody.innerHTML = '';
-                data.kwitansiList.forEach(kwitansi => {
-                    const row = `
-                        <tr>
-                            <td>${kwitansi.id_kwitansi}</td>
-                            <td>${kwitansi.waktu}</td>
-                            <td>${kwitansi.nama}</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm" onclick="showDetail('${kwitansi.id_kwitansi}', '${kwitansi.nama}')">
-                                    Detail
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
+                kwitansiData = data.kwitansiList;
+                renderKwitansiList();
+                setupSearchAndSort();
             } else {
                 alert('Gagal memuat daftar kwitansi: ' + data.message);
             }
@@ -52,14 +43,163 @@ function loadKwitansiList() {
         });
 }
 
+function renderKwitansiList(filteredData = kwitansiData) {
+    const tableBody = document.querySelector('#kwitansi-table tbody');
+    tableBody.innerHTML = '';
+    filteredData.forEach(kwitansi => {
+        const row = `
+            <tr>
+                <td>${kwitansi.id_kwitansi}</td>
+                <td>${kwitansi.waktu}</td>
+                <td>${kwitansi.nama}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="showDetail('${kwitansi.id_kwitansi}', '${kwitansi.nama}')">
+                        Detail
+                    </button>
+                </td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
+
+function setupSearchAndSort() {
+    // Tambahkan input pencarian
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Cari kwitansi...';
+    searchInput.className = 'form-control mb-3';
+    searchInput.addEventListener('input', handleSearch);
+    
+    // Tambahkan header untuk pengurutan
+    const headers = document.querySelectorAll('#kwitansi-table th');
+    headers.forEach(header => {
+        if (header.textContent !== 'Aksi') {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', () => handleSort(header.textContent.toLowerCase()));
+        }
+    });
+
+    // Masukkan input pencarian sebelum tabel
+    const table = document.querySelector('#kwitansi-table');
+    table.parentNode.insertBefore(searchInput, table);
+}
+
+function handleSearch(event) {
+    const searchTerm = event.target.value.toLowerCase();
+    const filteredData = kwitansiData.filter(kwitansi => 
+        kwitansi.id_kwitansi.toLowerCase().includes(searchTerm) ||
+        kwitansi.waktu.toLowerCase().includes(searchTerm) ||
+        kwitansi.nama.toLowerCase().includes(searchTerm)
+    );
+    renderKwitansiList(filteredData);
+}
+
+function handleSort(column) {
+    if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc';
+    }
+
+    kwitansiData.sort((a, b) => {
+        if (a[column] < b[column]) return currentSort.direction === 'asc' ? -1 : 1;
+        if (a[column] > b[column]) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    renderKwitansiList();
+}
+
+
+///////////////////////////////////////////////////
+
+
+
+function updateItemTotal(input) {
+    const row = input.closest('tr');
+    const nilaiTimbangCell = row.cells[2];
+    const itemTotalCell = row.querySelector('.item-total');
+    
+    if (!nilaiTimbangCell || !itemTotalCell) {
+        console.error('Struktur baris tidak sesuai yang diharapkan');
+        return;
+    }
+    
+    const nilaiTimbang = parseFloat(nilaiTimbangCell.textContent);
+    const harga = parseFloat(input.value);
+    const total = nilaiTimbang * harga;
+    itemTotalCell.textContent = total.toFixed(2);
+    updateSubtotals();
+    updateTotalHarga();
+}
+
+function updateSubtotals() {
+    const rows = document.querySelectorAll('#modalBody table tbody tr:not(.table-secondary)');
+    const subtotals = {};
+
+    rows.forEach(row => {
+        const cells = row.cells;
+        if (cells.length < 5) {
+            console.error('Jumlah sel dalam baris tidak cukup');
+            return;
+        }
+        
+        const product = cells[1].textContent.trim().toLowerCase().replace(/\s+/g, '_');
+        const nilaiTimbang = parseFloat(cells[2].textContent);
+        const itemTotalCell = row.querySelector('.item-total') || cells[4];
+        const total = parseFloat(itemTotalCell.textContent);
+
+        if (!subtotals[product]) {
+            subtotals[product] = { nilaiTimbang: 0, total: 0 };
+        }
+        subtotals[product].nilaiTimbang += nilaiTimbang;
+        subtotals[product].total += total;
+    });
+
+    Object.keys(subtotals).forEach(product => {
+        updateSubtotalRow(product, subtotals[product].nilaiTimbang, subtotals[product].total);
+    });
+}
+
+function updateSubtotalRow(product, nilaiTimbang, subtotal) {
+    const subtotalRowId = `subtotal_${product}`;
+    const subtotalRow = document.getElementById(subtotalRowId);
+
+    if (!subtotalRow) {
+        console.error(`Baris subtotal dengan ID "${subtotalRowId}" tidak ditemukan`);
+        return;
+    }
+
+    const nilaiTimbangElement = subtotalRow.querySelector('.subtotal-nilai-timbang');
+    const subtotalElement = subtotalRow.querySelector('.subtotal-total');
+
+    if (nilaiTimbangElement) {
+        nilaiTimbangElement.textContent = `${nilaiTimbang.toFixed(2)} kg`;
+    } else {
+        console.error(`Elemen nilai timbang tidak ditemukan dalam baris subtotal ${subtotalRowId}`);
+    }
+
+    if (subtotalElement) {
+        subtotalElement.textContent = subtotal.toFixed(2);
+    } else {
+        console.error(`Elemen subtotal tidak ditemukan dalam baris subtotal ${subtotalRowId}`);
+    }
+}
+
 function showDetail(idKwitansi, nama) {
     currentKwitansiId = idKwitansi;
     fetch(`${BASE_URL}/api/get_kwitansi_detail.php?id_kwitansi=${idKwitansi}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Mengurutkan data berdasarkan nama_produk
+                data.details.sort((a, b) => a.nama_produk.localeCompare(b.nama_produk));
+
                 let modalContent = `
                     <h4>Nama: ${nama}</h4>
+                    <p>Tanggal: ${data.tanggal}</p>
                     <table class="table">
                         <thead>
                             <tr>
@@ -74,22 +214,75 @@ function showDetail(idKwitansi, nama) {
                 `;
 
                 let totalHarga = 0;
+                let currentProduct = '';
+                let subtotal = 0;
+                let subtotalNilaiTimbang = 0;
+                let rowCount = 0;
+                let lastHarga = 0;
+
                 data.details.forEach((item, index) => {
+                    if (currentProduct !== item.nama_produk) {
+                        // Jika produk berubah, tampilkan subtotal produk sebelumnya
+                        if (currentProduct !== '') {
+                            const subtotalId = `subtotal_${currentProduct.toLowerCase().replace(/\s+/g, '_')}`;
+                            modalContent += `
+                                <tr id="${subtotalId}" class="table-secondary">
+                                    <td colspan="2"><strong>Subtotal ${currentProduct}</strong></td>
+                                    <td class="subtotal-nilai-timbang"><strong>${subtotalNilaiTimbang.toFixed(2)} kg</strong></td>
+                                    <td>
+                                        <input type="number" class="form-control harga-input" 
+                                               data-product="${currentProduct}"
+                                               value="${lastHarga}" 
+                                               onchange="updateSubtotalPrice(this)">
+                                    </td>
+                                    <td class="subtotal-total"><strong>${subtotal.toFixed(2)}</strong></td>
+                                </tr>
+                            `;
+                        }
+                        // Reset subtotal untuk produk baru
+                        currentProduct = item.nama_produk;
+                        subtotal = 0;
+                        subtotalNilaiTimbang = 0;
+                        rowCount = 0;
+                    }
+
+                    rowCount++;
                     const itemTotal = item.nilai_timbang * item.harga;
+                    subtotal += itemTotal;
+                    subtotalNilaiTimbang += parseFloat(item.nilai_timbang);
                     totalHarga += itemTotal;
+                    lastHarga = item.harga;
+
                     modalContent += `
                         <tr>
-                            <td>${index + 1}</td>
+                            <td>${rowCount}</td>
                             <td>${item.nama_produk}</td>
                             <td>${item.nilai_timbang} kg</td>
                             <td>
-                                <input type="number" class="form-control harga-input" 
-                                       data-id="${item.id}" value="${item.harga}" 
-                                       onchange="updateItemTotal(this)">
+                                <input type="number" class="form-control harga-input-item" 
+                                       data-id="${item.id}" value="${item.harga}" readonly>
                             </td>
-                            <td class="item-total">${itemTotal.toFixed(2)}</td>
+                            <td class="item-total" data-nilai-timbang="${item.nilai_timbang}">${itemTotal.toFixed(2)}</td>
                         </tr>
                     `;
+
+                    // Jika ini adalah item terakhir, tampilkan subtotal
+                    if (index === data.details.length - 1) {
+                        const subtotalId = `subtotal_${currentProduct.toLowerCase().replace(/\s+/g, '_')}`;
+                        modalContent += `
+                            <tr id="${subtotalId}" class="table-secondary">
+                                <td colspan="2"><strong>Subtotal ${currentProduct}</strong></td>
+                                <td class="subtotal-nilai-timbang"><strong>${subtotalNilaiTimbang.toFixed(2)} kg</strong></td>
+                                <td>
+                                    <input type="number" class="form-control harga-input" 
+                                           data-product="${currentProduct}"
+                                           value="${lastHarga}" 
+                                           onchange="updateSubtotalPrice(this)">
+                                </td>
+                                <td class="subtotal-total"><strong>${subtotal.toFixed(2)}</strong></td>
+                            </tr>
+                        `;
+                    }
                 });
 
                 modalContent += `
@@ -112,19 +305,52 @@ function showDetail(idKwitansi, nama) {
     $('#detailModal').on('shown.bs.modal', setupEventListeners);
 }
 
-function updateItemTotal(input) {
-    const row = input.closest('tr');
-    const nilaiTimbang = parseFloat(row.cells[2].textContent);
-    const harga = parseFloat(input.value);
-    const total = nilaiTimbang * harga;
-    row.querySelector('.item-total').textContent = total.toFixed(2);
+function updateSubtotalPrice(input) {
+    const product = input.dataset.product;
+    const newPrice = parseFloat(input.value);
+    const subtotalRow = document.getElementById(`subtotal_${product.toLowerCase().replace(/\s+/g, '_')}`);
+    const itemRows = document.querySelectorAll(`tr:not(.table-secondary) td:nth-child(2)`);
+    
+    let subtotalNilaiTimbang = 0;
+    let subtotalHarga = 0;
+
+    itemRows.forEach(cell => {
+        if (cell.textContent.trim() === product) {
+            const row = cell.closest('tr');
+            const nilaiTimbangCell = row.cells[2];
+            const hargaInput = row.querySelector('.harga-input-item');
+            const totalCell = row.querySelector('.item-total');
+            const nilaiTimbang = parseFloat(nilaiTimbangCell.textContent);
+            
+            subtotalNilaiTimbang += nilaiTimbang;
+            const newTotal = nilaiTimbang * newPrice;
+            subtotalHarga += newTotal;
+            
+            hargaInput.value = newPrice.toFixed(2);
+            totalCell.textContent = newTotal.toFixed(2);
+        }
+    });
+
+    if (subtotalRow) {
+        subtotalRow.querySelector('.subtotal-nilai-timbang').textContent = `${subtotalNilaiTimbang.toFixed(2)} kg`;
+        subtotalRow.querySelector('.subtotal-total').textContent = subtotalHarga.toFixed(2);
+    }
+
     updateTotalHarga();
 }
 
 function updateTotalHarga() {
-    const totals = Array.from(document.querySelectorAll('.item-total')).map(el => parseFloat(el.textContent));
-    const totalHarga = totals.reduce((a, b) => a + b, 0);
-    document.getElementById('totalHarga').textContent = totalHarga.toFixed(2);
+    const totalElements = document.querySelectorAll('.subtotal-total');
+    const totalHarga = Array.from(totalElements)
+        .map(el => parseFloat(el.textContent) || 0)
+        .reduce((a, b) => a + b, 0);
+    
+    const totalHargaElement = document.getElementById('totalHarga');
+    if (totalHargaElement) {
+        totalHargaElement.textContent = totalHarga.toFixed(2);
+    } else {
+        console.error('Elemen totalHarga tidak ditemukan');
+    }
 }
 
 function saveChanges() {
@@ -139,10 +365,24 @@ function saveChanges() {
         saveButton.disabled = true;
     }
 
-    const updatedData = Array.from(document.querySelectorAll('.harga-input')).map(input => ({
-        id: input.getAttribute('data-id'),
-        harga: parseFloat(input.value)
-    }));
+    const updatedData = [];
+    const subtotalInputs = document.querySelectorAll('.harga-input[data-product]');
+    
+    subtotalInputs.forEach(subtotalInput => {
+        const product = subtotalInput.getAttribute('data-product');
+        const harga = parseFloat(subtotalInput.value);
+        
+        // Mencari semua item untuk produk ini
+        const itemInputs = document.querySelectorAll(`.harga-input-item[data-id]`);
+        itemInputs.forEach(itemInput => {
+            if (itemInput.closest('tr').querySelector('td:nth-child(2)').textContent.trim() === product) {
+                updatedData.push({
+                    id: itemInput.getAttribute('data-id'),
+                    harga: harga
+                });
+            }
+        });
+    });
 
     console.log('Sending data:', {
         id_kwitansi: currentKwitansiId,

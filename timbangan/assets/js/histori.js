@@ -1,32 +1,17 @@
 // Definisikan BASE_URL di awal file
 const BASE_URL = '/pc/timbangan'; // Sesuaikan dengan path aplikasi Anda
 
+let kwitansiData = [];
+let currentSort = { column: 'waktu', direction: 'desc' };
+
 function loadKwitansiList() {
     fetch(`${BASE_URL}/api/get_kwitansi_list.php`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const tableBody = document.querySelector('#kwitansi-table tbody');
-                tableBody.innerHTML = ''; // Clear existing content
-                data.kwitansiList.sort((a, b) => new Date(b.waktu) - new Date(a.waktu)); // Urutkan berdasarkan waktu terbaru
-                data.kwitansiList.forEach(kwitansi => {
-                    const row = `
-                        <tr>
-                            <td>${kwitansi.id_kwitansi}</td>
-                            <td>${kwitansi.waktu}</td>
-                            <td>${kwitansi.nama}</td>
-                            <td>
-                                <button class="btn btn-sm btn-info" onclick="showDetail('${kwitansi.id_kwitansi}', '${kwitansi.nama}')" title="Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteKwitansi('${kwitansi.id_kwitansi}')" title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
+                kwitansiData = data.kwitansiList;
+                setupSearchAndSort();
+                sortAndRenderKwitansiList();
             } else {
                 alert('Gagal memuat daftar kwitansi: ' + data.message);
             }
@@ -36,6 +21,107 @@ function loadKwitansiList() {
             alert('Terjadi kesalahan saat memuat daftar kwitansi');
         });
 }
+
+
+function sortAndRenderKwitansiList() {
+    const sortedData = [...kwitansiData].sort((a, b) => {
+        let comparison = 0;
+        if (currentSort.column === 'waktu') {
+            // Pastikan waktu adalah string yang valid sebelum membuat objek Date
+            const dateA = new Date(a.waktu || '');
+            const dateB = new Date(b.waktu || '');
+            comparison = dateB - dateA; // Urutkan dari yang terbaru ke terlama
+        } else {
+            // Gunakan metode yang aman untuk membandingkan nilai
+            const valueA = (a[currentSort.column] || '').toString();
+            const valueB = (b[currentSort.column] || '').toString();
+            comparison = valueA.localeCompare(valueB);
+        }
+        return currentSort.direction === 'asc' ? comparison : -comparison;
+    });
+    renderKwitansiList(sortedData);
+}
+
+function renderKwitansiList(dataToRender = kwitansiData) {
+    const tableBody = document.querySelector('#kwitansi-table tbody');
+    tableBody.innerHTML = ''; // Clear existing content
+    if (dataToRender.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data kwitansi</td></tr>';
+        return;
+    }
+    dataToRender.forEach(kwitansi => {
+        const row = `
+            <tr>
+                <td>${kwitansi.id_kwitansi || ''}</td>
+                <td>${kwitansi.waktu || ''}</td>
+                <td>${kwitansi.nama || ''}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="showDetail('${kwitansi.id_kwitansi || ''}', '${(kwitansi.nama || '').replace(/'/g, "\\'")}')" title="Detail">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteKwitansi('${kwitansi.id_kwitansi || ''}')" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
+
+function handleSort(column) {
+    if (!column) {
+        console.error('Column is undefined');
+        return;
+    }
+    if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc';
+    }
+    sortAndRenderKwitansiList();
+}
+
+function setupSearchAndSort() {
+    // Tambahkan input pencarian jika belum ada
+    if (!document.getElementById('kwitansi-search')) {
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.id = 'kwitansi-search';
+        searchInput.placeholder = 'Cari kwitansi...';
+        searchInput.className = 'form-control mb-3';
+        searchInput.addEventListener('input', handleSearch);
+        
+        const table = document.querySelector('#kwitansi-table');
+        table.parentNode.insertBefore(searchInput, table);
+    }
+
+    // Tambahkan event listener untuk pengurutan pada header tabel
+    const headers = document.querySelectorAll('#kwitansi-table th');
+    headers.forEach(header => {
+        const column = header.dataset.column;
+        if (column) {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', () => handleSort(column));
+        }
+    });
+}
+function handleSearch(event) {
+    const searchTerm = event.target.value.toLowerCase();
+    const filteredData = kwitansiData.filter(kwitansi => 
+        kwitansi.id_kwitansi.toLowerCase().includes(searchTerm) ||
+        kwitansi.waktu.toLowerCase().includes(searchTerm) ||
+        kwitansi.nama.toLowerCase().includes(searchTerm)
+    );
+    renderKwitansiList(filteredData);
+}
+
+
+
+
+
+
 
 function deleteKwitansi(idKwitansi) {
     if (confirm('Apakah Anda yakin ingin menghapus kwitansi ini?')) {

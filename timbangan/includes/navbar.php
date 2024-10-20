@@ -22,7 +22,7 @@
         <li class="nav-item">
             <a class="nav-link text-center <?php echo ($page == 'harga') ? 'active' : ''; ?>" href="index.php?page=harga&user_type=<?php echo $user_type; ?>">
                 <i class="fas fa-tag d-block"></i>
-                <span class="small">Harga</span>
+                <span class="small">Edit</span>
             </a>
         </li>
         <?php endif; ?>
