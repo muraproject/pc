@@ -115,6 +115,16 @@ function handleSearch(event) {
         kwitansi.nama.toLowerCase().includes(searchTerm)
     );
     renderKwitansiList(filteredData);
+    if(userType==='user'){
+        // Pilih semua elemen dengan class 'btn-danger'
+        var buttons = document.querySelectorAll('.user-hide');
+
+        // Loop melalui elemen-elemen tersebut dan hapus dari DOM
+        buttons.forEach(function(button) {
+            button.remove();
+        });
+
+         }
 }
 
 

@@ -284,8 +284,8 @@ function showDetail(idKwitansi, nama) {
                             <tr>
                                 <th>No</th>
                                 <th>Produk</th>
-                                <th>Nilai Timbang (kg)</th>
-                                <th>Harga per kg</th>
+                                <th>Berat (kg)</th>
+                                <th>Harga</th>
                                 <th>Total</th>
                             </tr>
                         </thead>
@@ -307,14 +307,14 @@ function showDetail(idKwitansi, nama) {
                             modalContent += `
                                 <tr id="${subtotalId}" class="table-secondary">
                                     <td colspan="2"><strong>Subtotal ${currentProduct}</strong></td>
-                                    <td class="subtotal-nilai-timbang"><strong>${subtotalNilaiTimbang.toFixed(2)} kg</strong></td>
+                                    <td class="subtotal-nilai-timbang"><strong>${subtotalNilaiTimbang.toFixed(2) > 0 ? subtotalNilaiTimbang.toFixed(2) : '0' } kg</strong></td>
                                     <td>
                                         <input type="number" class="form-control harga-input" 
                                                data-product="${currentProduct}"
-                                               value="${lastHarga}" 
+                                               value="${lastHarga > 0 ? lastHarga : '0'}" 
                                                onchange="updateSubtotalPrice(this)">
                                     </td>
-                                    <td class="subtotal-total"><strong>${subtotal.toFixed(2)}</strong></td>
+                                    <td class="subtotal-total"><strong>${subtotal.toFixed(2)>0 ? subtotal.toFixed(2):'0'}</strong></td>
                                 </tr>
                             `;
                         }
@@ -338,17 +338,17 @@ function showDetail(idKwitansi, nama) {
                             <td>${item.nama_produk}</td>
                             <td>
                                 <input type="number" class="form-control nilai-timbang-input" 
-                                       data-id="${item.id}" value="${item.nilai_timbang}" 
+                                       data-id="${item.id}" value="${item.nilai_timbang > 0 ? item.nilai_timbang : '0'}" 
                                        step="0.01" min="0"
                                        onchange="updateItemTotal(this)">
                             </td>
                             <td>
                                 <input type="number" class="form-control harga-input-item" 
-                                       data-id="${item.id}" value="${item.harga}" 
+                                       data-id="${item.id}" value="${item.harga > 0?item.harga:'0' }" 
                                        step="100" min="0"
                                        onchange="updateItemTotal(this)" readOnly>
                             </td>
-                            <td class="item-total">${itemTotal.toFixed(2)}</td>
+                            <td class="item-total">${itemTotal.toFixed(2) > 0 ? itemTotal.toFixed(2) : '0'}</td>
                         </tr>
                     `;
 
@@ -358,14 +358,14 @@ function showDetail(idKwitansi, nama) {
                         modalContent += `
                             <tr id="${subtotalId}" class="table-secondary">
                                 <td colspan="2"><strong>Subtotal ${currentProduct}</strong></td>
-                                <td class="subtotal-nilai-timbang"><strong>${subtotalNilaiTimbang.toFixed(2)} kg</strong></td>
+                                <td class="subtotal-nilai-timbang"><strong>${subtotalNilaiTimbang.toFixed(2) > 0 ? subtotalNilaiTimbang.toFixed(2) : '0'} kg</strong></td>
                                 <td>
                                     <input type="number" class="form-control harga-input" 
                                            data-product="${currentProduct}"
-                                           value="${lastHarga}" 
+                                           value="${lastHarga > 0 ? lastHarga : '0'}" 
                                            onchange="updateSubtotalPrice(this)">
                                 </td>
-                                <td class="subtotal-total"><strong>${subtotal.toFixed(2)}</strong></td>
+                                <td class="subtotal-total"><strong>${subtotal.toFixed(2) > 0 ? subtotal.toFixed(2) : '0'}</strong></td>
                             </tr>
                         `;
                     }
@@ -374,7 +374,7 @@ function showDetail(idKwitansi, nama) {
                 modalContent += `
                         </tbody>
                     </table>
-                    <h5>Total Harga: <span id="totalHarga">${totalHarga.toFixed(2)}</span></h5>
+                    <h5>Total Harga: <span id="totalHarga">${totalHarga.toFixed(2) > 0 ? totalHarga.toFixed(2) : '0'}</span></h5>
                 `;
 
                 document.getElementById('modalBody').innerHTML = modalContent;
@@ -421,15 +421,15 @@ function updateSubtotalPrice(input) {
                 const newTotal = nilaiTimbang * newPrice;
                 subtotalHarga += newTotal;
                 
-                hargaInput.value = newPrice.toFixed(2);
-                totalCell.textContent = newTotal.toFixed(2);
+                hargaInput.value = newPrice.toFixed(2) > 0 ? newPrice.toFixed(2) : '0';
+                totalCell.textContent = newTotal.toFixed(2) > 0 ? newTotal.toFixed(2) : '0';
             }
         }
     });
 
     if (subtotalRow) {
         subtotalRow.querySelector('.subtotal-nilai-timbang').textContent = `${subtotalNilaiTimbang.toFixed(2)} kg`;
-        subtotalRow.querySelector('.subtotal-total').textContent = subtotalHarga.toFixed(2);
+        subtotalRow.querySelector('.subtotal-total').textContent = subtotalHarga.toFixed(2) > 0 ? subtotalHarga.toFixed(2) : '0';
     }
 
     updateTotalHarga();
@@ -443,7 +443,7 @@ function updateTotalHarga() {
     
     const totalHargaElement = document.getElementById('totalHarga');
     if (totalHargaElement) {
-        totalHargaElement.textContent = totalHarga.toFixed(2);
+        totalHargaElement.textContent = totalHarga.toFixed(2) > 0 ? totalHarga.toFixed(2) : '0';
     } else {
         console.error('Elemen totalHarga tidak ditemukan');
     }
