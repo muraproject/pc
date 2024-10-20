@@ -2,6 +2,9 @@
 header("Content-Type: application/json");
 require_once "../includes/db_connect.php";
 
+// Set zona waktu ke GMT+7 (Waktu Indonesia Barat)
+date_default_timezone_set('Asia/Jakarta');
+
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (isset($input['id_kwitansi']) && isset($input['data']) && is_array($input['data'])) {
@@ -14,7 +17,7 @@ if (isset($input['id_kwitansi']) && isset($input['data']) && is_array($input['da
         $stmt = $conn->prepare("INSERT INTO timbangan (id_kwitansi, waktu, nama, id_produk, nilai_timbang, harga) VALUES (?, ?, ?, ?, ?, ?)");
 
         foreach ($data as $item) {
-            $waktu = date('Y-m-d H:i:s', strtotime($item['waktu']));
+            $waktu = date('Y-m-d H:i:s'); // Menggunakan waktu server GMT+7
             $stmt->bind_param("sssidd", $id_kwitansi, $waktu, $item['nama'], $item['produkId'], $item['nilaiTimbang'], $item['harga']);
             $stmt->execute();
         }

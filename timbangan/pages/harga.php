@@ -52,9 +52,34 @@ $result = $conn->query($sql);
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                 <button type="button" class="btn btn-primary" onclick="saveChanges()">Simpan Perubahan</button>
+                <button type="button" class="btn btn-primary" onclick="generatePDF()">Print PDF</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="<?php echo $base_url; ?>/assets/js/harga.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

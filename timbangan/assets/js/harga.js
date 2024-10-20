@@ -449,5 +449,18 @@ function updateTotalHarga() {
     }
 }
 
-
-
+function generatePDF() {
+    fetch(`${BASE_URL}/includes/generate_pdf.php?id_kwitansi=${currentKwitansiId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Download URL:', data.download_url);
+                // Anda bisa menambahkan logika tambahan di sini jika diperlukan
+            } else {
+                console.error('Error generating PDF:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
