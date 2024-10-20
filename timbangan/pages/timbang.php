@@ -22,7 +22,7 @@ $result = $conn->query($sql);
             }
             ?>
         </select>
-        <button type="button" onclick="addWeighingData()">Timbang</button>
+        <button class="primary" type="button" onclick="addWeighingData()">Timbang</button>
     </form>
     <table id="weighing-table">
         <thead>

@@ -117,19 +117,97 @@ function handleSort(column) {
 
 
 
+
+
+function saveChanges() {
+    if (isSaving) {
+        console.log('Penyimpanan sedang berlangsung, mencegah submission ganda');
+        return;
+    }
+
+    isSaving = true;
+    const saveButton = document.querySelector('#detailModal .modal-footer .btn-primary');
+    if (saveButton) {
+        saveButton.disabled = true;
+    }
+
+    const updatedData = [];
+    const itemInputs = document.querySelectorAll('.nilai-timbang-input[data-id], .harga-input-item[data-id]');
+    
+    itemInputs.forEach(input => {
+        const id = input.getAttribute('data-id');
+        const row = input.closest('tr');
+        const nilaiTimbangInput = row.querySelector('.nilai-timbang-input');
+        const hargaInput = row.querySelector('.harga-input-item');
+        
+        updatedData.push({
+            id: id,
+            nilai_timbang: parseFloat(nilaiTimbangInput.value),
+            harga: parseFloat(hargaInput.value)
+        });
+    });
+
+    console.log('Sending data:', {
+        id_kwitansi: currentKwitansiId,
+        data: updatedData
+    });
+
+    fetch(`${BASE_URL}/api/update_harga_kwitansi.php`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id_kwitansi: currentKwitansiId,
+            data: updatedData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Server response:', data);
+        if (data.success) {
+            alert(`Perubahan berhasil disimpan. ${data.updated_rows} baris diupdate.`);
+            $('#detailModal').modal('hide');
+            loadKwitansiList();
+        } else {
+            alert('Gagal menyimpan perubahan: ' + data.message);
+        }
+        
+        if (data.debug_info) {
+            console.log('Debug info:', data.debug_info);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menyimpan perubahan: ' + error.message);
+    })
+    .finally(() => {
+        isSaving = false;
+        if (saveButton) {
+            saveButton.disabled = false;
+        }
+    });
+}
+
+
+
+
 function updateItemTotal(input) {
     const row = input.closest('tr');
-    const nilaiTimbangCell = row.cells[2];
+    const nilaiTimbangInput = row.querySelector('.nilai-timbang-input');
+    const hargaInput = row.querySelector('.harga-input-item');
     const itemTotalCell = row.querySelector('.item-total');
     
-    if (!nilaiTimbangCell || !itemTotalCell) {
-        console.error('Struktur baris tidak sesuai yang diharapkan');
+    const nilaiTimbang = parseFloat(nilaiTimbangInput.value);
+    const harga = parseFloat(hargaInput.value);
+    
+    if (isNaN(nilaiTimbang) || isNaN(harga)) {
+        alert('Mohon masukkan angka yang valid untuk nilai timbang dan harga.');
         return;
     }
     
-    const nilaiTimbang = parseFloat(nilaiTimbangCell.textContent);
-    const harga = parseFloat(input.value);
     const total = nilaiTimbang * harga;
+    
     itemTotalCell.textContent = total.toFixed(2);
     updateSubtotals();
     updateTotalHarga();
@@ -146,9 +224,10 @@ function updateSubtotals() {
             return;
         }
         
-        const product = cells[1].textContent.trim().toLowerCase().replace(/\s+/g, '_');
-        const nilaiTimbang = parseFloat(cells[2].textContent);
-        const itemTotalCell = row.querySelector('.item-total') || cells[4];
+        const product = cells[1].textContent.trim();
+        const nilaiTimbangInput = row.querySelector('.nilai-timbang-input');
+        const nilaiTimbang = parseFloat(nilaiTimbangInput.value);
+        const itemTotalCell = row.querySelector('.item-total');
         const total = parseFloat(itemTotalCell.textContent);
 
         if (!subtotals[product]) {
@@ -164,7 +243,7 @@ function updateSubtotals() {
 }
 
 function updateSubtotalRow(product, nilaiTimbang, subtotal) {
-    const subtotalRowId = `subtotal_${product}`;
+    const subtotalRowId = `subtotal_${product.toLowerCase().replace(/\s+/g, '_')}`;
     const subtotalRow = document.getElementById(subtotalRowId);
 
     if (!subtotalRow) {
@@ -205,7 +284,7 @@ function showDetail(idKwitansi, nama) {
                             <tr>
                                 <th>No</th>
                                 <th>Produk</th>
-                                <th>Nilai Timbang</th>
+                                <th>Nilai Timbang (kg)</th>
                                 <th>Harga per kg</th>
                                 <th>Total</th>
                             </tr>
@@ -257,12 +336,19 @@ function showDetail(idKwitansi, nama) {
                         <tr>
                             <td>${rowCount}</td>
                             <td>${item.nama_produk}</td>
-                            <td>${item.nilai_timbang} kg</td>
+                            <td>
+                                <input type="number" class="form-control nilai-timbang-input" 
+                                       data-id="${item.id}" value="${item.nilai_timbang}" 
+                                       step="0.01" min="0"
+                                       onchange="updateItemTotal(this)">
+                            </td>
                             <td>
                                 <input type="number" class="form-control harga-input-item" 
-                                       data-id="${item.id}" value="${item.harga}" readonly>
+                                       data-id="${item.id}" value="${item.harga}" 
+                                       step="100" min="0"
+                                       onchange="updateItemTotal(this)" readOnly>
                             </td>
-                            <td class="item-total" data-nilai-timbang="${item.nilai_timbang}">${itemTotal.toFixed(2)}</td>
+                            <td class="item-total">${itemTotal.toFixed(2)}</td>
                         </tr>
                     `;
 
@@ -308,6 +394,13 @@ function showDetail(idKwitansi, nama) {
 function updateSubtotalPrice(input) {
     const product = input.dataset.product;
     const newPrice = parseFloat(input.value);
+    
+    if (isNaN(newPrice)) {
+        alert('Mohon masukkan angka yang valid untuk harga.');
+        input.value = input.defaultValue; // Reset ke nilai sebelumnya
+        return;
+    }
+    
     const subtotalRow = document.getElementById(`subtotal_${product.toLowerCase().replace(/\s+/g, '_')}`);
     const itemRows = document.querySelectorAll(`tr:not(.table-secondary) td:nth-child(2)`);
     
@@ -317,17 +410,20 @@ function updateSubtotalPrice(input) {
     itemRows.forEach(cell => {
         if (cell.textContent.trim() === product) {
             const row = cell.closest('tr');
-            const nilaiTimbangCell = row.cells[2];
+            const nilaiTimbangInput = row.querySelector('.nilai-timbang-input');
             const hargaInput = row.querySelector('.harga-input-item');
             const totalCell = row.querySelector('.item-total');
-            const nilaiTimbang = parseFloat(nilaiTimbangCell.textContent);
             
-            subtotalNilaiTimbang += nilaiTimbang;
-            const newTotal = nilaiTimbang * newPrice;
-            subtotalHarga += newTotal;
+            const nilaiTimbang = parseFloat(nilaiTimbangInput.value);
             
-            hargaInput.value = newPrice.toFixed(2);
-            totalCell.textContent = newTotal.toFixed(2);
+            if (!isNaN(nilaiTimbang)) {
+                subtotalNilaiTimbang += nilaiTimbang;
+                const newTotal = nilaiTimbang * newPrice;
+                subtotalHarga += newTotal;
+                
+                hargaInput.value = newPrice.toFixed(2);
+                totalCell.textContent = newTotal.toFixed(2);
+            }
         }
     });
 
@@ -353,75 +449,5 @@ function updateTotalHarga() {
     }
 }
 
-function saveChanges() {
-    if (isSaving) {
-        console.log('Penyimpanan sedang berlangsung, mencegah submission ganda');
-        return;
-    }
 
-    isSaving = true;
-    const saveButton = document.querySelector('#detailModal .modal-footer .btn-primary');
-    if (saveButton) {
-        saveButton.disabled = true;
-    }
 
-    const updatedData = [];
-    const subtotalInputs = document.querySelectorAll('.harga-input[data-product]');
-    
-    subtotalInputs.forEach(subtotalInput => {
-        const product = subtotalInput.getAttribute('data-product');
-        const harga = parseFloat(subtotalInput.value);
-        
-        // Mencari semua item untuk produk ini
-        const itemInputs = document.querySelectorAll(`.harga-input-item[data-id]`);
-        itemInputs.forEach(itemInput => {
-            if (itemInput.closest('tr').querySelector('td:nth-child(2)').textContent.trim() === product) {
-                updatedData.push({
-                    id: itemInput.getAttribute('data-id'),
-                    harga: harga
-                });
-            }
-        });
-    });
-
-    console.log('Sending data:', {
-        id_kwitansi: currentKwitansiId,
-        data: updatedData
-    });
-
-    fetch(`${BASE_URL}/api/update_harga_kwitansi.php`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            id_kwitansi: currentKwitansiId,
-            data: updatedData
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Server response:', data);
-        if (data.success) {
-            alert(`Perubahan harga berhasil disimpan. ${data.updated_rows} baris diupdate.`);
-            $('#detailModal').modal('hide');
-            loadKwitansiList();
-        } else {
-            alert('Gagal menyimpan perubahan harga: ' + data.message);
-        }
-        
-        if (data.debug_info) {
-            console.log('Debug info:', data.debug_info);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan saat menyimpan perubahan harga: ' + error.message);
-    })
-    .finally(() => {
-        isSaving = false;
-        if (saveButton) {
-            saveButton.disabled = false;
-        }
-    });
-}

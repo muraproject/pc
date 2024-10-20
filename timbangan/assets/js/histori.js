@@ -59,7 +59,7 @@ function renderKwitansiList(dataToRender = kwitansiData) {
                     <button class="btn btn-sm btn-info" onclick="showDetail('${kwitansi.id_kwitansi || ''}', '${(kwitansi.nama || '').replace(/'/g, "\\'")}')" title="Detail">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteKwitansi('${kwitansi.id_kwitansi || ''}')" title="Hapus">
+                    <button class="btn btn-sm btn-danger user-hide" onclick="deleteKwitansi('${kwitansi.id_kwitansi || ''}')" title="Hapus">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
