@@ -1,6 +1,7 @@
 const BASE_URL = '/pc/timbangan';
 let currentKwitansiId;
 let isSaving = false;
+var nama_kirim="";
 
 document.addEventListener('DOMContentLoaded', function() {
     loadKwitansiList();
@@ -269,6 +270,7 @@ function updateSubtotalRow(product, nilaiTimbang, subtotal) {
 
 function showDetail(idKwitansi, nama) {
     currentKwitansiId = idKwitansi;
+    nama_kirim = nama;
     fetch(`${BASE_URL}/api/get_kwitansi_detail.php?id_kwitansi=${idKwitansi}`)
         .then(response => response.json())
         .then(data => {
@@ -450,7 +452,7 @@ function updateTotalHarga() {
 }
 
 function generatePDF() {
-    fetch(`${BASE_URL}/includes/generate_pdf.php?id_kwitansi=${currentKwitansiId}`)
+    fetch(`${BASE_URL}/includes/generate_pdf.php?id_kwitansi=${currentKwitansiId}&nama=${nama_kirim}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {

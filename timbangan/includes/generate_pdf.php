@@ -4,6 +4,7 @@ require('fpdf/fpdf.php');
 require_once "../includes/db_connect.php";
 
 $id_kwitansi = $_GET['id_kwitansi'] ?? '';
+$nama = $_GET['nama'] ?? '';
 
 if (empty($id_kwitansi)) {
     echo json_encode(["success" => false, "message" => "ID Kwitansi is required"]);
@@ -61,6 +62,7 @@ $pdf->AddPage();
 $pdf->SetFont('Arial', '', 12);
 $pdf->Cell(0, 10, 'ID Kwitansi: ' . $id_kwitansi, 0, 1);
 $pdf->Cell(0, 10, 'Tanggal: ' . $tanggal_kwitansi, 0, 1);
+$pdf->Cell(0, 10, 'Nama: ' . $nama, 0, 1);
 $pdf->Ln(10);
 
 $pdf->SetFont('Arial', 'B', 12);

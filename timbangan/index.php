@@ -128,7 +128,7 @@ function getPageTitle($page) {
                 button.remove();
             });
 
-        }
+             }
             }, 200);
         
 
@@ -168,7 +168,7 @@ function getPageTitle($page) {
             // Di sini Anda bisa menambahkan logika logout sebenarnya
             // Misalnya, mengarahkan ke halaman login
             setTimeout(function() {
-                window.location.href = 'login.html';
+                window.location.href = 'login.php';
             }, 1000);
         });
 
