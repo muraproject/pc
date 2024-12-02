@@ -118,6 +118,20 @@ function getPageTitle($page) {
         let isBluetoothConnected = false;
         var userType = '<?php echo $user_type; ?>';
 
+        setTimeout(function() {
+            if(userType==='user'){
+            // Pilih semua elemen dengan class 'btn-danger'
+            var buttons = document.querySelectorAll('.user-hide');
+
+            // Loop melalui elemen-elemen tersebut dan hapus dari DOM
+            buttons.forEach(function(button) {
+                button.remove();
+            });
+
+             }
+            }, 200);
+        
+
         function bluetoothConnected() {
             isBluetoothConnected = true;
             document.getElementById('bluetoothStatus').textContent = 'Connected';
@@ -144,7 +158,9 @@ function getPageTitle($page) {
 
         function updateScale(input) {
             // const randomWeight = Math.random() * 100;
-            document.getElementById('scale-value').textContent = input.replace("ww", "");;
+            input= input.replace("ww", "");
+            input =input*1;
+            document.getElementById('scale-value').textContent = input;
         }
 
         document.getElementById('logoutBtn').addEventListener('click', function() {
@@ -152,7 +168,7 @@ function getPageTitle($page) {
             // Di sini Anda bisa menambahkan logika logout sebenarnya
             // Misalnya, mengarahkan ke halaman login
             setTimeout(function() {
-                window.location.href = 'login.html';
+                window.location.href = 'login.php';
             }, 1000);
         });
 

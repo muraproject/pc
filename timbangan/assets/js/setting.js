@@ -1,93 +1,145 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('product-form');
-    form.addEventListener('submit', handleSubmit);
+    const productForm = document.getElementById('product-form');
+    const personForm = document.getElementById('person-form');
+    
+    productForm.addEventListener('submit', handleProductSubmit);
+    personForm.addEventListener('submit', handlePersonSubmit);
+
+    // Reset product form when "Tambah Produk" is clicked
+    // document.getElementById('product-submit-btn').addEventListener('click', function(event) {
+    //     if (this.textContent === 'Tambah Produk') {
+    //         resetProductForm();
+    //     }
+    // });
 });
 
-function handleSubmit(event) {
+function resetProductForm() {
+    document.getElementById('product-id').value = '';
+    document.getElementById('product-name').value = '';
+    document.getElementById('product-submit-btn').textContent = 'Tambah Produk';
+}
+
+function handleProductSubmit(event) {
     event.preventDefault();
     const id = document.getElementById('product-id').value;
     const name = document.getElementById('product-name').value;
 
+    if (!name) {
+        alert('Nama produk harus diisi');
+        return;
+    }
+
     if (id) {
-        updateProduct(id, name);
+        updateItem('produk', id, name);
     } else {
-        createProduct(name);
+        createItem('produk', name);
     }
 }
 
-function createProduct(name) {
+function handlePersonSubmit(event) {
+    event.preventDefault();
+    const id = document.getElementById('person-id').value;
+    const name = document.getElementById('person-name').value;
+
+    if (!name) {
+        alert('Nama orang harus diisi');
+        return;
+    }
+
+    if (id) {
+        updateItem('orang', id, name);
+    } else {
+        createItem('orang', name);
+    }
+}
+
+function createItem(type, name) {
     fetch('api/product_crud.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `action=create&name=${encodeURIComponent(name)}`
+        body: `action=create&type=${type}&name=${encodeURIComponent(name)}`
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Produk berhasil ditambahkan');
+            alert(data.message);
             location.reload();
         } else {
-            alert('Gagal menambahkan produk: ' + data.message);
+            alert('Gagal menambahkan: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan saat menambahkan produk');
+        alert('Terjadi kesalahan saat menambahkan');
     });
 }
 
 function editProduct(id, name) {
     document.getElementById('product-id').value = id;
     document.getElementById('product-name').value = name;
-    document.getElementById('submit-btn').textContent = 'Update Produk';
+    document.getElementById('product-submit-btn').textContent = 'Update Produk';
 }
 
-function updateProduct(id, name) {
+function editPerson(id, name) {
+    document.getElementById('person-id').value = id;
+    document.getElementById('person-name').value = name;
+    document.getElementById('person-submit-btn').textContent = 'Update Orang';
+}
+
+function updateItem(type, id, name) {
     fetch('api/product_crud.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `action=update&id=${id}&name=${encodeURIComponent(name)}`
+        body: `action=update&type=${type}&id=${id}&name=${encodeURIComponent(name)}`
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Produk berhasil diupdate');
+            alert(data.message);
             location.reload();
         } else {
-            alert('Gagal mengupdate produk: ' + data.message);
+            alert('Gagal mengupdate: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan saat mengupdate produk');
+        alert('Terjadi kesalahan saat mengupdate');
     });
 }
 
 function deleteProduct(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+    deleteItem('produk', id);
+}
+
+function deletePerson(id) {
+    deleteItem('orang', id);
+}
+
+function deleteItem(type, id) {
+    if (confirm('Apakah Anda yakin ingin menghapus ini?')) {
         fetch('api/product_crud.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `action=delete&id=${id}`
+            body: `action=delete&type=${type}&id=${id}`
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Produk berhasil dihapus');
+                alert(data.message);
                 location.reload();
             } else {
-                alert('Gagal menghapus produk: ' + data.message);
+                alert('Gagal menghapus: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus produk');
+            alert('Terjadi kesalahan saat menghapus');
         });
     }
 }

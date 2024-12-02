@@ -3,11 +3,12 @@ let weighingData = [];
 
 
 function addWeighingData() {
-    const nama = document.getElementById('nama').value;
+    const nama = document.getElementById('nama').options[nama.selectedIndex].text;
     const produk = document.getElementById('produk');
     const produkId = produk.value;
     const produkNama = produk.options[produk.selectedIndex].text;
     const nilaiTimbang = document.getElementById('scale-value').textContent;
+    console.log(nama);
 
     if (!nama || !produkId) {
         alert('Nama dan Produk harus diisi');
@@ -78,10 +79,11 @@ function saveKwitansi() {
 // ... (fungsi lainnya tetap sama)
 
 function addWeighingData() {
-    const nama = document.getElementById('nama').value;
+    const nama = document.getElementById('nama');
     const produk = document.getElementById('produk');
     const produkId = produk.value;
     const produkNama = produk.options[produk.selectedIndex].text;
+    const namaOrang = nama.options[nama.selectedIndex].text;
     const nilaiTimbang = document.getElementById('scale-value').textContent;
 
     if (!nama || !produkId) {
@@ -91,7 +93,7 @@ function addWeighingData() {
 
     const newData = {
         waktu: new Date().toLocaleString(),
-        nama: nama,
+        nama: namaOrang,
         produkId: produkId,
         produkNama: produkNama,
         nilaiTimbang: nilaiTimbang,
@@ -113,7 +115,6 @@ function updateTable() {
             <td>${data.produkNama}</td>
             <td>${data.nilaiTimbang} kg</td>
             <td>
-                <button onclick="editWeighingData(${index})">Edit</button>
                 <button onclick="deleteWeighingData(${index})">Hapus</button>
             </td>
         `;

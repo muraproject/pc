@@ -43,8 +43,16 @@ input, select, button {
     border-radius: 4px;
 }
 
-button {
-    background-color: #4CAF50;
+.saved {
+    background-color: #049b1d;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.add {
+    background-color: #4C52AF;
     color: white;
     border: none;
     cursor: pointer;
@@ -52,7 +60,7 @@ button {
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #4C52AF;
 }
 
 /* Table styling */

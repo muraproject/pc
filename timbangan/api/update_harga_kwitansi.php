@@ -26,31 +26,32 @@ try {
     $conn->begin_transaction();
 
     $updateCount = 0;
-    $stmt = $conn->prepare("UPDATE timbangan SET harga = ? WHERE id = ? AND id_kwitansi = ?");
+    $stmt = $conn->prepare("UPDATE timbangan SET harga = ?, nilai_timbang = ? WHERE id = ? AND id_kwitansi = ?");
 
     foreach ($data as $item) {
-        if (!isset($item['id']) || !isset($item['harga'])) {
+        if (!isset($item['id']) || !isset($item['harga']) || !isset($item['nilai_timbang'])) {
             throw new Exception("Data item tidak lengkap");
         }
 
-        $stmt->bind_param("dis", $item['harga'], $item['id'], $id_kwitansi);
+        $stmt->bind_param("ddis", $item['harga'], $item['nilai_timbang'], $item['id'], $id_kwitansi);
         $stmt->execute();
         $affectedRows = $stmt->affected_rows;
         $updateCount += $affectedRows;
-        
-        // Get the current value in the database
-        $checkStmt = $conn->prepare("SELECT harga FROM timbangan WHERE id = ? AND id_kwitansi = ?");
+
+        // Get the current values in the database
+        $checkStmt = $conn->prepare("SELECT harga, nilai_timbang FROM timbangan WHERE id = ? AND id_kwitansi = ?");
         $checkStmt->bind_param("is", $item['id'], $id_kwitansi);
         $checkStmt->execute();
         $checkResult = $checkStmt->get_result();
         $currentValue = $checkResult->fetch_assoc();
-        
+
         $debugInfo = [
             "id" => $item['id'],
             "harga" => $item['harga'],
+            "nilai_timbang" => $item['nilai_timbang'],
             "id_kwitansi" => $id_kwitansi,
             "affected_rows" => $affectedRows,
-            "current_value" => $currentValue ? $currentValue['harga'] : null
+            "current_value" => $currentValue
         ];
         $response["debug_info"][] = $debugInfo;
     }
@@ -59,7 +60,7 @@ try {
     $conn->commit();
 
     $response["success"] = true;
-    $response["message"] = $updateCount > 0 ? "Harga berhasil diupdate" : "Tidak ada perubahan harga";
+    $response["message"] = $updateCount > 0 ? "Data berhasil diupdate" : "Tidak ada perubahan data";
     $response["updated_rows"] = $updateCount;
 
 } catch (Exception $e) {
@@ -67,7 +68,7 @@ try {
     if (isset($conn) && !$conn->connect_errno) {
         $conn->rollback();
     }
-    
+
     $response["message"] = "Error: " . $e->getMessage();
 } finally {
     // Tutup statement dan koneksi
@@ -84,4 +85,3 @@ try {
 
 // Kirim response
 echo json_encode($response);
-?>

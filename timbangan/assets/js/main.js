@@ -174,10 +174,12 @@ function deleteProduct(id) {
 
 
 function updateScale(value) {
+    value = value*100;
     const scaleValueElement = document.getElementById('scale-value');
     if (scaleValueElement) {
-        scaleValueElement.textContent = value;
+        scaleValueElement.textContent = value*1;
     }
+    console.log("aaa");
 }
 
 // Fungsi untuk menambahkan data timbangan
