@@ -1,0 +1,95 @@
+Directory Structure 
+----------------- 
+ 
+Folder PATH listing for volume Data
+Volume serial number is DCDF-EA9E
+D:.
+|   .htaccess
+|   aplikasi_timbangan.sql
+|   cek.bat
+|   index.php
+|   login.html
+|   structure.txt
+|   
++---api
+|       delete_histori.php
+|       delete_kwitansi.php
+|       get_kwitansi_detail.php
+|       get_kwitansi_list.php
+|       harga.php
+|       histori.php
+|       product_crud.php
+|       save_kwitansi.php
+|       setting.php
+|       timbang.php
+|       update_harga.php
+|       update_harga_kwitansi.php
+|       
++---assets
+|   +---css
+|   |       styles.css
+|   |       
+|   \---js
+|           harga.js
+|           histori.js
+|           main.js
+|           setting.js
+|           timbang.js
+|           
++---includes
+|       config.php
+|       db.php
+|       db_connect.php
+|       functions.php
+|       navbar.php
+|       
++---pages
+|       harga.php
+|       histori.php
+|       setting.php
+|       timbang.php
+|       
+\---timbangan_rekap
+    |   create_tables.sql
+    |   index.php
+    |   
+    +---api
+    |   +---hitung
+    |   |       supplier.php
+    |   |       tenaga.php
+    |   |       
+    |   +---inventory
+    |   |       barang_keluar.php
+    |   |       barang_masuk.php
+    |   |       biaya_tenaga.php
+    |   |       stock.php
+    |   |       
+    |   \---master
+    |           customer.php
+    |           kategori.php
+    |           produk.php
+    |           supplier.php
+    |           
+    +---assets
+    |   +---css
+    |   |       style.css
+    |   |       
+    |   \---js
+    |           hitung.js
+    |           inventory.js
+    |           master.js
+    |           
+    +---includes
+    |       config.php
+    |       db.php
+    |       functions.php
+    |       navbar.php
+    |       
+    \---pages
+            barang_keluar.php
+            barang_masuk.php
+            dashboard.php
+            hitung.php
+            master.php
+            timbang_biaya.php
+            
