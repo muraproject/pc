@@ -12,12 +12,14 @@
                 <span class="small">Histori</span>
             </a>
         </li>
+        <?php if ($user_type === 'admin'): ?>
         <li class="nav-item">
             <a class="nav-link text-center <?php echo ($page == 'setting') ? 'active' : ''; ?>" href="index.php?page=setting&user_type=<?php echo $user_type; ?>">
                 <i class="fas fa-cog d-block"></i>
                 <span class="small">Setting</span>
             </a>
         </li>
+        <?php endif; ?>
         <?php if ($user_type === 'admin'): ?>
         <li class="nav-item">
             <a class="nav-link text-center <?php echo ($page == 'harga') ? 'active' : ''; ?>" href="index.php?page=harga&user_type=<?php echo $user_type; ?>">

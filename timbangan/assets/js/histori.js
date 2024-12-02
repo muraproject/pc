@@ -207,17 +207,34 @@ function showDetail(idKwitansi, nama) {
                                 <td>${counter}${String.fromCharCode(97 + index)}.</td>
                                 <td>${item.nama_produk}</td>
                                 <td>${item.nilai_timbang} kg</td>
-                                <td>Rp ${item.harga.toLocaleString()}</td>
-                                <td>Rp ${itemTotal.toLocaleString()}</td>
+                                <td>Rp - </td>
+                                <td>Rp - </td>
                             </tr>
                         `;
+
+                        // modalContent += `
+                        //     <tr>
+                        //         <td>${counter}${String.fromCharCode(97 + index)}.</td>
+                        //         <td>${item.nama_produk}</td>
+                        //         <td>${item.nilai_timbang} kg</td>
+                        //         <td>Rp ${item.harga.toLocaleString()}</td>
+                        //         <td>Rp ${itemTotal.toLocaleString()}</td>
+                        //     </tr>
+                        // `;
                     });
                     modalContent += `
                         <tr>
                             <td colspan="4" style="text-align: left;"><strong>Total ${jenis}:</strong></td>
-                            <td><strong>Rp ${subtotal.toLocaleString()}</strong></td>
+                            <td><strong>Rp - </strong></td>
                         </tr>
                     `;
+
+                    // modalContent += `
+                    //     <tr>
+                    //         <td colspan="4" style="text-align: left;"><strong>Total ${jenis}:</strong></td>
+                    //         <td><strong>Rp ${subtotal.toLocaleString()}</strong></td>
+                    //     </tr>
+                    // `;
                     totalKeseluruhan += subtotal;
                     counter++;
                 });
@@ -225,11 +242,20 @@ function showDetail(idKwitansi, nama) {
                 modalContent += `
                         <tr>
                             <td colspan="4" style="text-align: left;"><strong>Total ${nama}:</strong></td>
-                            <td><strong>Rp ${totalKeseluruhan.toLocaleString()}</strong></td>
+                            <td><strong>Rp - </strong></td>
                         </tr>
                     </tbody>
                 </table>
                 `;
+
+                // modalContent += `
+                //         <tr>
+                //             <td colspan="4" style="text-align: left;"><strong>Total ${nama}:</strong></td>
+                //             <td><strong>Rp ${totalKeseluruhan.toLocaleString()}</strong></td>
+                //         </tr>
+                //     </tbody>
+                // </table>
+                // `;
 
                 document.getElementById('modalBody').innerHTML = modalContent;
                 $('#detailModal').modal('show');

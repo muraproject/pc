@@ -11,7 +11,15 @@ $result_orang = $conn->query($sql_orang);
 ?>
 
 <div class="container">
+
     <h2 class="mt-4">Pengaturan Produk</h2>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Pengaturan Sistem</h2>
+        <a href="ganti_password.php" class="btn btn-primary">
+            <i class="fas fa-key"></i> Ganti Password User
+        </a>
+    </div>
     
     <!-- Form for products -->
     <form id="product-form">

@@ -98,6 +98,7 @@ if ($is_logged_in) {
 <body class="bg-light">
     <div class="container mt-5">
         <div class="row justify-content-center">
+            
             <div class="col-md-6">
                 <?php if (!$is_logged_in): ?>
                 <!-- Login Form -->
@@ -177,6 +178,8 @@ if ($is_logged_in) {
                 <?php endif; ?>
             </div>
         </div>
+        <a href="index.php?page=setting&user_type=admin" class="btn btn-light btn-sm">Kembali ke Setting</a>
+
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
