@@ -217,7 +217,7 @@
 }
 </style>
 
-<script src="">
+<script>
 
 let currentStep = 1;
 let customers = [];
@@ -225,8 +225,11 @@ let categories = [];
 let products = [];
 let currentStock = 0;
 
+console.log("cek");
+
 document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
+    console.log("cek");
     loadCustomers();
     loadCategories();
     loadBarangKeluar();
@@ -325,7 +328,7 @@ function updateFormView() {
 
 // Data Loading Functions
 function loadCustomers() {
-    fetch('../api/master/customer.php')
+    fetch('../timbangan_rekap/api/master/customer.php')
         .then(response => response.json())
         .then(data => {
             customers = data;
@@ -335,7 +338,7 @@ function loadCustomers() {
 }
 
 function loadCategories() {
-    fetch('../api/master/kategori.php')
+    fetch('../timbangan_rekap/api/master/kategori.php')
         .then(response => response.json())
         .then(data => {
             categories = data;
@@ -345,7 +348,7 @@ function loadCategories() {
 }
 
 function loadProducts(kategoriId) {
-    fetch(`../api/master/produk.php?kategori_id=${kategoriId}`)
+    fetch(`../timbangan_rekap/api/master/produk.php?kategori_id=${kategoriId}`)
         .then(response => response.json())
         .then(data => {
             products = data;
@@ -355,7 +358,7 @@ function loadProducts(kategoriId) {
 }
 
 function loadStock(produkId) {
-    fetch(`../api/inventory/stock.php?produk_id=${produkId}`)
+    fetch(`../timbangan_rekap/api/inventory/stock.php?produk_id=${produkId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -367,44 +370,47 @@ function loadStock(produkId) {
 }
 
 // Update UI Functions
-function updateCustomerDropdowns() {
-    const customerSelect = document.getElementById('customer_id');
-    const filterCustomer = document.getElementById('filter-customer');
-    
-    const options = customers.map(c => 
-        `<option value="${c.id}">${c.nama}</option>`
-    ).join('');
-
-    customerSelect.innerHTML = '<option value="">Pilih Customer</option>' + options;
-    filterCustomer.innerHTML = '<option value="">Semua Customer</option>' + options;
-}
-
 function updateCategoryDropdowns() {
     const categorySelect = document.getElementById('kategori_id');
     const filterCategory = document.getElementById('filter-kategori');
     
-    const options = categories.map(c => 
-        `<option value="${c.id}">${c.nama}</option>`
-    ).join('');
+    fetch('../timbangan_rekap/api/master/kategori.php')
+        .then(response => response.json())
+        .then(result => {
+            if (result.success && Array.isArray(result.data)) {
+                const options = result.data.map(c => 
+                    `<option value="${c.id}">${c.nama}</option>`
+                ).join('');
 
-    categorySelect.innerHTML = '<option value="">Pilih Kategori</option>' + options;
-    filterCategory.innerHTML = '<option value="">Semua Kategori</option>' + options;
+                categorySelect.innerHTML = '<option value="">Pilih Kategori</option>' + options;
+                filterCategory.innerHTML = '<option value="">Semua Kategori</option>' + options;
+            }
+        })
+        .catch(error => console.error('Error loading categories:', error));
+}
 
-    // Event listener untuk perubahan kategori
-    categorySelect.addEventListener('change', (e) => {
-        if (e.target.value) {
-            loadProducts(e.target.value);
-        } else {
-            document.getElementById('produk_id').innerHTML = 
-                '<option value="">Pilih Produk</option>';
-            currentStock = 0;
-            updateStockInfo();
-        }
-    });
+function updateCustomerDropdowns() {
+    const customerSelect = document.getElementById('customer_id');
+    const filtercustomer = document.getElementById('filter-customer');
+    
+    fetch('../timbangan_rekap/api/master/customer.php')
+        .then(response => response.json())
+        .then(result => {
+            if (result.success && Array.isArray(result.data)) {
+                const options = result.data.map(s => 
+                    `<option value="${s.id}">${s.nama}</option>`
+                ).join('');
+
+                customerSelect.innerHTML = '<option value="">Pilih customer</option>' + options;
+                filtercustomer.innerHTML = '<option value="">Semua customer</option>' + options;
+            }
+        })
+        .catch(error => console.error('Error loading customers:', error));
 }
 
 function updateProductDropdown() {
     const productSelect = document.getElementById('produk_id');
+    console.log(productSelect ? "produk_id ditemukan" : "produk_id tidak ditemukan");
     
     const options = products.map(p => 
         `<option value="${p.id}">${p.nama}</option>`
@@ -413,14 +419,20 @@ function updateProductDropdown() {
     productSelect.innerHTML = '<option value="">Pilih Produk</option>' + options;
 
     // Event listener untuk perubahan produk
-    productSelect.addEventListener('change', (e) => {
-        if (e.target.value) {
-            loadStock(e.target.value);
-        } else {
-            currentStock = 0;
-            updateStockInfo();
-        }
-    });
+    // productSelect.addEventListener('change', (e) => {
+    //     console.log("hai");
+    //     if (e.target.value) {
+    //         loadStock(e.target.value);
+            
+    //     } else {
+    //         currentStock = 0;
+    //         updateStockInfo();
+    //     }
+    // });
+
+    productSelect.onchange = function(){
+        console.log("hoha");
+    };
 }
 
 function updateStockInfo() {
@@ -440,7 +452,7 @@ function handleSubmit(e) {
         keterangan: document.getElementById('keterangan').value
     };
 
-    fetch('../api/inventory/barang_keluar.php', {
+    fetch('../timbangan_rekap/api/inventory/barang_keluar.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -462,7 +474,7 @@ function handleSubmit(e) {
 
 // Data Loading and Table Functions
 function loadBarangKeluar() {
-    fetch('../api/inventory/barang_keluar.php')
+    fetch('../timbangan_rekap/api/inventory/barang_keluar.php')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -520,7 +532,7 @@ function applyFilters() {
     const categoryId = document.getElementById('filter-kategori').value;
     const date = document.getElementById('filter-tanggal').value;
 
-    let url = '../api/inventory/barang_keluar.php?';
+    let url = '../timbangan_rekap/api/inventory/barang_keluar.php?';
     const params = new URLSearchParams();
 
     if (customerId) params.append('customer_id', customerId);
@@ -541,7 +553,7 @@ function applyFilters() {
 
 // CRUD Functions
 function editItem(id) {
-    fetch(`../api/inventory/barang_keluar.php?id=${id}`)
+    fetch(`../timbangan_rekap/api/inventory/barang_keluar.php?id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -618,7 +630,7 @@ function handleEdit(e) {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
-    fetch('../api/inventory/barang_keluar.php', {
+    fetch('../timbangan_rekap/api/inventory/barang_keluar.php', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -640,7 +652,7 @@ function handleEdit(e) {
 
 function deleteItem(id) {
     if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-        fetch(`../api/inventory/barang_keluar.php?id=${id}`, {
+        fetch(`../timbangan_rekap/api/inventory/barang_keluar.php?id=${id}`, {
             method: 'DELETE'
         })
         .then(response => response.json())

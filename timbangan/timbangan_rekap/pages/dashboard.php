@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadStock() {
-    fetch('../api/inventory/stock.php')
+    fetch('../timbangan_rekap/api/inventory/stock.php')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -44,56 +44,64 @@ function loadStock() {
         .catch(error => console.error('Error:', error));
 }
 
-function updateDashboard(categories) {
-    // Update summary cards
-    document.getElementById('total-kategori').textContent = categories.length;
+function updateDashboard(data) {
+    if (!data || !data.categories) return;
+
+    document.getElementById('total-kategori').textContent = data.categories.length;
     
     let totalProducts = 0;
     let totalStock = 0;
     
-    categories.forEach(category => {
-        totalProducts += category.products.length;
-        totalStock += parseFloat(category.stock || 0);
-    });
-    
-    document.getElementById('total-produk').textContent = totalProducts;
-    document.getElementById('total-stock').textContent = totalStock.toFixed(2) + ' kg';
-
-    // Update category list
     const categoryList = document.getElementById('category-list');
     categoryList.innerHTML = '';
 
-    categories.forEach(category => {
-        const categoryElement = document.createElement('div');
-        categoryElement.className = 'border rounded-lg p-4';
-        
-        categoryElement.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">${category.kategori}</h3>
-                <span class="text-lg font-bold ${parseFloat(category.stock) > 0 ? 'text-green-600' : 'text-red-600'}">
-                    ${parseFloat(category.stock).toFixed(2)} kg
-                </span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                ${category.products.map(product => `
-                    <div class="bg-gray-50 rounded p-3">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium">${product.nama}</span>
-                            <span class="font-semibold ${parseFloat(product.stock) > 0 ? 'text-green-600' : 'text-red-600'}">
-                                ${parseFloat(product.stock).toFixed(2)} kg
-                            </span>
+    data.categories.forEach(category => {
+        totalProducts += category.products.length;
+        totalStock += parseFloat(category.total || 0);
+
+        const categoryElement = `
+            <div class="border rounded-lg p-4 mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">${category.nama}</h3>
+                    <span class="text-lg font-bold ${getStockColorClass(category.total)}">
+                        ${formatNumber(category.total)} kg
+                    </span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    ${category.products.map(product => `
+                        <div class="bg-gray-50 rounded p-3">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">${product.nama}</span>
+                                <span class="font-semibold ${getStockColorClass(product.stock)}">
+                                    ${formatNumber(product.stock)} kg
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-500 mt-1">
+                                <span>Masuk: ${formatNumber(product.total_masuk)} kg</span>
+                                <span class="mx-2">|</span>
+                                <span>Keluar: ${formatNumber(product.total_keluar)} kg</span>
+                            </div>
                         </div>
-                        <div class="text-sm text-gray-500 mt-1">
-                            <span>Masuk: ${parseFloat(product.total_masuk).toFixed(2)} kg</span>
-                            <span class="mx-2">|</span>
-                            <span>Keluar: ${parseFloat(product.total_keluar).toFixed(2)} kg</span>
-                        </div>
-                    </div>
-                `).join('')}
+                    `).join('')}
+                </div>
             </div>
         `;
-        
-        categoryList.appendChild(categoryElement);
+        categoryList.innerHTML += categoryElement;
     });
+
+    document.getElementById('total-produk').textContent = totalProducts;
+    document.getElementById('total-stock').textContent = formatNumber(totalStock) + ' kg';
+}
+
+function getStockColorClass(stock) {
+    stock = parseFloat(stock) || 0;
+    if (stock <= 0) return 'text-red-600';
+    if (stock < 100) return 'text-yellow-600';
+    return 'text-green-600';
+}
+
+
+function formatNumber(number) {
+    return new Intl.NumberFormat('id-ID').format(parseFloat(number) || 0);
 }
 </script>

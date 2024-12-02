@@ -257,4 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export modules
-export { Utils, ApiService, TimbanganService };
+// In main.js, remove export statements and make objects global
+window.Utils = Utils;
+window.ApiService = ApiService;
+window.TimbanganService = TimbanganService;

@@ -52,7 +52,7 @@ const Inventory = {
     // Load data stock
     async loadStock() {
         try {
-            const response = await fetch('../api/inventory/stock.php');
+            const response = await fetch('../timbangan_rekap/api/inventory/stock.php');
             const data = await response.json();
             
             if (data.success) {
@@ -114,7 +114,7 @@ const Inventory = {
         const formData = new FormData(form);
         
         try {
-            const response = await fetch('../api/inventory/barang_masuk.php', {
+            const response = await fetch('../timbangan_rekap/api/inventory/barang_masuk.php', {
                 method: 'POST',
                 body: formData
             });
@@ -147,7 +147,7 @@ const Inventory = {
                 return;
             }
 
-            const response = await fetch('../api/inventory/barang_keluar.php', {
+            const response = await fetch('../timbangan_rekap/api/inventory/barang_keluar.php', {
                 method: 'POST',
                 body: formData
             });
@@ -171,7 +171,7 @@ const Inventory = {
         if (!kategoriId) return;
 
         try {
-            const response = await fetch(`../api/master/produk.php?kategori_id=${kategoriId}`);
+            const response = await fetch(`../timbangan_rekap/api/master/produk.php?kategori_id=${kategoriId}`);
             const data = await response.json();
             
             const produkSelect = document.getElementById('produk_id');

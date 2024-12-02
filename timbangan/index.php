@@ -1,6 +1,6 @@
 <?php
 // Tentukan base URL
-$base_url = '/pc/timbangan';
+$base_url = '/pc/timbangan/timbangan_rekap';
 
 // Definisikan halaman yang valid
 $valid_pages = ['timbang', 'histori', 'setting', 'harga'];
