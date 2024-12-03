@@ -111,26 +111,26 @@ const Inventory = {
 
     // Handle form barang masuk submit
     async handleBarangMasuk(form) {
-        const formData = new FormData(form);
+        // const formData = new FormData(form);
         
-        try {
-            const response = await fetch('../timbangan_rekap/api/inventory/barang_masuk.php', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
+        // try {
+        //     const response = await fetch('../timbangan_rekap/api/inventory/barang_masuk.php', {
+        //         method: 'POST',
+        //         body: formData
+        //     });
+        //     const data = await response.json();
             
-            if (data.success) {
-                this.showMessage('Barang masuk berhasil disimpan', 'success');
-                form.reset();
-                this.loadStock();
-            } else {
-                this.showMessage(data.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error saving barang masuk:', error);
-            this.showMessage('Gagal menyimpan barang masuk', 'error');
-        }
+        //     if (data.success) {
+        //         this.showMessage('Barang masuk berhasil disimpan', 'success');
+        //         form.reset();
+        //         this.loadStock();
+        //     } else {
+        //         this.showMessage(data.message, 'error');
+        //     }
+        // } catch (error) {
+        //     console.error('Error saving barang masuk:', error);
+        //     this.showMessage('Gagal menyimpan barang masuk', 'error');
+        // }
     },
 
     // Handle form barang keluar submit

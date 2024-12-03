@@ -363,6 +363,7 @@ function loadStock(produkId) {
         .then(data => {
             if (data.success) {
                 currentStock = data.stock;
+                console.log(data);
                 updateStockInfo();
             }
         })
@@ -419,21 +420,23 @@ function updateProductDropdown() {
     productSelect.innerHTML = '<option value="">Pilih Produk</option>' + options;
 
     // Event listener untuk perubahan produk
-    // productSelect.addEventListener('change', (e) => {
-    //     console.log("hai");
-    //     if (e.target.value) {
-    //         loadStock(e.target.value);
+    productSelect.addEventListener('change', (e) => {
+        console.log("hai");
+        if (e.target.value) {
+            loadStock(e.target.value);
             
-    //     } else {
-    //         currentStock = 0;
-    //         updateStockInfo();
-    //     }
-    // });
+        } else {
+            currentStock = 0;
+            updateStockInfo();
+        }
+    });
 
-    productSelect.onchange = function(){
-        console.log("hoha");
-    };
+    // productSelect.onchange = function(){
+    //     console.log("hoha");
+    // };
 }
+
+updateProductDropdown();
 
 function updateStockInfo() {
     const stockInfo = document.getElementById('stock-info');

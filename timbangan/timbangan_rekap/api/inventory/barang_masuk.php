@@ -70,28 +70,49 @@ function addBarangMasuk() {
     global $conn;
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $stmt = $conn->prepare("INSERT INTO tr_barang_masuk (supplier_id, produk_id, berat, harga_per_kg, total_harga, keterangan) VALUES (?, ?, ?, ?, ?, ?)");
+    // Default values jika tidak ada
+    $harga_per_kg = isset($data['harga_per_kg']) ? $data['harga_per_kg'] : 0;
+    $berat = isset($data['berat']) ? $data['berat'] : 0;
+    $keterangan = isset($data['keterangan']) ? $data['keterangan'] : '';
+
+    // Hitung total harga
+    $total_harga = $berat * $harga_per_kg;
+
+    $stmt = $conn->prepare("INSERT INTO tr_barang_masuk (
+        supplier_id, 
+        produk_id, 
+        berat, 
+        harga_per_kg, 
+        total_harga, 
+        keterangan
+    ) VALUES (?, ?, ?, ?, ?, ?)");
     
-    $total_harga = $data['berat'] * $data['harga_per_kg'];
     $stmt->bind_param("iiddds", 
         $data['supplier_id'], 
         $data['produk_id'], 
-        $data['berat'],
-        $data['harga_per_kg'],
+        $berat,
+        $harga_per_kg,
         $total_harga,
-        $data['keterangan']
+        $keterangan
     );
 
-    if($stmt->execute()) {
-        echo json_encode([
-            'success' => true, 
-            'id' => $conn->insert_id,
-            'message' => 'Data berhasil disimpan'
-        ]);
-    } else {
+    try {
+        if($stmt->execute()) {
+            echo json_encode([
+                'success' => true, 
+                'id' => $conn->insert_id,
+                'message' => 'Data berhasil disimpan'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menyimpan data: ' . $stmt->error
+            ]);
+        }
+    } catch (Exception $e) {
         echo json_encode([
             'success' => false,
-            'message' => 'Gagal menyimpan data: ' . $stmt->error
+            'message' => 'Error: ' . $e->getMessage()
         ]);
     }
 }

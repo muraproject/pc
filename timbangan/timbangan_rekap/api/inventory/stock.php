@@ -2,21 +2,45 @@
 header('Content-Type: application/json');
 require_once '../../includes/config.php';
 
-// Create database connection
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-// Check connection
 if ($conn->connect_error) {
+    die(json_encode(['success' => false, 'message' => $conn->connect_error]));
+}
+
+// Handle produk_id request untuk single stock
+if (isset($_GET['produk_id'])) {
+    $produk_id = $_GET['produk_id'];
+    
+    $sql = "SELECT 
+            COALESCE(SUM(bm.berat), 0) as total_masuk,
+            COALESCE(SUM(bk.berat), 0) as total_keluar,
+            (COALESCE(SUM(bm.berat), 0) - COALESCE(SUM(bk.berat), 0)) as stock
+            FROM tr_produk p
+            LEFT JOIN tr_barang_masuk bm ON p.id = bm.produk_id
+            LEFT JOIN tr_barang_keluar bk ON p.id = bk.produk_id
+            WHERE p.id = ?
+            GROUP BY p.id";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $produk_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = $result->fetch_assoc();
+    
     echo json_encode([
-        "success" => false,
-        "message" => "Connection failed: " . $conn->connect_error
+        "success" => true,
+        "stock" => $data ? floatval($data['stock']) : 0
     ]);
     exit;
 }
 
+// Get all stock information
 try {
-    // Get categories with stock info
-    $sql = "SELECT k.*, 
+    // Get categories with their stocks
+    $sql = "SELECT 
+            k.id,
+            k.nama,
+            k.keterangan,
             COALESCE(SUM(bm.berat), 0) as total_masuk,
             COALESCE(SUM(bk.berat), 0) as total_keluar,
             (COALESCE(SUM(bm.berat), 0) - COALESCE(SUM(bk.berat), 0)) as total
@@ -29,9 +53,12 @@ try {
     $result = $conn->query($sql);
     $categories = [];
     
-    while($row = $result->fetch_assoc()) {
+    while ($category = $result->fetch_assoc()) {
         // Get products for each category
-        $produkSql = "SELECT p.*, 
+        $produkSql = "SELECT 
+                      p.id,
+                      p.nama,
+                      p.keterangan,
                       COALESCE(SUM(bm.berat), 0) as total_masuk,
                       COALESCE(SUM(bk.berat), 0) as total_keluar,
                       (COALESCE(SUM(bm.berat), 0) - COALESCE(SUM(bk.berat), 0)) as stock
@@ -42,22 +69,33 @@ try {
                       GROUP BY p.id";
         
         $stmt = $conn->prepare($produkSql);
-        $stmt->bind_param("i", $row['id']);
+        $stmt->bind_param("i", $category['id']);
         $stmt->execute();
         $produktResult = $stmt->get_result();
         
         $products = [];
-        while($product = $produktResult->fetch_assoc()) {
+        while ($product = $produktResult->fetch_assoc()) {
+            // Convert numeric strings to float
+            $product['total_masuk'] = floatval($product['total_masuk']);
+            $product['total_keluar'] = floatval($product['total_keluar']);
+            $product['stock'] = floatval($product['stock']);
             $products[] = $product;
         }
         
-        $row['products'] = $products;
-        $categories[] = $row;
+        // Convert numeric strings to float for category
+        $category['total_masuk'] = floatval($category['total_masuk']);
+        $category['total_keluar'] = floatval($category['total_keluar']);
+        $category['total'] = floatval($category['total']);
+        
+        $category['products'] = $products;
+        $categories[] = $category;
     }
 
     echo json_encode([
         "success" => true,
-        "data" => ["categories" => $categories]
+        "data" => [
+            "categories" => $categories
+        ]
     ]);
 
 } catch(Exception $e) {

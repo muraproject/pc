@@ -70,6 +70,15 @@ function addBarangKeluar() {
     global $conn;
     $data = json_decode(file_get_contents('php://input'), true);
 
+    // Check required fields
+    if (!isset($data['customer_id']) || !isset($data['produk_id']) || !isset($data['berat'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Data tidak lengkap'
+        ]);
+        return;
+    }
+
     // Check stock availability
     $stock = checkStock($data['produk_id']);
     if($stock < $data['berat']) {
@@ -80,16 +89,22 @@ function addBarangKeluar() {
         return;
     }
 
-    $stmt = $conn->prepare("INSERT INTO tr_barang_keluar (customer_id, produk_id, berat, harga_per_kg, total_harga, keterangan) VALUES (?, ?, ?, ?, ?, ?)");
+    // Set default values if not provided
+    $harga_per_kg = isset($data['harga_per_kg']) ? $data['harga_per_kg'] : 0;
+    $total_harga = $data['berat'] * $harga_per_kg;
+    $keterangan = isset($data['keterangan']) ? $data['keterangan'] : '';
+
+    $stmt = $conn->prepare("INSERT INTO tr_barang_keluar 
+        (customer_id, produk_id, berat, harga_per_kg, total_harga, keterangan, tanggal) 
+        VALUES (?, ?, ?, ?, ?, ?, NOW())");
     
-    $total_harga = $data['berat'] * $data['harga_per_kg'];
     $stmt->bind_param("iiddds", 
         $data['customer_id'], 
         $data['produk_id'], 
         $data['berat'],
-        $data['harga_per_kg'],
+        $harga_per_kg,
         $total_harga,
-        $data['keterangan']
+        $keterangan
     );
 
     if($stmt->execute()) {
