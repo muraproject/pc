@@ -12,14 +12,12 @@ if (isset($_GET['produk_id'])) {
     $produk_id = $_GET['produk_id'];
     
     $sql = "SELECT 
-            COALESCE(SUM(bm.berat), 0) as total_masuk,
-            COALESCE(SUM(bk.berat), 0) as total_keluar,
-            (COALESCE(SUM(bm.berat), 0) - COALESCE(SUM(bk.berat), 0)) as stock
+            (SELECT COALESCE(SUM(berat), 0) FROM tr_barang_masuk WHERE produk_id = p.id) as total_masuk,
+            (SELECT COALESCE(SUM(berat), 0) FROM tr_barang_keluar WHERE produk_id = p.id) as total_keluar,
+            (SELECT COALESCE(SUM(berat), 0) FROM tr_barang_masuk WHERE produk_id = p.id) - 
+            (SELECT COALESCE(SUM(berat), 0) FROM tr_barang_keluar WHERE produk_id = p.id) as stock
             FROM tr_produk p
-            LEFT JOIN tr_barang_masuk bm ON p.id = bm.produk_id
-            LEFT JOIN tr_barang_keluar bk ON p.id = bk.produk_id
-            WHERE p.id = ?
-            GROUP BY p.id";
+            WHERE p.id = ?";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $produk_id);
@@ -41,14 +39,23 @@ try {
             k.id,
             k.nama,
             k.keterangan,
-            COALESCE(SUM(bm.berat), 0) as total_masuk,
-            COALESCE(SUM(bk.berat), 0) as total_keluar,
-            (COALESCE(SUM(bm.berat), 0) - COALESCE(SUM(bk.berat), 0)) as total
-            FROM tr_kategori k
-            LEFT JOIN tr_produk p ON k.id = p.kategori_id
-            LEFT JOIN tr_barang_masuk bm ON p.id = bm.produk_id
-            LEFT JOIN tr_barang_keluar bk ON p.id = bk.produk_id
-            GROUP BY k.id";
+            (SELECT COALESCE(SUM(bm.berat), 0) 
+             FROM tr_barang_masuk bm 
+             JOIN tr_produk p ON bm.produk_id = p.id 
+             WHERE p.kategori_id = k.id) as total_masuk,
+            (SELECT COALESCE(SUM(bk.berat), 0) 
+             FROM tr_barang_keluar bk 
+             JOIN tr_produk p ON bk.produk_id = p.id 
+             WHERE p.kategori_id = k.id) as total_keluar,
+            (SELECT COALESCE(SUM(bm.berat), 0) 
+             FROM tr_barang_masuk bm 
+             JOIN tr_produk p ON bm.produk_id = p.id 
+             WHERE p.kategori_id = k.id) - 
+            (SELECT COALESCE(SUM(bk.berat), 0) 
+             FROM tr_barang_keluar bk 
+             JOIN tr_produk p ON bk.produk_id = p.id 
+             WHERE p.kategori_id = k.id) as total
+            FROM tr_kategori k";
     
     $result = $conn->query($sql);
     $categories = [];
@@ -59,14 +66,12 @@ try {
                       p.id,
                       p.nama,
                       p.keterangan,
-                      COALESCE(SUM(bm.berat), 0) as total_masuk,
-                      COALESCE(SUM(bk.berat), 0) as total_keluar,
-                      (COALESCE(SUM(bm.berat), 0) - COALESCE(SUM(bk.berat), 0)) as stock
+                      (SELECT COALESCE(SUM(berat), 0) FROM tr_barang_masuk WHERE produk_id = p.id) as total_masuk,
+                      (SELECT COALESCE(SUM(berat), 0) FROM tr_barang_keluar WHERE produk_id = p.id) as total_keluar,
+                      (SELECT COALESCE(SUM(berat), 0) FROM tr_barang_masuk WHERE produk_id = p.id) - 
+                      (SELECT COALESCE(SUM(berat), 0) FROM tr_barang_keluar WHERE produk_id = p.id) as stock
                       FROM tr_produk p
-                      LEFT JOIN tr_barang_masuk bm ON p.id = bm.produk_id
-                      LEFT JOIN tr_barang_keluar bk ON p.id = bk.produk_id
-                      WHERE p.kategori_id = ?
-                      GROUP BY p.id";
+                      WHERE p.kategori_id = ?";
         
         $stmt = $conn->prepare($produkSql);
         $stmt->bind_param("i", $category['id']);

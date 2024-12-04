@@ -495,9 +495,9 @@ function updateTable(data) {
         const row = `
             <tr>
                 <td class="px-6 py-4">${formatDate(item.tanggal)}</td>
-                <td class="px-6 py-4">${item.customer}</td>
-                <td class="px-6 py-4">${item.kategori}</td>
-                <td class="px-6 py-4">${item.produk}</td>
+                <td class="px-6 py-4">${item.customer_nama}</td>
+                <td class="px-6 py-4">${item.kategori_nama}</td>
+                <td class="px-6 py-4">${item.produk_nama}</td>
                 <td class="px-6 py-4">${formatNumber(item.berat)} kg</td>
                 <td class="px-6 py-4">${item.keterangan || '-'}</td>
                 <td class="px-6 py-4">

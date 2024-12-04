@@ -201,6 +201,7 @@ const TimbanganService = {
         displays.forEach(display => {
             display.textContent = Utils.formatNumber(this.weight) + ' kg';
         });
+        document.querySelector('nav').style.top='0';
     },
 
     // Disconnect from scale
@@ -217,6 +218,8 @@ const TimbanganService = {
 // Event Handlers
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize tooltips
+    console.log("halo");
+    document.querySelector('nav').style.top='0';
     const tooltips = document.querySelectorAll('[data-tooltip]');
     tooltips.forEach(tooltip => {
         tooltip.addEventListener('mouseenter', (e) => {
@@ -258,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Export modules
 // In main.js, remove export statements and make objects global
+
 window.Utils = Utils;
 window.ApiService = ApiService;
 window.TimbanganService = TimbanganService;
