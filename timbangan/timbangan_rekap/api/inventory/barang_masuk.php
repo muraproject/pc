@@ -29,41 +29,90 @@ switch($method) {
         break;
 }
 
+// Di file api/inventory/barang_masuk.php
+
 function getBarangMasuk() {
     global $conn;
     
     $sql = "SELECT bm.*, 
-            s.nama as supplier_nama,
+            p.kategori_id,
             p.nama as produk_nama,
-            k.nama as kategori_nama
+            k.nama as kategori_nama,
+            s.nama as supplier_nama
             FROM tr_barang_masuk bm
-            LEFT JOIN tr_supplier s ON bm.supplier_id = s.id
-            LEFT JOIN tr_produk p ON bm.produk_id = p.id
-            LEFT JOIN tr_kategori k ON p.kategori_id = k.id 
-            ORDER BY bm.tanggal DESC";
+            JOIN tr_produk p ON bm.produk_id = p.id
+            JOIN tr_kategori k ON p.kategori_id = k.id
+            JOIN tr_supplier s ON bm.supplier_id = s.id
+            WHERE 1=1"; // Base query dengan WHERE 1=1 untuk memudahkan penambahan filter
 
-    if(isset($_GET['supplier_id'])) {
-        $sql = $sql . " WHERE bm.supplier_id = " . $_GET['supplier_id'];
-    }
-    if(isset($_GET['start_date']) && isset($_GET['end_date'])) {
-        $sql = $sql . " AND bm.tanggal BETWEEN '" . $_GET['start_date'] . "' AND '" . $_GET['end_date'] . "'";
+    $params = []; // Array untuk parameter
+    $types = '';  // String untuk tipe parameter
+
+    // Tambahkan filter jika ada
+    if (isset($_GET['supplier_id']) && !empty($_GET['supplier_id'])) {
+        $sql .= " AND bm.supplier_id = ?";
+        $params[] = $_GET['supplier_id'];
+        $types .= 'i';
     }
 
-    $result = $conn->query($sql);
+    if (isset($_GET['kategori_id']) && !empty($_GET['kategori_id'])) {
+        $sql .= " AND p.kategori_id = ?";
+        $params[] = $_GET['kategori_id'];
+        $types .= 'i';
+    }
+
+    if (isset($_GET['tanggal']) && !empty($_GET['tanggal'])) {
+        $sql .= " AND DATE(bm.tanggal) = ?";
+        $params[] = $_GET['tanggal'];
+        $types .= 's';
+    }
+
+    $sql .= " ORDER BY bm.tanggal DESC";
+
+    $stmt = $conn->prepare($sql);
+    
+    // Bind parameters jika ada
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
     $data = [];
-    while($row = $result->fetch_assoc()) {
+    while ($row = $result->fetch_assoc()) {
         $data[] = $row;
     }
-    echo json_encode(['success' => true, 'data' => $data]);
+    
+    echo json_encode([
+        'success' => true,
+        'data' => $data
+    ]);
 }
 
+// Di dalam file api/inventory/barang_masuk.php
 function getBarangMasukById($id) {
     global $conn;
-    $stmt = $conn->prepare("SELECT * FROM tr_barang_masuk WHERE id = ?");
+    $sql = "SELECT bm.*, p.kategori_id, 
+            p.nama as produk_nama,
+            k.nama as kategori_nama,
+            s.nama as supplier_nama
+            FROM tr_barang_masuk bm
+            JOIN tr_produk p ON bm.produk_id = p.id
+            JOIN tr_kategori k ON p.kategori_id = k.id
+            JOIN tr_supplier s ON bm.supplier_id = s.id
+            WHERE bm.id = ?";
+            
+    $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
-    echo json_encode(['success' => true, 'data' => $result->fetch_assoc()]);
+    $data = $result->fetch_assoc();
+    
+    echo json_encode([
+        'success' => true,
+        'data' => $data
+    ]);
 }
 
 function addBarangMasuk() {
@@ -122,13 +171,15 @@ function updateBarangMasuk() {
     $data = json_decode(file_get_contents('php://input'), true);
 
     $stmt = $conn->prepare("UPDATE tr_barang_masuk SET supplier_id = ?, produk_id = ?, berat = ?, harga_per_kg = ?, total_harga = ?, keterangan = ? WHERE id = ?");
-    
-    $total_harga = $data['berat'] * $data['harga_per_kg'];
+    $harga_per_kg = isset($data['harga_per_kg']) ? $data['harga_per_kg'] : 0;
+    $keterangan = isset($data['keterangan']) ? $data['keterangan'] : '';
+
+    $total_harga = $data['berat'] * $harga_per_kg;
     $stmt->bind_param("iidddsi", 
         $data['supplier_id'], 
         $data['produk_id'], 
         $data['berat'],
-        $data['harga_per_kg'],
+        $harga_per_kg,
         $total_harga,
         $data['keterangan'],
         $data['id']
