@@ -1,0 +1,1 @@
+// JavaScript for receipt-out.js
