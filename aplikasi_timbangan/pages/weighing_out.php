@@ -130,14 +130,17 @@ $buyers = $conn->query("SELECT id, name FROM buyers ORDER BY name");
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Preview Kwitansi</h3>
-            <div id="receipt-content"></div>
-            <div class="mt-4 flex justify-end space-x-4">
-                <button onclick="closeReceiptModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+            <button onclick="closeReceiptModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
                     Batal
                 </button>
                 <button onclick="confirmSaveReceipt()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
                     Simpan & Cetak
                 </button>
+            <div id="receipt-content">
+
+            </div>
+            <div class="mt-4 flex justify-end space-x-4">
+                
             </div>
         </div>
     </div>
@@ -418,6 +421,15 @@ function resetScale() {
     isScaleStable = false;
 }
 
+function mockScale() {
+    setInterval(() => {
+        if (!isScaleStable) {
+            const randomWeight = Math.random() * 100;
+            document.getElementById('scale-value').textContent = randomWeight.toFixed(2);
+        }
+    }, 500);
+}
+
 function deleteItem(index) {
     if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
         currentItems.splice(index, 1);
@@ -431,5 +443,18 @@ function cancelWeighing() {
         updateItemsTable();
         resetForm();
     }
+}
+
+function mockScale() {
+    setInterval(() => {
+        if (!isScaleStable) {
+            const randomWeight = Math.random() * 100;
+            document.getElementById('scale-value').textContent = randomWeight.toFixed(2);
+        }
+    }, 500);
+}
+
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    mockScale();
 }
 </script>

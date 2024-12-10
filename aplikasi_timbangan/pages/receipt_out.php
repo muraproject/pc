@@ -182,60 +182,57 @@ $result = $stmt->get_result();
 
 <script>
 function viewDetail(receiptId) {
-    fetch(`api/receipt_out.php?action=detail&receipt_id=${receiptId}`)
+    fetch(`api/receipt_out.php?action=detail&id=${receiptId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                let content = `
+                let modalContent = `
                     <div class="mb-4">
-                        <p class="text-sm text-gray-600">No Kwitansi: ${data.receipt_id}</p>
+                        <p class="font-medium">No Kwitansi: ${data.receipt_id}</p>
                         <p class="text-sm text-gray-600">Tanggal: ${data.date}</p>
-                        <p class="text-sm text-gray-600">Operator: ${data.user_name}</p>
+                        <p class="text-sm text-gray-600">Pembeli: ${data.buyer_name}</p>
                     </div>
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                        <thead>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Berat (kg)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga/kg</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Berat (kg)</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Harga/kg</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody>
                 `;
 
-                let totalAmount = 0;
                 data.items.forEach(item => {
                     const itemTotal = item.weight * item.price;
-                    totalAmount += itemTotal;
-                    content += `
+                    modalContent += `
                         <tr>
-                            <td class="px-6 py-4 text-sm text-gray-900">${item.category_name}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">${item.product_name}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">${Number(item.weight).toFixed(2)}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">Rp ${Number(item.price).toLocaleString()}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">Rp ${Number(itemTotal).toLocaleString()}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${Number(item.weight).toFixed(2)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">Rp ${Number(item.price).toLocaleString()}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">Rp ${itemTotal.toLocaleString()}</td>
                         </tr>
                     `;
                 });
 
-                content += `
-                        </tbody>
-                        <tfoot class="bg-gray-50">
-                            <tr>
-                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900">Total</td>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900">Rp ${Number(totalAmount).toLocaleString()}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                `;
+                modalContent += `
+                        <tr class="border-t">
+                            <td colspan="3" class="px-6 py-4 text-sm font-bold text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm font-bold text-right text-gray-900">Rp ${data.total_amount.toLocaleString()}</td>
+                        </tr>
+                    </tbody>
+                </table>`;
 
-                document.getElementById('detailContent').innerHTML = content;
+                document.getElementById('detailContent').innerHTML = modalContent;
                 document.getElementById('detailModal').classList.remove('hidden');
             } else {
                 alert('Gagal memuat detail kwitansi: ' + data.message);
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memuat detail kwitansi');
         });
 }
 
