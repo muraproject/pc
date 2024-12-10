@@ -19,8 +19,8 @@ $query = "
         u.name as user_name
     FROM weighing_in wi
     LEFT JOIN suppliers s ON wi.supplier_id = s.id
-    LEFT JOIN categories c ON wi.category_id = c.id
     LEFT JOIN products p ON wi.product_id = p.id
+    LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN users u ON wi.user_id = u.id
     WHERE 1=1
 ";
@@ -41,7 +41,7 @@ if ($end_date) {
 }
 
 if ($category_id) {
-    $query .= " AND wi.category_id = ?";
+    $query .= " AND p.category_id = ?";
     $params[] = $category_id;
     $types .= "i";
 }
@@ -54,14 +54,14 @@ if ($supplier_id) {
 
 if ($search) {
     $search = "%$search%";
-    $query .= " AND (wi.receipt_id LIKE ? OR s.name LIKE ? OR c.name LIKE ? OR p.name LIKE ?)";
-    $params = array_merge($params, [$search, $search, $search, $search]);
-    $types .= "ssss";
+    $query .= " AND (wi.receipt_id LIKE ? OR s.name LIKE ? OR p.name LIKE ?)";
+    $params = array_merge($params, [$search, $search, $search]);
+    $types .= "sss";
 }
 
 $query .= " ORDER BY wi.created_at DESC";
 
-// Prepare and execute the query
+// Prepare and execute query
 $stmt = $conn->prepare($query);
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
@@ -71,7 +71,6 @@ $result = $stmt->get_result();
 
 // Get categories for filter
 $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
-
 // Get suppliers for filter
 $suppliers = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
 ?>

@@ -13,12 +13,14 @@ $query = "
         wo.weight,
         wo.price,
         wo.created_at,
+        b.name as buyer_name,
         c.name as category_name,
         p.name as product_name,
         u.name as user_name
     FROM weighing_out wo
-    LEFT JOIN categories c ON wo.category_id = c.id
+    LEFT JOIN buyers b ON wo.buyer_id = b.id
     LEFT JOIN products p ON wo.product_id = p.id
+    LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN users u ON wo.user_id = u.id
     WHERE 1=1
 ";
@@ -39,21 +41,21 @@ if ($end_date) {
 }
 
 if ($category_id) {
-    $query .= " AND wo.category_id = ?";
+    $query .= " AND p.category_id = ?";
     $params[] = $category_id;
     $types .= "i";
 }
 
 if ($search) {
     $search = "%$search%";
-    $query .= " AND (wo.receipt_id LIKE ? OR c.name LIKE ? OR p.name LIKE ? OR u.name LIKE ?)";
-    $params = array_merge($params, [$search, $search, $search, $search]);
-    $types .= "ssss";
+    $query .= " AND (wo.receipt_id LIKE ? OR b.name LIKE ? OR p.name LIKE ?)";
+    $params = array_merge($params, [$search, $search, $search]);
+    $types .= "sss";
 }
 
 $query .= " ORDER BY wo.created_at DESC";
 
-// Prepare and execute the query
+// Prepare and execute query
 $stmt = $conn->prepare($query);
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
@@ -68,7 +70,7 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
 <div class="space-y-6">
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <form class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
                 <input type="date" name="start_date" value="<?php echo $start_date; ?>" 
@@ -92,17 +94,15 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
                     <?php endwhile; ?>
                 </select>
             </div>
-            
-            <div>
+
+            <div class="md:col-span-3">
                 <label class="block text-sm font-medium text-gray-700">Cari</label>
                 <div class="mt-1 flex rounded-md shadow-sm">
                     <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
-                           placeholder="Cari no kwitansi..."
-                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
+                           placeholder="Cari no kwitansi, pembeli, atau produk..."
+                           class="block w-full rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-r-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Cari
                     </button>
                 </div>
             </div>
@@ -112,37 +112,19 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
     <!-- Data Table -->
     <div class="bg-white rounded-lg shadow">
         <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold text-gray-900">History Barang Keluar</h2>
-                <div class="flex">
-                    <button onclick="exportToExcel()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 mr-2">
-                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                        Export Excel
-                    </button>
-                    <button onclick="printData()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                        </svg>
-                        Print
-                    </button>
-                </div>
-            </div>
-
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No Kwitansi</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Berat (kg)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga/kg</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No Kwitansi</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pembeli</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Berat (kg)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga/kg</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -150,24 +132,13 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo htmlspecialchars($row['receipt_id']); ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo htmlspecialchars($row['buyer_name']); ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo htmlspecialchars($row['category_name']); ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo htmlspecialchars($row['product_name']); ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo number_format($row['weight'], 2); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp <?php echo number_format($row['price'], 0); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp <?php echo number_format($row['weight'] * $row['price'], 0); ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp <?php echo number_format($row['price']); ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp <?php echo number_format($row['weight'] * $row['price']); ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo htmlspecialchars($row['user_name']); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button onclick="editData(<?php echo $row['id']; ?>)" class="text-blue-600 hover:text-blue-900 mr-3">
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    <button onclick="deleteData(<?php echo $row['id']; ?>)" class="text-red-600 hover:text-red-900">
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </td>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>
