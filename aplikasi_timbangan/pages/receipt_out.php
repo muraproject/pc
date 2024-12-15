@@ -186,132 +186,242 @@ function viewDetail(receiptId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Group items by product
+                const groupedItems = {};
+                data.items.forEach(item => {
+                    if (!groupedItems[item.product_name]) {
+                        groupedItems[item.product_name] = {
+                            items: [],
+                            subtotal: 0,
+                            subtotal_weight: 0
+                        };
+                    }
+                    groupedItems[item.product_name].items.push(item);
+                    groupedItems[item.product_name].subtotal += (item.weight * item.price);
+                    groupedItems[item.product_name].subtotal_weight += parseFloat(item.weight);
+                });
+
                 let modalContent = `
                     <div class="mb-4">
-                        <p class="font-medium">No Kwitansi: ${data.receipt_id}</p>
+                        <p class="font-medium">Nama: ${data.buyer_name}</p>
                         <p class="text-sm text-gray-600">Tanggal: ${data.date}</p>
-                        <p class="text-sm text-gray-600">Pembeli: ${data.buyer_name}</p>
                     </div>
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Berat (kg)</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Harga/kg</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                                <th class="px-4 py-2">No</th>
+                                <th class="px-4 py-2">Produk</th>
+                                <th class="px-4 py-2">Berat (kg)</th>
+                                <th class="px-4 py-2">Harga</th>
+                                <th class="px-4 py-2">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                 `;
 
-                data.items.forEach(item => {
-                    const itemTotal = item.weight * item.price;
+                let no = 1;
+                let totalAll = 0;
+                
+                Object.entries(groupedItems).forEach(([productName, group]) => {
+                    group.items.forEach(item => {
+                        const itemTotal = item.weight * item.price;
+                        modalContent += `
+                            <tr>
+                                <td class="px-4 py-2">${no++}</td>
+                                <td class="px-4 py-2">${productName}</td>
+                                <td>
+        <input type="number" step="0.01" value="${item.weight}" 
+               class="border rounded px-2 py-1 w-24" 
+               onchange="updateItemTotal(this, this.parentElement.nextElementSibling.querySelector('input'))">
+    </td>
+    <td>
+        <input type="number" value="${item.price}" 
+               class="border rounded px-2 py-1 w-24"
+               onchange="updateItemTotal(this.parentElement.previousElementSibling.querySelector('input'), this)">
+    </td>
+    <td class="item-total">${itemTotal.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    // Subtotal per product
                     modalContent += `
-                        <tr>
-                            <td class="px-6 py-4 text-sm text-gray-900">${item.product_name}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">${Number(item.weight).toFixed(2)}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">Rp ${Number(item.price).toLocaleString()}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">Rp ${itemTotal.toLocaleString()}</td>
+                        <tr class="bg-gray-100">
+                            <td colspan="2" class="px-4 py-2">Subtotal ${productName}</td>
+                            <td class="px-4 py-2">${group.subtotal_weight.toFixed(2)} kg</td>
+                            <td></td>
+                            <td class="px-4 py-2 subtotal">${group.subtotal.toFixed(2)}</td>
                         </tr>
                     `;
+                    totalAll += group.subtotal;
                 });
 
                 modalContent += `
-                        <tr class="border-t">
-                            <td colspan="3" class="px-6 py-4 text-sm font-bold text-gray-900">Total</td>
-                            <td class="px-6 py-4 text-sm font-bold text-right text-gray-900">Rp ${data.total_amount.toLocaleString()}</td>
-                        </tr>
-                    </tbody>
-                </table>`;
+                        </tbody>
+                        <tfoot>
+                            <tr class="font-bold">
+                                <td colspan="4" class="px-4 py-2">Total Harga:</td>
+                                <td class="px-4 py-2" id="totalAll">${totalAll.toFixed(2)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <div class="mt-4 flex justify-end space-x-2">
+                        <button onclick="closeDetailModal()" class="px-4 py-2 bg-gray-500 text-white rounded">Tutup</button>
+                        <button onclick="saveChanges('${receiptId}')" class="px-4 py-2 bg-blue-500 text-white rounded">Simpan Perubahan</button>
+                        <button onclick="printDetail('${receiptId}')" class="px-4 py-2 bg-green-500 text-white rounded">Print PDF</button>
+                    </div>
+                    </br>
+                    <div class="mt-4 flex justify-end space-x-2">
+                       
+                    </div>
+                `;
 
                 document.getElementById('detailContent').innerHTML = modalContent;
                 document.getElementById('detailModal').classList.remove('hidden');
-            } else {
-                alert('Gagal memuat detail kwitansi: ' + data.message);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat memuat detail kwitansi');
         });
+}
+
+let currentItems = [];
+
+function updateItemTotal(weightInput, priceInput) {
+    const row = weightInput.parentElement.parentElement; // Dapatkan parent tr
+    const weight = parseFloat(weightInput.value || 0);
+    const price = parseFloat(priceInput.value || 0);
+    const total = weight * price;
+    
+    const totalCell = row.querySelector('.item-total');
+    if (totalCell) {
+        totalCell.textContent = total.toLocaleString();
+    }
+    
+    // Update subtotal
+    const productName = row.querySelector('td:first-child').textContent;
+    updateSubtotalByProduct(productName);
+    updateGrandTotal();
+}
+
+function updateSubtotalByProduct(productName) {
+    // Get all rows for this product
+    const rows = Array.from(document.querySelectorAll('tr')).filter(row => 
+        row.querySelector('td:nth-child(2)')?.textContent === productName
+    );
+    
+    let subtotalWeight = 0;
+    let subtotalAmount = 0;
+    
+    // Calculate subtotals
+    rows.forEach(row => {
+        if (!row.classList.contains('bg-gray-100')) { // Skip subtotal row
+            const weight = parseFloat(row.querySelector('input[type="number"][step="0.01"]').value || 0);
+            const price = parseFloat(row.querySelector('input[type="number"]:not([step])').value || 0);
+            subtotalWeight += weight;
+            subtotalAmount += (weight * price);
+        }
+    });
+
+    // Update subtotal row
+    const subtotalRow = Array.from(document.querySelectorAll('tr.bg-gray-100')).find(row => 
+        row.textContent.includes('Subtotal ' + productName)
+    );
+    
+    if (subtotalRow) {
+        subtotalRow.querySelector('td:nth-child(3)').textContent = subtotalWeight.toFixed(2) + ' kg';
+        subtotalRow.querySelector('.subtotal').textContent = subtotalAmount.toLocaleString();
+    }
+
+    updateGrandTotal();
+}
+
+function updateGrandTotal() {
+    const subtotals = document.querySelectorAll('.subtotal');
+    let grandTotal = 0;
+    
+    subtotals.forEach(subtotal => {
+        grandTotal += parseFloat(subtotal.textContent.replace(/,/g, '') || 0);
+    });
+    
+    document.getElementById('totalAll').textContent = grandTotal.toLocaleString();
+}
+
+function updateSubtotals() {
+    const subtotalRows = document.querySelectorAll('.subtotal');
+    let totalAll = 0;
+    
+    subtotalRows.forEach(row => {
+        const productRows = row.closest('tbody').querySelectorAll('.item-total');
+        let subtotal = 0;
+        productRows.forEach(itemRow => {
+            subtotal += parseFloat(itemRow.textContent);
+        });
+        row.textContent = subtotal;
+        totalAll += subtotal;
+    });
+    
+    document.getElementById('totalAll').textContent = totalAll;
+}
+
+function saveChanges(receiptId) {
+   const rows = document.querySelectorAll('tbody tr:not(.bg-gray-100)');
+   const updates = [];
+   
+   rows.forEach(row => {
+       const weightInput = row.querySelector('input[type="number"][step]');
+       const priceInput = row.querySelector('input[type="number"]:not([step])');
+       
+       // Skip header rows and subtotal rows
+       if (!row.closest('thead') && !row.closest('tfoot') && weightInput && priceInput) {
+           const weight = parseFloat(weightInput.value);
+           const price = parseFloat(priceInput.value);
+           
+           if (!isNaN(weight) && !isNaN(price)) {
+               updates.push({
+                   weight: weight,
+                   price: price
+               });
+           }
+       }
+   });
+
+   if (updates.length === 0) {
+       alert('Tidak ada data yang dapat disimpan');
+       return;
+   }
+
+   fetch('api/update_receipt_out.php', {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json', 
+       },
+       body: JSON.stringify({
+           receipt_id: receiptId,
+           updates: updates
+       })
+   })
+   .then(response => response.json())
+   .then(data => {
+       if (data.success) {
+           alert('Perubahan berhasil disimpan');
+           location.reload();
+       } else {
+           alert('Gagal menyimpan perubahan: ' + data.message);
+       }
+   })
+   .catch(error => {
+       console.error('Error:', error);
+       alert('Terjadi kesalahan saat menyimpan data');
+   });
+}
+
+function printDetail(receiptId) {
+    window.open(`api/print_receipt_out.php?id=${receiptId}`, '_blank');
 }
 
 function closeDetailModal() {
     document.getElementById('detailModal').classList.add('hidden');
 }
 
-function printReceipt(receiptId) {
-    fetch(`api/receipt_out.php?action=detail&receipt_id=${receiptId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const printContent = document.createElement('div');
-                printContent.innerHTML = `
-                    <style>
-                        @media print {
-                            @page { size: 80mm auto; margin: 0; }
-                            body { font-family: Arial, sans-serif; padding: 10mm; }
-                            table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-                            th, td { padding: 5px; text-align: left; }
-                            .text-center { text-align: center; }
-                            .text-right { text-align: right; }
-                            .heading { font-size: 16px; font-weight: bold; margin: 10px 0; }
-                            .info { font-size: 12px; margin: 5px 0; }
-                            .total { font-weight: bold; border-top: 1px solid #000; }
-                            .amount { text-align: right; }
-                        }
-                    </style>
-                    <div class="text-center heading">KWITANSI BARANG KELUAR</div>
-                    <div class="info">No: ${data.receipt_id}</div>
-                    <div class="info">Tanggal: ${data.date}</div>
-                    <div class="info">Operator: ${data.user_name}</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Produk</th>
-                                <th class="text-right">Berat</th>
-                                <th class="text-right">Harga</th>
-                                <th class="text-right">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
 
-                let totalAmount = 0;
-                data.items.forEach(item => {
-                    const itemTotal = item.weight * item.price;
-                    totalAmount += itemTotal;
-                    printContent.innerHTML += `
-                        <tr>
-                            <td>${item.product_name}</td>
-                            <td class="text-right">${Number(item.weight).toFixed(2)}</td>
-                            <td class="text-right">${Number(item.price).toLocaleString()}</td>
-                            <td class="text-right">${Number(itemTotal).toLocaleString()}</td>
-                        </tr>
-                    `;
-                });
-
-                printContent.innerHTML += `
-                            <tr class="total">
-                                <td colspan="3">Total</td>
-                                <td class="text-right">${Number(totalAmount).toLocaleString()}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="text-center info">Terima kasih</div>
-                `;
-
-                const printWindow = window.open('', 'PRINT', 'height=600,width=800');
-                printWindow.document.write(printContent.innerHTML);
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-                printWindow.close();
-            } else {
-                alert('Gagal memuat data kwitansi untuk dicetak: ' + data.message);
-            }
-        });
-}
 
 function deleteReceipt(receiptId) {
     if (confirm('Apakah Anda yakin ingin menghapus kwitansi ini?')) {
