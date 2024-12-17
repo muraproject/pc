@@ -198,7 +198,7 @@ document.getElementById('weighing-form').addEventListener('submit', function(e) 
     currentItems.push(item);
     console.log(currentItems);
     updateItemsTable();
-    resetForm();
+    // resetForm();
 });
 
 function updateItemsTable() {
@@ -232,7 +232,7 @@ function cancelWeighing() {
     if (confirm('Apakah Anda yakin ingin membatalkan timbangan ini?')) {
         currentItems = [];
         updateItemsTable();
-        resetForm();
+        // resetForm();
     }
 }
 
@@ -453,7 +453,7 @@ function confirmSaveReceipt() {
         if (data.success) {
             currentItems = [];
             updateItemsTable();
-            resetForm();
+            // resetForm();
             document.getElementById('receiptModal').classList.add('hidden');
             alert('Data berhasil disimpan');
         } else {

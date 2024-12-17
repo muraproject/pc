@@ -278,7 +278,7 @@ $latest_transactions = $latest_result ? $latest_result->fetch_all(MYSQLI_ASSOC) 
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" style="display:none;">
         <!-- Weight Chart -->
         <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Grafik Berat (7 Hari Terakhir)</h2>
@@ -286,7 +286,7 @@ $latest_transactions = $latest_result ? $latest_result->fetch_all(MYSQLI_ASSOC) 
         </div>
 
         <!-- Amount Chart -->
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-6" style="display:none;">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Grafik Nominal (7 Hari Terakhir)</h2>
             <canvas id="amountChart" class="w-full h-64"></canvas>
         </div>

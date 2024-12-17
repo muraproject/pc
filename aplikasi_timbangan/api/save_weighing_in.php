@@ -3,27 +3,26 @@ header('Content-Type: application/json');
 require_once '../includes/db.php';
 require_once '../includes/functions.php';
 
-// Get input data
-$input = json_decode(file_get_contents('php://input'), true);
+// Start session to get user_id
+session_start();
 
-if (!isset($input['supplier_id']) || !isset($input['items']) || empty($input['items'])) {
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
     echo json_encode([
         'success' => false,
-        'message' => 'Data tidak lengkap'
+        'message' => 'User tidak terautentikasi'
     ]);
     exit;
 }
 
-// Validate supplier exists
-$stmt = $conn->prepare("SELECT id FROM suppliers WHERE id = ?");
-$stmt->bind_param("i", $input['supplier_id']);
-$stmt->execute();
-$result = $stmt->get_result();
+// Get input data
+$input = json_decode(file_get_contents('php://input'), true);
 
-if ($result->num_rows === 0) {
+// Validate input
+if (!isset($input['supplier_id']) || !isset($input['items']) || empty($input['items'])) {
     echo json_encode([
         'success' => false,
-        'message' => 'Supplier tidak ditemukan'
+        'message' => 'Data tidak lengkap'
     ]);
     exit;
 }
@@ -35,6 +34,9 @@ $receipt_id = 'IN' . date('YmdHis') . rand(100, 999);
 $conn->begin_transaction();
 
 try {
+    // Get user_id from session
+    $user_id = $_SESSION['user_id'];
+
     // Prepare statement for inserting items
     $stmt = $conn->prepare("
         INSERT INTO weighing_in (
@@ -49,34 +51,19 @@ try {
 
     // Insert each item
     foreach ($input['items'] as $item) {
-        // Validate product exists
-        $checkProduct = $conn->prepare("SELECT id FROM products WHERE id = ?");
-        $checkProduct->bind_param("i", $item['product_id']);
-        $checkProduct->execute();
-        if ($checkProduct->get_result()->num_rows === 0) {
-            throw new Exception('Product dengan ID ' . $item['product_id'] . ' tidak ditemukan');
-        }
-
         $stmt->bind_param(
             'siidi',
             $receipt_id,
             $input['supplier_id'],
             $item['product_id'],
             $item['weight'],
-            $_SESSION['user_id']
+            $user_id
         );
         
         if (!$stmt->execute()) {
-            throw new Exception($stmt->error);
+            throw new Exception('Failed to insert item: ' . $stmt->error);
         }
     }
-
-    // Log activity
-    logActivity($_SESSION['user_id'], 'CREATE_WEIGHING_IN', [
-        'receipt_id' => $receipt_id,
-        'supplier_id' => $input['supplier_id'],
-        'total_items' => count($input['items'])
-    ]);
 
     // Commit transaction
     $conn->commit();
@@ -90,15 +77,9 @@ try {
 } catch (Exception $e) {
     // Rollback transaction
     $conn->rollback();
-    
     echo json_encode([
         'success' => false,
         'message' => 'Gagal menyimpan data: ' . $e->getMessage()
     ]);
 }
-
-// Close all statements
-if (isset($stmt)) $stmt->close();
-if (isset($checkProduct)) $checkProduct->close();
-$conn->close();
 ?>

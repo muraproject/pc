@@ -1,6 +1,7 @@
 <?php
 // Get required data
 $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
+$buyers = $conn->query("SELECT id, name FROM buyers ORDER BY name");
 ?>
 
 <div class="space-y-6">
@@ -37,6 +38,16 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Data Timbangan</h3>
                 <form id="weighing-form" class="space-y-4">
                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Pembeli</label>
+                        <select id="buyer_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">Pilih Pembeli</option>
+                            <?php while ($buyer = $buyers->fetch_assoc()): ?>
+                                <option value="<?php echo $buyer['id']; ?>"><?php echo htmlspecialchars($buyer['name']); ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700">Kategori</label>
                         <select id="category_id" onchange="loadProducts(this.value)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Pilih Kategori</option>
@@ -55,13 +66,12 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Harga per kg</label>
-                        <div class="mt-1 flex rounded-md shadow-sm">
-                            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                                Rp
-                            </span>
-                            <input type="number" id="price" 
-                                   class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                   placeholder="0">
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                            </div>
+                            <input type="number" id="price" step="1" min="0"
+                                class="pl-12 block w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                     </div>
 
@@ -76,11 +86,11 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
                 </form>
             </div>
 
-            <!-- Right Column (Current Items) -->
+            <!-- Right Column -->
             <div>
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Item Timbangan</h3>
                 <div class="overflow-y-auto max-h-96">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table id="items-table" class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
@@ -90,16 +100,8 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="items-table" class="bg-white divide-y divide-gray-200">
-                            <!-- Items will be added here -->
+                        <tbody class="bg-white divide-y divide-gray-200">
                         </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="3" class="px-6 py-4 text-sm font-medium text-gray-900">Total</td>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900" id="total-amount">Rp 0</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -123,42 +125,31 @@ $categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
     </div>
 </div>
 
-<!-- Preview Receipt Modal -->
+<!-- Preview Modal -->
 <div id="receiptModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Preview Kwitansi</h3>
-            <div id="receipt-content">
-                <!-- Receipt content will be loaded here -->
-            </div>
-            <div class="mt-4 flex justify-end space-x-4">
-                <button onclick="closeReceiptModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+            <button onclick="closeReceiptModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
                     Batal
                 </button>
                 <button onclick="confirmSaveReceipt()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
                     Simpan & Cetak
                 </button>
+            <div id="receipt-content">
+
+            </div>
+            <div class="mt-4 flex justify-end space-x-4">
+                
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Global variables
 let currentItems = [];
 let isScaleStable = false;
 
-// Scale functions
-function stabilizeScale() {
-    isScaleStable = true;
-}
-
-function resetScale() {
-    document.getElementById('scale-value').textContent = '0.00';
-    isScaleStable = false;
-}
-
-// Product loading
 function loadProducts(categoryId) {
     if (!categoryId) {
         document.getElementById('product_id').innerHTML = '<option value="">Pilih Produk</option>';
@@ -170,61 +161,44 @@ function loadProducts(categoryId) {
         .then(data => {
             const select = document.getElementById('product_id');
             select.innerHTML = '<option value="">Pilih Produk</option>' +
-                data.map(product => 
+                (Array.isArray(data) ? data.map(product => 
                     `<option value="${product.id}">${product.name}</option>`
-                ).join('');
+                ).join('') : '');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('product_id').innerHTML = '<option value="">Error loading products</option>';
         });
-}
-
-// Load last price for product
-function loadLastPrice(productId) {
-    if (!productId) {
-        document.getElementById('price').value = '';
-        return;
-    }
-
-    fetch(`api/get_last_price.php?product_id=${productId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.price) {
-                document.getElementById('price').value = data.price;
-            }
-        });
-}
-
-// Calculate total amount
-function calculateTotalAmount() {
-    const total = currentItems.reduce((sum, item) => sum + (item.weight * item.price), 0);
-    document.getElementById('total-amount').textContent = `Rp ${total.toLocaleString()}`;
-    return total;
 }
 
 // Form handling
 document.getElementById('weighing-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    
     if (!isScaleStable) {
         alert('Harap stabilkan timbangan terlebih dahulu');
         return;
     }
 
+    const buyer_id = document.getElementById('buyer_id').value;
     const product_id = document.getElementById('product_id').value;
-    const price = parseFloat(document.getElementById('price').value);
+    const price = 0;
     const weight = parseFloat(document.getElementById('scale-value').textContent);
 
-    if (!product_id || isNaN(price) || price <= 0) {
-        alert('Harap pilih produk dan masukkan harga yang valid');
+    if (!buyer_id || !product_id) {
+        alert('Harap lengkapi semua data dengan benar');
         return;
     }
 
-    const productElement = document.getElementById('product_id');
-    const product_name = productElement.options[productElement.selectedIndex].text;
+    const buyerSelect = document.getElementById('buyer_id');
+    const productSelect = document.getElementById('product_id');
 
     const item = {
-        product_id,
-        product_name,
-        weight,
-        price
+        buyer_id: buyer_id,
+        buyer_name: buyerSelect.options[buyerSelect.selectedIndex].text,
+        product_id: product_id,
+        product_name: productSelect.options[productSelect.selectedIndex].text,
+        weight: weight,
+        price: price
     };
 
     currentItems.push(item);
@@ -233,13 +207,20 @@ document.getElementById('weighing-form').addEventListener('submit', function(e) 
 });
 
 function updateItemsTable() {
-    const tbody = document.getElementById('items-table');
-    tbody.innerHTML = currentItems.map((item, index) => `
-        <tr>
+    const tbody = document.getElementById('items-table').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
+    let totalAmount = 0;
+
+    currentItems.forEach((item, index) => {
+        const total = item.weight * item.price;
+        totalAmount += total;
+
+        const row = tbody.insertRow();
+        row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.product_name}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.weight.toFixed(2)}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp ${item.price.toLocaleString()}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp ${(item.weight * item.price).toLocaleString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp ${total.toLocaleString()}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button onclick="deleteItem(${index})" class="text-red-600 hover:text-red-900">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,28 +228,8 @@ function updateItemsTable() {
                     </svg>
                 </button>
             </td>
-        </tr>
-    `).join('');
-
-    calculateTotalAmount();
-}
-
-function deleteItem(index) {
-    currentItems.splice(index, 1);
-    updateItemsTable();
-}
-
-function resetForm() {
-    document.getElementById('weighing-form').reset();
-    resetScale();
-}
-
-function cancelWeighing() {
-    if (confirm('Apakah Anda yakin ingin membatalkan timbangan ini?')) {
-        currentItems = [];
-        updateItemsTable();
-        resetForm();
-    }
+        `;
+    });
 }
 
 function saveReceipt() {
@@ -277,44 +238,40 @@ function saveReceipt() {
         return;
     }
 
-    // Group items by category
-    const groupedItems = {};
-    currentItems.forEach(item => {
-        if (!groupedItems[item.product_name]) {
-            groupedItems[item.product_name] = {
-                name: item.product_name,
-                total_weight: 0,
-                total_amount: 0,
-                items: []
-            };
-        }
-        groupedItems[item.product_name].total_weight += item.weight;
-        groupedItems[item.product_name].total_amount += item.weight * item.price;
-        groupedItems[item.product_name].items.push(item);
-    });
+    const buyer_id = document.getElementById('buyer_id').value;
+    if (!buyer_id) {
+        alert('Pilih pembeli terlebih dahulu');
+        return;
+    }
 
-    const totalAmount = calculateTotalAmount();
+    const buyerSelect = document.getElementById('buyer_id');
+    const buyer_name = buyerSelect.options[buyerSelect.selectedIndex].text;
 
     let receiptContent = `
         <div class="space-y-4">
             <div>
+                <p class="font-medium">Pembeli: ${buyer_name}</p>
                 <p class="text-sm text-gray-500">Tanggal: ${new Date().toLocaleString()}</p>
+                <input type="hidden" id="preview_buyer_id" value="${buyer_id}">
             </div>
     `;
 
-    Object.values(groupedItems).forEach(group => {
+    let totalAmount = 0;
+    currentItems.forEach(item => {
+        const itemTotal = item.weight * item.price;
+        totalAmount += itemTotal;
         receiptContent += `
             <div>
-                <h4 class="font-medium">${group.name}</h4>
-                <p>Total Berat: ${group.total_weight.toFixed(2)} kg</p>
-                <p>Total Harga: Rp ${group.total_amount.toLocaleString()}</p>
+                <h4 class="font-medium">${item.product_name}</h4>
+                <p class="text-sm">${item.weight.toFixed(2)} kg x Rp ${item.price.toLocaleString()}</p>
+                <p class="text-sm">Total: Rp ${itemTotal.toLocaleString()}</p>
             </div>
         `;
     });
 
     receiptContent += `
             <div class="mt-4 pt-4 border-t border-gray-200">
-                <h4 class="font-medium">Total Keseluruhan</h4>
+                <p class="font-medium">Total Keseluruhan:</p>
                 <p class="text-lg font-bold">Rp ${totalAmount.toLocaleString()}</p>
             </div>
         </div>
@@ -324,13 +281,16 @@ function saveReceipt() {
     document.getElementById('receiptModal').classList.remove('hidden');
 }
 
-function closeReceiptModal() {
-    document.getElementById('receiptModal').classList.add('hidden');
-}
-
 function confirmSaveReceipt() {
+    const buyer_id = document.getElementById('preview_buyer_id').value;
+    
     const receipt_data = {
-        items: currentItems
+        buyer_id: buyer_id,
+        items: currentItems.map(item => ({
+            product_id: item.product_id,
+            weight: parseFloat(item.weight),
+            price: parseFloat(item.price)
+        }))
     };
 
     fetch('api/save_weighing_out.php', {
@@ -352,6 +312,10 @@ function confirmSaveReceipt() {
         } else {
             alert('Gagal menyimpan data: ' + data.message);
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menyimpan data');
     });
 }
 
@@ -374,14 +338,15 @@ function printReceipt(receiptId) {
                         .total { font-weight: bold; border-top: 1px solid #000; }
                     }
                 </style>
-                <div class="text-center heading">TIMBANGAN KELUAR</div>
+                <div class="text-center heading">KWITANSI BARANG KELUAR</div>
                 <div class="info">No: ${data.receipt_id}</div>
                 <div class="info">Tanggal: ${data.date}</div>
+                <div class="info">Pembeli: ${data.buyer_name}</div>
                 <table>
                     <thead>
                         <tr>
                             <th>Produk</th>
-                            <th class="text-right">Berat (kg)</th>
+                            <th class="text-right">Berat</th>
                             <th class="text-right">Harga/kg</th>
                             <th class="text-right">Total</th>
                         </tr>
@@ -389,30 +354,16 @@ function printReceipt(receiptId) {
                     <tbody>
             `;
 
-            // Group items by product
-            const groupedItems = {};
-            data.items.forEach(item => {
-                if (!groupedItems[item.product_name]) {
-                    groupedItems[item.product_name] = {
-                        name: item.product_name,
-                        total_weight: 0,
-                        total_amount: 0
-                    };
-                }
-                groupedItems[item.product_name].total_weight += parseFloat(item.weight);
-                groupedItems[item.product_name].total_amount += parseFloat(item.weight) * parseFloat(item.price);
-            });
-
-            // Add grouped items to receipt
             let totalAmount = 0;
-            Object.values(groupedItems).forEach(group => {
-                totalAmount += group.total_amount;
+            data.items.forEach(item => {
+                const itemTotal = item.weight * item.price;
+                totalAmount += itemTotal;
                 printContent.innerHTML += `
                     <tr>
-                        <td>${group.name}</td>
-                        <td class="text-right">${group.total_weight.toFixed(2)}</td>
-                        <td class="text-right">${Number(group.total_amount / group.total_weight).toLocaleString()}</td>
-                        <td class="text-right">${group.total_amount.toLocaleString()}</td>
+                        <td>${item.product_name}</td>
+                        <td class="text-right">${parseFloat(item.weight).toFixed(2)} kg</td>
+                        <td class="text-right">Rp ${parseFloat(item.price).toLocaleString()}</td>
+                        <td class="text-right">Rp ${itemTotal.toLocaleString()}</td>
                     </tr>
                 `;
             });
@@ -436,58 +387,40 @@ function printReceipt(receiptId) {
         });
 }
 
-// Scale connection handling
-let port;
-let reader;
-let keepReading = true;
-
-async function connectScale() {
-    try {
-        port = await navigator.serial.requestPort();
-        await port.open({ baudRate: 9600 });
-        
-        reader = port.readable.getReader();
-        document.getElementById('scale-status').textContent = 'Connected';
-        document.getElementById('scale-status').classList.add('text-green-500');
-        
-        readScale();
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('scale-status').textContent = 'Connection failed';
-        document.getElementById('scale-status').classList.add('text-red-500');
+function loadLastPrice(productId) {
+    if (!productId) {
+        document.getElementById('price').value = '';
+        return;
     }
-}
 
-async function readScale() {
-    while (keepReading) {
-        try {
-            const { value, done } = await reader.read();
-            if (done) {
-                break;
+    fetch(`api/get_last_price.php?product_id=${productId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.price) {
+                document.getElementById('price').value = data.price;
             }
-            // Parse scale data
-            const weight = parseFloat(new TextDecoder().decode(value));
-            if (!isNaN(weight)) {
-                document.getElementById('scale-value').textContent = weight.toFixed(2);
-            }
-        } catch (error) {
-            console.error('Error reading scale:', error);
-            break;
-        }
-    }
+        });
 }
 
-async function disconnectScale() {
-    keepReading = false;
-    if (reader) {
-        await reader.cancel();
-        await port.close();
-        document.getElementById('scale-status').textContent = 'Disconnected';
-        document.getElementById('scale-status').classList.remove('text-green-500');
-    }
+function closeReceiptModal() {
+    document.getElementById('receiptModal').classList.add('hidden');
 }
 
-// Mock scale for testing
+function resetForm() {
+    // document.getElementById('weighing-form').reset();
+    // resetScale();
+}
+
+// Scale related functions
+function stabilizeScale() {
+    isScaleStable = true;
+}
+
+function resetScale() {
+    document.getElementById('scale-value').textContent = '0.00';
+    isScaleStable = false;
+}
+
 function mockScale() {
     setInterval(() => {
         if (!isScaleStable) {
@@ -497,7 +430,30 @@ function mockScale() {
     }, 500);
 }
 
-// Enable mock scale for development
+function deleteItem(index) {
+    if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+        currentItems.splice(index, 1);
+        updateItemsTable();
+    }
+}
+
+function cancelWeighing() {
+    if (confirm('Apakah Anda yakin ingin membatalkan timbangan ini?')) {
+        currentItems = [];
+        updateItemsTable();
+        resetForm();
+    }
+}
+
+function mockScale() {
+    setInterval(() => {
+        if (!isScaleStable) {
+            const randomWeight = Math.random() * 100;
+            document.getElementById('scale-value').textContent = randomWeight.toFixed(2);
+        }
+    }, 500);
+}
+
 if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
     mockScale();
 }

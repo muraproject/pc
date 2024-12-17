@@ -4,13 +4,10 @@ if ($_SESSION['role'] !== 'admin') {
     exit;
 }
 
-// Get default date range (current month)
-$start_date = $_GET['start_date'] ?? date('Y-m-01');
-$end_date = $_GET['end_date'] ?? date('Y-m-t');
+// Get filter values
+$start_date = $_GET['start_date'] ?? date('Y-m-01'); // Default to first day of current month
+$end_date = $_GET['end_date'] ?? date('Y-m-t');     // Default to last day of current month
 $user_id = $_GET['user_id'] ?? '';
-
-// Get users list
-$users = $conn->query("SELECT id, name, wage_per_kg FROM users ORDER BY name");
 
 // Base query for weighing records
 $query = "
@@ -26,39 +23,33 @@ $query = "
     WHERE u.role = 'user'
 ";
 
+// Add user filter if specified
 if ($user_id) {
     $query .= " AND u.id = ?";
+    $params = [$start_date, $end_date, $start_date, $end_date, $start_date, $end_date, $start_date, $end_date, $user_id];
+    $types = "ssssssssi";
+} else {
+    $params = [$start_date, $end_date, $start_date, $end_date, $start_date, $end_date, $start_date, $end_date];
+    $types = "ssssssss";
 }
 
 $query .= " ORDER BY u.name";
 
 // Prepare and execute query
 $stmt = $conn->prepare($query);
-if ($user_id) {
-    $stmt->bind_param("ssssssss", 
-        $start_date, $end_date, 
-        $start_date, $end_date,
-        $start_date, $end_date,
-        $start_date, $end_date,
-        $user_id
-    );
-} else {
-    $stmt->bind_param("ssssssss", 
-        $start_date, $end_date, 
-        $start_date, $end_date,
-        $start_date, $end_date,
-        $start_date, $end_date
-    );
-}
-
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Get users for filter
+$users = $conn->query("SELECT id, name FROM users WHERE role = 'user' ORDER BY name");
 ?>
 
 <div class="space-y-6">
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="hidden" name="page" value="wages">
             <div>
                 <label class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
                 <input type="date" name="start_date" value="<?php echo $start_date; ?>" 
@@ -92,7 +83,7 @@ $result = $stmt->get_result();
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php
         $total_wages = 0;
         while ($row = $result->fetch_assoc()):
@@ -105,19 +96,19 @@ $result = $stmt->get_result();
             <dl class="mt-5 space-y-4">
                 <div>
                     <dt class="text-sm font-medium text-gray-500">Total Berat Masuk</dt>
-                    <dd class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($row['total_weight_in'] ?? 0, 2); ?> kg</dd>
+                    <dd class="mt-1 text-2xl font-semibold text-gray-900"><?php echo number_format($row['total_weight_in'] ?? 0, 2); ?> kg</dd>
                 </div>
                 <div>
                     <dt class="text-sm font-medium text-gray-500">Total Berat Keluar</dt>
-                    <dd class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($row['total_weight_out'] ?? 0, 2); ?> kg</dd>
+                    <dd class="mt-1 text-2xl font-semibold text-gray-900"><?php echo number_format($row['total_weight_out'] ?? 0, 2); ?> kg</dd>
                 </div>
                 <div>
                     <dt class="text-sm font-medium text-gray-500">Total Hari Kerja</dt>
-                    <dd class="mt-1 text-3xl font-semibold text-gray-900"><?php echo $row['total_days']; ?> hari</dd>
+                    <dd class="mt-1 text-2xl font-semibold text-gray-900"><?php echo $row['total_days']; ?> hari</dd>
                 </div>
                 <div>
                     <dt class="text-sm font-medium text-gray-500">Upah per Kg</dt>
-                    <dd class="mt-1 text-3xl font-semibold text-gray-900">Rp <?php echo number_format($row['wage_per_kg'], 0); ?></dd>
+                    <dd class="mt-1 text-2xl font-semibold text-gray-900">Rp <?php echo number_format($row['wage_per_kg'], 0); ?></dd>
                 </div>
                 <div class="pt-4 border-t border-gray-200">
                     <dt class="text-sm font-medium text-gray-500">Total Upah</dt>
@@ -126,16 +117,6 @@ $result = $stmt->get_result();
             </dl>
         </div>
         <?php endwhile; ?>
-    </div>
-
-    <!-- Details Button -->
-    <div class="flex justify-end">
-        <button onclick="showDetails()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
-            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-            Lihat Detail
-        </button>
     </div>
 
     <!-- Print Summary -->
