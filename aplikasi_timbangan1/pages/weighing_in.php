@@ -486,7 +486,16 @@ function mockScale() {
 }
 
 // Enable mock scale for development
-if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    mockScale();
+// if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+//     mockScale();
+// }
+
+function updateScale(value) {
+    value = value*100;
+    const scaleValueElement = document.getElementById('scale-value');
+    if (scaleValueElement) {
+        scaleValueElement.textContent = value*1;
+    }
+    console.log("aaa");
 }
 </script>

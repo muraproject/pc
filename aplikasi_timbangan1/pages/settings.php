@@ -448,224 +448,189 @@ $users = $conn->query("SELECT * FROM users ORDER BY name");
 </div>
 
 <script>
-// Initialize by showing first tab
 document.addEventListener('DOMContentLoaded', function() {
-    showTab('categories');
+   // Initialize first tab
+   showTab('categories');
 });
 
-// Tab functions
+// TAB FUNCTIONS
 function showTab(tabName) {
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
+   document.querySelectorAll('.tab-content').forEach(content => {
+       content.classList.add('hidden'); 
+   });
 
-    // Remove active class from all tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('border-blue-500', 'text-blue-600');
-        btn.classList.add('border-transparent', 'text-gray-500');
-    });
+   document.querySelectorAll('.tab-btn').forEach(btn => {
+       btn.classList.remove('border-blue-500', 'text-blue-600');
+       btn.classList.add('border-transparent', 'text-gray-500');
+   });
 
-    // Show selected tab content
-    document.getElementById(tabName + '-tab').classList.remove('hidden');
-    
-    // Add active class to selected tab button
-    event.currentTarget.classList.remove('border-transparent', 'text-gray-500');
-    event.currentTarget.classList.add('border-blue-500', 'text-blue-600');
+   document.getElementById(tabName + '-tab').classList.remove('hidden');
+   document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('border-blue-500', 'text-blue-600');
 }
 
-// Modal functions
+// MODAL FUNCTIONS
 function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
+   document.getElementById(modalId).classList.add('hidden');
 }
 
-// Category functions
-function showCategoryModal(category = null) {
-    const modalTitle = document.getElementById('categoryModalTitle');
-    const form = document.getElementById('categoryForm');
-    
-    if (category) {
-        modalTitle.textContent = 'Edit Kategori';
-        document.getElementById('category_id').value = category.id;
-        document.getElementById('category_name').value = category.name;
-    } else {
-        modalTitle.textContent = 'Tambah Kategori';
-        form.reset();
-        document.getElementById('category_id').value = '';
-    }
-    
-    document.getElementById('categoryModal').classList.remove('hidden');
+// HELPER FUNCTIONS
+function submitToServer(formData, modalId) {
+   fetch('api/settings.php', {
+       method: 'POST',
+       body: formData
+   })
+   .then(response => response.json())
+   .then(data => {
+       if(data.success) {
+           closeModal(modalId);
+           location.reload();
+       } else {
+           alert('Error: ' + data.message);
+       }
+   })
+   .catch(error => {
+       console.error('Error:', error);
+       alert('Terjadi kesalahan sistem');
+   });
 }
 
+// DELETE FUNCTIONS
+function deleteItem(type, id) {
+   if(confirm(`Hapus ${type} ini?`)) {
+       fetch('api/settings.php', {
+           method: 'POST',
+           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+           body: `action=delete_${type}&id=${id}`
+       })
+       .then(response => response.json())
+       .then(data => {
+           if(data.success) location.reload();
+           else alert('Gagal: ' + data.message);
+       });
+   }
+}
+
+// CATEGORY FUNCTIONS 
+function editCategory(category) {
+   document.getElementById('categoryModalTitle').textContent = 'Edit Kategori';
+   document.getElementById('category_id').value = category.id;
+   document.getElementById('category_name').value = category.name;
+   document.getElementById('categoryModal').classList.remove('hidden');
+}
+
+function showCategoryModal() {
+   document.getElementById('categoryModalTitle').textContent = 'Tambah Kategori';
+   document.getElementById('category_id').value = '';
+   document.getElementById('category_name').value = '';
+   document.getElementById('categoryModal').classList.remove('hidden');
+}
+
+// PRODUCT FUNCTIONS
+function editProduct(product) {
+   document.getElementById('productModalTitle').textContent = 'Edit Produk';
+   document.getElementById('product_id').value = product.id;
+   document.getElementById('product_name').value = product.name;
+   document.getElementById('product_category_id').value = product.category_id;
+   document.getElementById('productModal').classList.remove('hidden');
+}
+
+function showProductModal() {
+   document.getElementById('productModalTitle').textContent = 'Tambah Produk';
+   document.getElementById('product_id').value = '';
+   document.getElementById('product_name').value = '';
+   document.getElementById('product_category_id').value = '';
+   document.getElementById('productModal').classList.remove('hidden');
+}
+
+// SUPPLIER FUNCTIONS
+function editSupplier(supplier) {
+   document.getElementById('supplierModalTitle').textContent = 'Edit Supplier';
+   document.getElementById('supplier_id').value = supplier.id;
+   document.getElementById('supplier_name').value = supplier.name;
+   document.getElementById('supplier_address').value = supplier.address; 
+   document.getElementById('supplier_phone').value = supplier.phone;
+   document.getElementById('supplierModal').classList.remove('hidden');
+}
+
+function showSupplierModal() {
+   document.getElementById('supplierModalTitle').textContent = 'Tambah Supplier';
+   document.getElementById('supplier_id').value = '';
+   document.getElementById('supplier_name').value = '';
+   document.getElementById('supplier_address').value = '';
+   document.getElementById('supplier_phone').value = '';
+   document.getElementById('supplierModal').classList.remove('hidden');
+}
+
+// BUYER FUNCTIONS
+function editBuyer(buyer) {
+   document.getElementById('buyerModalTitle').textContent = 'Edit Pembeli';
+   document.getElementById('buyer_id').value = buyer.id;
+   document.getElementById('buyer_name').value = buyer.name;
+   document.getElementById('buyer_address').value = buyer.address;
+   document.getElementById('buyer_phone').value = buyer.phone;
+   document.getElementById('buyerModal').classList.remove('hidden');
+}
+
+function showBuyerModal() {
+   document.getElementById('buyerModalTitle').textContent = 'Tambah Pembeli';
+   document.getElementById('buyer_id').value = '';
+   document.getElementById('buyer_name').value = '';
+   document.getElementById('buyer_address').value = '';
+   document.getElementById('buyer_phone').value = '';
+   document.getElementById('buyerModal').classList.remove('hidden');
+}
+
+// FORM HANDLERS
 document.getElementById('categoryForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', document.getElementById('category_name').value);
-    
-    const categoryId = document.getElementById('category_id').value;
-    formData.append('action', categoryId ? 'update' : 'create');
-    if (categoryId) formData.append('id', categoryId);
+   e.preventDefault();
+   const formData = new FormData();
+   const id = document.getElementById('category_id').value;
+   
+   formData.append('action', id ? 'update' : 'create');
+   if(id) formData.append('id', id);
+   formData.append('name', document.getElementById('category_name').value);
 
-    fetch('api/settings.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    });
+   submitToServer(formData, 'categoryModal');
 });
-
-// Buyer functions
-function showBuyerModal(buyer = null) {
-    const modalTitle = document.getElementById('buyerModalTitle');
-    const form = document.getElementById('buyerForm');
-    
-    if (buyer) {
-        modalTitle.textContent = 'Edit Pembeli';
-        document.getElementById('buyer_id').value = buyer.id;
-        document.getElementById('buyer_name').value = buyer.name;
-        document.getElementById('buyer_address').value = buyer.address;
-        document.getElementById('buyer_phone').value = buyer.phone;
-    } else {
-        modalTitle.textContent = 'Tambah Pembeli';
-        form.reset();
-        document.getElementById('buyer_id').value = '';
-    }
-    
-    document.getElementById('buyerModal').classList.remove('hidden');
-}
-
-document.getElementById('buyerForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', document.getElementById('buyer_name').value);
-    formData.append('address', document.getElementById('buyer_address').value);
-    formData.append('phone', document.getElementById('buyer_phone').value);
-    
-    const buyerId = document.getElementById('buyer_id').value;
-    formData.append('action', buyerId ? 'update_buyer' : 'create_buyer');
-    if (buyerId) formData.append('id', buyerId);
-
-    fetch('api/settings.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    });
-});
-
-function deleteBuyer(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus pembeli ini?')) {
-        fetch('api/settings.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `action=delete_buyer&id=${id}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        });
-    }
-}
-
-// Product functions
-function showProductModal(product = null) {
-    const modalTitle = document.getElementById('productModalTitle');
-    const form = document.getElementById('productForm');
-    
-    if (product) {
-        modalTitle.textContent = 'Edit Produk';
-        document.getElementById('product_id').value = product.id;
-        document.getElementById('product_category_id').value = product.category_id;
-        document.getElementById('product_name').value = product.name;
-    } else {
-        modalTitle.textContent = 'Tambah Produk';
-        form.reset();
-        document.getElementById('product_id').value = '';
-    }
-    
-    document.getElementById('productModal').classList.remove('hidden');
-}
 
 document.getElementById('productForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', document.getElementById('product_name').value);
-    formData.append('category_id', document.getElementById('product_category_id').value);
-    
-    const productId = document.getElementById('product_id').value;
-    formData.append('action', productId ? 'update_product' : 'create_product');
-    if (productId) formData.append('id', productId);
+   e.preventDefault();
+   const formData = new FormData();
+   const id = document.getElementById('product_id').value;
+   
+   formData.append('action', id ? 'update_product' : 'create_product');
+   if(id) formData.append('id', id);
+   formData.append('name', document.getElementById('product_name').value);
+   formData.append('category_id', document.getElementById('product_category_id').value);
 
-    fetch('api/settings.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    });
+   submitToServer(formData, 'productModal');
 });
 
-function deleteProduct(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-        fetch('api/settings.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `action=delete_product&id=${id}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        });
-    }
-}
+document.getElementById('supplierForm').addEventListener('submit', function(e) {
+   e.preventDefault();
+   const formData = new FormData();
+   const id = document.getElementById('supplier_id').value;
+   
+   formData.append('action', id ? 'update_supplier' : 'create_supplier');
+   if(id) formData.append('id', id);
+   formData.append('name', document.getElementById('supplier_name').value);
+   formData.append('address', document.getElementById('supplier_address').value);
+   formData.append('phone', document.getElementById('supplier_phone').value);
 
-// Similar functions for Supplier and User...
-// Add event listeners for forms
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips or other UI elements if needed
-    const forms = ['categoryForm', 'productForm', 'supplierForm', 'buyerForm', 'userForm'];
-    forms.forEach(formId => {
-        const form = document.getElementById(formId);
-        if (form) {
-            form.addEventListener('submit', handleSubmit);
-        }
-    });
+   submitToServer(formData, 'supplierModal'); 
 });
 
-function handleSubmit(e) {
-    e.preventDefault();
-    // Form submission logic here based on form ID
-}
+document.getElementById('buyerForm').addEventListener('submit', function(e) {
+   e.preventDefault();
+   const formData = new FormData();
+   const id = document.getElementById('buyer_id').value;
+   
+   formData.append('action', id ? 'update_buyer' : 'create_buyer');
+   if(id) formData.append('id', id);
+   formData.append('name', document.getElementById('buyer_name').value);
+   formData.append('address', document.getElementById('buyer_address').value);
+   formData.append('phone', document.getElementById('buyer_phone').value);
 
-// Buyer functions
-
+   submitToServer(formData, 'buyerModal');
+});
 </script>
