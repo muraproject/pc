@@ -52,6 +52,54 @@ function getPageTitle($page) {
     <?php if ($page === 'dashboard'): ?>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <?php endif; ?>
+    <style>
+.android-header {
+    background-color: #333333;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.android-header h1 {
+    font-size: 20px;
+    margin: 0;
+}
+
+.bluetooth-status {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.bluetooth-status i {
+    margin-right: 5px;
+}
+
+.bluetooth-toggle {
+    margin-left: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #ffffff;
+    color: #333333;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.main-content {
+    padding-top: 56px;
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body class="bg-gray-100">
     <!-- Header -->
@@ -60,6 +108,11 @@ function getPageTitle($page) {
             <h1 class="text-xl font-semibold text-gray-900">
                 <?php echo getPageTitle($page); ?>
             </h1>
+            <div class="bluetooth-status">
+                <i class="fa fa-bluetooth"></i>
+                <span id="bluetoothStatus"></span>
+                <button id="bluetoothToggle" class="bluetooth-toggle">Connect</button>
+            </div>
             <div class="flex items-center">
                 <span class="text-gray-700 mr-4">
                     <?php echo htmlspecialchars($_SESSION['name']); ?>
@@ -69,6 +122,7 @@ function getPageTitle($page) {
                     Logout
                 </button>
             </div>
+            
         </div>
     </header>
 
@@ -230,6 +284,39 @@ function getPageTitle($page) {
             console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
             return false;
         };
+
+
+// let isBluetoothConnected = false;
+
+function bluetoothConnected() {
+   isBluetoothConnected = true;
+   document.getElementById('bluetoothStatus').textContent = 'Connected';
+   document.querySelector('.bluetooth-status i').style.color = '#4CAF50';
+   document.getElementById('bluetoothToggle').textContent = 'Disconnect';
+}
+
+function bluetoothNotConnected() {
+   isBluetoothConnected = false;
+   document.getElementById('bluetoothStatus').textContent = 'Not Connected';
+   document.querySelector('.bluetooth-status i').style.color = '#F44336';
+   document.getElementById('bluetoothToggle').textContent = 'Connect';
+}
+
+document.getElementById('bluetoothToggle').addEventListener('click', function() {
+   if (isBluetoothConnected) {
+       console.log('Disconnecting Bluetooth...');
+       bluetoothNotConnected();
+   } else {
+       console.log('Connecting Bluetooth...');
+       bluetoothConnected();
+   }
+});
+
+function updateScale(input) {
+   input = input.replace("ww", "");
+   input = input * 1; 
+   document.getElementById('scale-value').textContent = input;
+}
     </script>
 </body>
 </html>
