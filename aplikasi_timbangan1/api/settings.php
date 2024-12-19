@@ -45,6 +45,16 @@ switch ($action) {
     case 'delete_supplier':
         deleteSupplier();
         break;
+
+    case 'create_buyer':
+        createBuyer();
+        break;
+    case 'update_buyer':
+        updateBuyer(); 
+        break;
+    case 'delete_buyer':
+        deleteBuyer();
+        break;
         
     // User actions
     case 'create_user':
@@ -386,6 +396,68 @@ function deleteUser() {
     }
 
     $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => $conn->error]);
+    }
+}
+
+function createBuyer() {
+    global $conn;
+    $name = $_POST['name'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    
+    if (empty($name)) {
+        echo json_encode(['success' => false, 'message' => 'Nama wajib diisi']);
+        return;
+    }
+
+    $stmt = $conn->prepare("INSERT INTO buyers (name, address, phone) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $name, $address, $phone);
+    
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => $conn->error]);
+    }
+}
+
+function updateBuyer() {
+    global $conn;
+    $id = $_POST['id'] ?? '';
+    $name = $_POST['name'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    
+    if (empty($id) || empty($name)) {
+        echo json_encode(['success' => false, 'message' => 'ID dan nama wajib diisi']);
+        return;
+    }
+
+    $stmt = $conn->prepare("UPDATE buyers SET name = ?, address = ?, phone = ? WHERE id = ?");
+    $stmt->bind_param("sssi", $name, $address, $phone, $id);
+    
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => $conn->error]);
+    }
+}
+
+function deleteBuyer() {
+    global $conn;
+    $id = $_POST['id'] ?? '';
+    
+    if (empty($id)) {
+        echo json_encode(['success' => false, 'message' => 'ID wajib diisi']);
+        return;
+    }
+
+    $stmt = $conn->prepare("DELETE FROM buyers WHERE id = ?");
     $stmt->bind_param("i", $id);
     
     if ($stmt->execute()) {

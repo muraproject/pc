@@ -408,6 +408,7 @@ $users = $conn->query("SELECT * FROM users ORDER BY name");
 </div>
 
 <!-- User Modal -->
+<!-- User Modal -->
 <div id="userModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
@@ -433,6 +434,11 @@ $users = $conn->query("SELECT * FROM users ORDER BY name");
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
                     </select>
+                </div>
+                <!-- Tambahkan ini -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Upah per Kg</label>
+                    <input type="number" id="wage_per_kg" min="0" step="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
                 <div class="flex justify-end">
                     <button type="button" onclick="closeModal('userModal')" class="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
@@ -633,4 +639,148 @@ document.getElementById('buyerForm').addEventListener('submit', function(e) {
 
    submitToServer(formData, 'buyerModal');
 });
+
+document.getElementById('userForm').addEventListener('submit', function(e) {
+   e.preventDefault();
+   const formData = new FormData();
+   const id = document.getElementById('user_id').value;
+   
+   formData.append('action', id ? 'update_user' : 'create_user');
+   if(id) formData.append('id', id);
+   formData.append('username', document.getElementById('username').value);
+   formData.append('password', document.getElementById('password').value);
+   formData.append('name', document.getElementById('user_name').value);
+   formData.append('role', document.getElementById('user_role').value);
+   formData.append('wage_per_kg', document.getElementById('wage_per_kg').value || 0);
+
+   submitToServer(formData, 'userModal');
+});
+
+// Dan tambahkan fungsi untuk user
+function editUser(user) {
+   document.getElementById('userModalTitle').textContent = 'Edit User';
+   document.getElementById('user_id').value = user.id; 
+   document.getElementById('username').value = user.username;
+   document.getElementById('user_name').value = user.name;
+   document.getElementById('user_role').value = user.role;
+   document.getElementById('wage_per_kg').value = user.wage_per_kg;
+   document.getElementById('password').value = '';
+   document.getElementById('userModal').classList.remove('hidden');
+}
+
+
+function showUserModal() {
+    document.getElementById('userModalTitle').textContent = 'Tambah User';
+    document.getElementById('user_id').value = '';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('user_name').value = '';
+    document.getElementById('user_role').value = 'user';
+    document.getElementById('wage_per_kg').value = '0';
+    document.getElementById('userModal').classList.remove('hidden');
+}
+
+function editUser(user) {
+    document.getElementById('userModalTitle').textContent = 'Edit User';
+    document.getElementById('user_id').value = user.id;
+    document.getElementById('username').value = user.username;
+    document.getElementById('password').value = '';
+    document.getElementById('user_name').value = user.name;
+    document.getElementById('user_role').value = user.role;
+    document.getElementById('wage_per_kg').value = user.wage_per_kg;
+    document.getElementById('userModal').classList.remove('hidden');
+}
+
+// User form handler
+document.getElementById('userForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData();
+    const id = document.getElementById('user_id').value;
+    
+    formData.append('action', id ? 'update_user' : 'create_user');
+    if(id) formData.append('id', id);
+    formData.append('username', document.getElementById('username').value);
+    formData.append('password', document.getElementById('password').value); 
+    formData.append('name', document.getElementById('user_name').value);
+    formData.append('role', document.getElementById('user_role').value);
+    formData.append('wage_per_kg', document.getElementById('wage_per_kg').value || 0);
+
+    submitToServer(formData, 'userModal');
+});
+
+// Delete functions
+function deleteCategory(id) {
+    if(confirm('Hapus kategori ini?')) {
+        fetch('api/settings.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `action=delete_category&id=${id}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) location.reload();
+            else alert('Gagal: ' + data.message);
+        });
+    }
+}
+
+function deleteProduct(id) {
+    if(confirm('Hapus produk ini?')) {
+        fetch('api/settings.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `action=delete_product&id=${id}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) location.reload();
+            else alert('Gagal: ' + data.message);
+        });
+    }
+}
+
+function deleteSupplier(id) {
+    if(confirm('Hapus supplier ini?')) {
+        fetch('api/settings.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `action=delete_supplier&id=${id}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) location.reload();
+            else alert('Gagal: ' + data.message);
+        });
+    }
+}
+
+function deleteBuyer(id) {
+    if(confirm('Hapus pembeli ini?')) {
+        fetch('api/settings.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `action=delete_buyer&id=${id}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) location.reload();
+            else alert('Gagal: ' + data.message);
+        });
+    }
+}
+
+function deleteUser(id) {
+    if(confirm('Hapus user ini?')) {
+        fetch('api/settings.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `action=delete_user&id=${id}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) location.reload();
+            else alert('Gagal: ' + data.message);
+        });
+    }
+}
 </script>
