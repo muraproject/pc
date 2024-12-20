@@ -5,7 +5,7 @@ $end_date = $_GET['end_date'] ?? date('Y-m-d');
 $supplier_id = $_GET['supplier_id'] ?? '';
 $search = $_GET['search'] ?? '';
 
-// Query to get receipt list
+// Query untuk mendapatkan daftar kwitansi
 $query = "
     SELECT DISTINCT 
         wi.receipt_id,
@@ -48,7 +48,7 @@ if ($search) {
 
 $query .= " GROUP BY wi.receipt_id ORDER BY MIN(wi.created_at) DESC";
 
-// Prepare and execute the query
+// Prepare and execute query
 $stmt = $conn->prepare($query);
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
@@ -94,7 +94,7 @@ $suppliers = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
                     <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
                            placeholder="Cari no kwitansi atau supplier..."
                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
@@ -104,13 +104,13 @@ $suppliers = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
         </form>
     </div>
 
-    <!-- Kwitansi List -->
+    <!-- Daftar Kwitansi -->
     <div class="bg-white rounded-lg shadow">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold text-gray-900">Daftar Kwitansi Barang Masuk</h2>
-                <div class="flex">
-                    <button onclick="exportToExcel()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 mr-2">
+                <h2 class="text-lg font-medium text-gray-900">Daftar Kwitansi Masuk</h2>
+                <div class="flex space-x-2">
+                    <button onclick="exportToExcel()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
@@ -123,22 +123,32 @@ $suppliers = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No Kwitansi</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Item</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Berat (kg)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No Kwitansi</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Supplier</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Item</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Berat</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php while ($row = $result->fetch_assoc()): ?>
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo htmlspecialchars($row['receipt_id']); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo date('d/m/Y H:i', strtotime($row['date'])); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo htmlspecialchars($row['supplier_name']); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo $row['total_items']; ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo number_format($row['total_weight'], 2); ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <?php echo htmlspecialchars($row['receipt_id']); ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <?php echo date('d/m/Y H:i', strtotime($row['date'])); ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <?php echo htmlspecialchars($row['supplier_name']); ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <?php echo number_format($row['total_items']); ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <?php echo number_format($row['total_weight'], 2); ?> kg
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <button onclick="viewDetail('<?php echo $row['receipt_id']; ?>')" class="text-blue-600 hover:text-blue-900 mr-3">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,18 +156,11 @@ $suppliers = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
                                     </button>
-                                    <button onclick="printReceipt('<?php echo $row['receipt_id']; ?>')" class="text-gray-600 hover:text-gray-900 mr-3">
+                                    <button onclick="printReceipt('<?php echo $row['receipt_id']; ?>')" class="text-gray-600 hover:text-gray-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                                         </svg>
                                     </button>
-                                    <?php if ($_SESSION['role'] === 'admin'): ?>
-                                    <button onclick="deleteReceipt('<?php echo $row['receipt_id']; ?>')" class="text-red-600 hover:text-red-900">
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -187,13 +190,46 @@ $suppliers = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
     </div>
 </div>
 
+<!-- Script --> 
 <script>
+// Handle filter form
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData.entries()) {
+        if (value) params.append(key, value);
+    }
+    
+    window.location.href = `?page=receipt_in&${params.toString()}`;
+});
+
+// Close modal
+function closeDetailModal() {
+    document.getElementById('detailModal').classList.add('hidden');
+}
+
+// View detail 
 function viewDetail(receiptId) {
     fetch(`api/receipt_in.php?action=detail&receipt_id=${receiptId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                let content = `
+                // Group items by product
+                const groupedItems = {};
+                data.items.forEach(item => {
+                    if (!groupedItems[item.product_name]) {
+                        groupedItems[item.product_name] = {
+                            items: [],
+                            subtotal_weight: 0
+                        };
+                    }
+                    groupedItems[item.product_name].items.push(item);
+                    groupedItems[item.product_name].subtotal_weight += parseFloat(item.weight);
+                });
+
+                let modalContent = `
                     <div class="mb-4">
                         <p class="text-sm text-gray-600">No Kwitansi: ${data.receipt_id}</p>
                         <p class="text-sm text-gray-600">Tanggal: ${data.date}</p>
@@ -202,47 +238,88 @@ function viewDetail(receiptId) {
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Berat (kg)</th>
+                                <th class="px-4 py-2">No</th>
+                                <th class="px-4 py-2">Produk</th>
+                                <th class="px-4 py-2">Berat (kg)</th>
+                                <th class="px-4 py-2">Total</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody>
                 `;
 
-                data.items.forEach(item => {
-                    content += `
-                        <tr>
-                            <td class="px-6 py-4 text-sm text-gray-900">${item.category_name}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">${item.product_name}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">${Number(item.weight).toFixed(2)}</td>
+                let no = 1;
+                let totalWeight = 0;
+
+                Object.entries(groupedItems).forEach(([product, group]) => {
+                    group.items.forEach(item => {
+                        modalContent += `
+                            <tr>
+                                <td class="px-4 py-2">${no++}</td>
+                                <td class="px-4 py-2">${product}</td>
+                                <td class="px-4 py-2">
+                                    <input type="number" step="0.01" value="${item.weight}" 
+                                           class="border rounded px-2 py-1 w-24" 
+                                           onchange="updateItemWeight(this)">
+                                </td>
+                                <td class="px-4 py-2">${item.weight} kg</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    modalContent += `
+                        <tr class="bg-gray-100">
+                            <td colspan="2" class="px-4 py-2">Subtotal ${product}</td>
+                            <td class="px-4 py-2">${group.subtotal_weight.toFixed(2)} kg</td>
+                            <td class="px-4 py-2">${group.subtotal_weight.toFixed(2)} kg</td>
                         </tr>
                     `;
+                    totalWeight += group.subtotal_weight;
                 });
 
-                content += `
+                modalContent += `
                         </tbody>
-                        <tfoot class="bg-gray-50">
-                            <tr>
-                                <td colspan="2" class="px-6 py-4 text-sm font-medium text-gray-900">Total</td>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900">${Number(data.total_weight).toFixed(2)} kg</td>
+                        <tfoot>
+                            <tr class="font-bold">
+                                <td colspan="3" class="px-4 py-2 text-right">Total Berat:</td>
+                                <td class="px-4 py-2">${totalWeight.toFixed(2)} kg</td>
                             </tr>
                         </tfoot>
                     </table>
+                    <div class="mt-4 flex justify-end space-x-2">
+                        <button onclick="closeDetailModal()" class="px-4 py-2 bg-gray-500 text-white rounded">Tutup</button>
+                        <button onclick="saveChanges('${data.receipt_id}')" class="px-4 py-2 bg-blue-500 text-white rounded">
+                            Simpan Perubahan
+                        </button>
+                        <button onclick="printDetail('${data.receipt_id}')" class="px-4 py-2 bg-green-500 text-white rounded">
+                            Print
+                        </button>
+                    </div>
                 `;
 
-                document.getElementById('detailContent').innerHTML = content;
+                document.getElementById('detailContent').innerHTML = modalContent;
                 document.getElementById('detailModal').classList.remove('hidden');
-            } else {
-                alert('Gagal memuat detail kwitansi: ' + data.message);
             }
         });
 }
 
-function closeDetailModal() {
-    document.getElementById('detailModal').classList.add('hidden');
+// Update weight
+function updateItemWeight(input) {
+    const row = input.closest('tr');
+    const weight = parseFloat(input.value);
+    row.querySelector('td:last-child').textContent = `${weight.toFixed(2)} kg`;
+    updateTotals();
 }
 
+// Update totals
+function updateTotals() {
+    let totalWeight = 0;
+    document.querySelectorAll('tr:not(.bg-gray-100) input[type="number"]').forEach(input => {
+        totalWeight += parseFloat(input.value) || 0;
+    });
+    document.querySelector('tfoot td:last-child').textContent = `${totalWeight.toFixed(2)} kg`;
+}
+
+// Print receipt
 function printReceipt(receiptId) {
     fetch(`api/receipt_in.php?action=detail&receipt_id=${receiptId}`)
         .then(response => response.json())
@@ -252,76 +329,104 @@ function printReceipt(receiptId) {
                 printContent.innerHTML = `
                     <style>
                         @media print {
-                            @page { size: 80mm auto; margin: 0; }
-                            body { font-family: Arial, sans-serif; padding: 10mm; }
-                            table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-                            th, td { padding: 5px; text-align: left; }
-                            .text-center { text-align: center; }
-                            .text-right { text-align: right; }
-                            .heading { font-size: 16px; font-weight: bold; margin: 10px 0; }
-                            .info { font-size: 12px; margin: 5px 0; }
-                            .total { font-weight: bold; border-top: 1px solid #000; }
+                            @page { 
+                                size: A4;
+                                margin: 10mm; 
+                            }
+                            .no-print { display: none; }
+                            table { 
+                                width: 100%; 
+                                border-collapse: collapse;
+                                margin: 10px 0;
+                            }
+                            th, td { 
+                                border: 1px solid black;
+                                padding: 5px;
+                                text-align: left;
+                            }
+                            .subtotal { background: #f0f0f0; }
                         }
                     </style>
-                    <div class="text-center heading">KWITANSI BARANG MASUK</div>
-                    <div class="info">No: ${data.receipt_id}</div>
-                    <div class="info">Tanggal: ${data.date}</div>
-                    <div class="info">Supplier: ${data.supplier_name}</div>
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2>KWITANSI BARANG MASUK</h2>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <p>No: ${data.receipt_id}</p>
+                        <p>Tanggal: ${data.date}</p>
+                        <p>Supplier: ${data.supplier_name}</p>
+                    </div>
                     <table>
                         <thead>
                             <tr>
+                                <th>No</th>
                                 <th>Produk</th>
-                                <th class="text-right">Berat (kg)</th>
+                                <th>Berat (kg)</th>
+                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${data.items.map(item => `
-                                <tr>
-                                    <td>${item.product_name}</td>
-                                    <td class="text-right">${Number(item.weight).toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                            <tr class="total">
-                                <td>Total</td>
-                                <td class="text-right">${Number(data.total_weight).toFixed(2)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="text-center info">Terima kasih</div>
                 `;
 
-                const printWindow = window.open('', 'PRINT', 'height=600,width=800');
+                // Group items
+                const groupedItems = {};
+                data.items.forEach(item => {
+                    if (!groupedItems[item.product_name]) {
+                        groupedItems[item.product_name] = {
+                            items: [],
+                            subtotal_weight: 0
+                        };
+                    }
+                    groupedItems[item.product_name].items.push(item);
+                    groupedItems[item.product_name].subtotal_weight += parseFloat(item.weight);
+                });
+
+                let no = 1;
+                let totalWeight = 0;
+
+                Object.entries(groupedItems).forEach(([product, group]) => {
+                    group.items.forEach(item => {
+                        printContent.innerHTML += `
+                            <tr>
+                                <td>${no++}</td>
+                                <td>${product}</td>
+                                <td style="text-align: right">${item.weight.toFixed(2)}</td>
+                                <td style="text-align: right">${item.weight.toFixed(2)} kg</td>
+                            </tr>
+                        `;
+                    });
+
+                    printContent.innerHTML += `
+                        <tr class="subtotal">
+                            <td colspan="2">Subtotal ${product}</td>
+                            <td style="text-align: right">${group.subtotal_weight.toFixed(2)}</td>
+                            <td style="text-align: right">${group.subtotal_weight.toFixed(2)} kg</td>
+                        </tr>
+                    `;
+                    totalWeight += group.subtotal_weight;
+                });
+
+                printContent.innerHTML += `
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align: right"><strong>Total Berat:</strong></td>
+                                <td style="text-align: right"><strong>${totalWeight.toFixed(2)} kg</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                `;
+
+                const printWindow = window.open('', '', 'height=600,width=800');
                 printWindow.document.write(printContent.innerHTML);
                 printWindow.document.close();
                 printWindow.focus();
                 printWindow.print();
                 printWindow.close();
-            } else {
-                alert('Gagal memuat data kwitansi untuk dicetak: ' + data.message);
             }
         });
 }
 
-function deleteReceipt(receiptId) {
-    if (confirm('Apakah Anda yakin ingin menghapus kwitansi ini?')) {
-        fetch('api/receipt_in.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `action=delete&receipt_id=${receiptId}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Gagal menghapus kwitansi: ' + data.message);
-            }
-        });
-    }
-}
-
+// Export to excel
 function exportToExcel() {
     const urlParams = new URLSearchParams(window.location.search);
     const params = {
@@ -339,14 +444,33 @@ function exportToExcel() {
     window.location.href = `api/export_receipt_in.php?${queryString}`;
 }
 
-// Handle filter form submission
-document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    const params = new URLSearchParams();
-    for (const [key, value] of formData.entries()) {
-        if (value) params.append(key, value);
-    }
-    window.location.href = `?${params.toString()}`;
-});
+// Save changes
+function saveChanges(receiptId) {
+    const updates = [];
+    document.querySelectorAll('tr:not(.bg-gray-100) input[type="number"]').forEach((input, index) => {
+        updates.push({
+            weight: parseFloat(input.value) || 0
+        });
+    });
+
+    fetch('api/update_receipt_in.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            receipt_id: receiptId,
+            updates: updates
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Perubahan berhasil disimpan');
+            location.reload();
+        } else {
+            alert('Gagal menyimpan perubahan: ' + data.message);
+        }
+    });
+}
 </script>
