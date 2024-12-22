@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Format Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: fit-content;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            white-space: pre;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Data Format Converter</h1>
+        <div>
+            <h3>Input:</h3>
+            <textarea id="inputData" placeholder="Paste your data here..."></textarea>
+        </div>
+        <div class="button-group">
+            <button id="convertBtn">Convert</button>
+            <button id="copyBtn">Copy Output</button>
+            <button id="clearBtn">Clear All</button>
+        </div>
+        <div>
+            <h3>Output:</h3>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        function cleanInput(input) {
+            // Normalize spaces and clean the input
+            return input
+                .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+                .replace(/\n+/g, ' ') // Replace newlines with space
+                .trim();
+        }
+
+        function parseItems(line) {
+            const items = [];
+            let currentItem = {
+                quantity: null,
+                description: []
+            };
+
+            const parts = line.split(/\s+/);
+            let i = 0;
+
+            while (i < parts.length) {
+                const num = parseInt(parts[i]);
+                
+                if (!isNaN(num)) {
+                    if (currentItem.quantity !== null && currentItem.description.length > 0) {
+                        items.push({
+                            quantity: currentItem.quantity,
+                            description: currentItem.description.join(' ')
+                        });
+                        currentItem = {
+                            quantity: null,
+                            description: []
+                        };
+                    }
+                    currentItem.quantity = num;
+                } else {
+                    if (currentItem.quantity !== null) {
+                        currentItem.description.push(parts[i]);
+                    }
+                }
+                i++;
+            }
+
+            if (currentItem.quantity !== null && currentItem.description.length > 0) {
+                items.push({
+                    quantity: currentItem.quantity,
+                    description: currentItem.description.join(' ')
+                });
+            }
+
+            return items;
+        }
+
+        function transformData(input) {
+            let counter = 1;
+            let result = [];
+            
+            const cleanedInput = cleanInput(input);
+            const entries = cleanedInput.split(/\d+ -1- 2024/).filter(entry => entry.trim());
+            const dates = cleanedInput.match(/\d+ -1- 2024/g) || [];
+            
+            entries.forEach((entry, index) => {
+                if (!dates[index]) return;
+                
+                const date = dates[index].trim();
+                const line = date + entry;
+                const plateIndex = line.indexOf('AG');
+                
+                if (plateIndex === -1) return;
+                
+                const plateNumber = line.substring(plateIndex, plateIndex + 11);
+                const afterPlate = line.substring(plateIndex + 11).trim();
+                const items = parseItems(afterPlate);
+                
+                items.forEach(item => {
+                    result.push({
+                        id: `asdaddd${counter}`,
+                        groupId: `asdsdas${index + 11}`,
+                        date: date.split(' ')[0] + '/1/2024',
+                        plateNumber: plateNumber.trim(),
+                        quantity: item.quantity,
+                        description: item.description
+                    });
+                    counter++;
+                });
+            });
+            
+            return result;
+        }
+
+        // Event listener for convert button
+        document.getElementById('convertBtn').addEventListener('click', function() {
+            const input = document.getElementById('inputData').value;
+            const output = document.getElementById('output');
+            
+            try {
+                if (!input.trim()) {
+                    output.textContent = 'Please enter some data to convert.';
+                    return;
+                }
+                
+                const transformedData = transformData(input);
+                const csvRows = transformedData.map(entry => 
+                    `${entry.id}\t${entry.groupId}\t${entry.date}\t${entry.plateNumber}\t${entry.quantity}\t${entry.description}`
+                );
+                output.textContent = csvRows.join('\n');
+            } catch (error) {
+                console.error(error);
+                output.textContent = 'Error processing data: ' + error.message;
+            }
+        });
+
+        // Copy output button
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const output = document.getElementById('output');
+            const text = output.textContent;
+            
+            if (!text.trim()) {
+                alert('No output to copy!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(
+                function() {
+                    alert('Output copied to clipboard!');
+                },
+                function(err) {
+                    console.error('Could not copy text: ', err);
+                    alert('Failed to copy output. Please select and copy manually.');
+                }
+            );
+        });
+
+        // Clear button
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('inputData').value = '';
+            document.getElementById('output').textContent = '';
+        });
+    </script>
+</body>
+</html>
