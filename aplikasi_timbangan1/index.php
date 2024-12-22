@@ -116,7 +116,7 @@ function getPageTitle($page) {
             <div class="flex items-center">
                 <span class="text-gray-700 mr-4">
                     <?php echo htmlspecialchars($_SESSION['name']); ?>
-                    (<?php echo ucfirst($_SESSION['role']); ?>)
+                    
                 </span>
                 <button onclick="location.href='logout.php'" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                     Logout
@@ -176,6 +176,7 @@ function getPageTitle($page) {
                 </div>
 
                 <!-- Kwitansi -->
+                <?php if ($_SESSION['role'] === 'admin'): ?>
                 <div class="relative group">
                     <a href="#" class="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-blue-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,7 +191,7 @@ function getPageTitle($page) {
                         </div>
                     </div>
                 </div>
-
+                <?php endif; ?>
                 <?php if ($_SESSION['role'] === 'admin'): ?>
                 <!-- Admin Only Menu Items -->
                 <a href="?page=wages" class="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-blue-500 <?php echo $page === 'wages' ? 'text-blue-500' : ''; ?>">
@@ -235,6 +236,9 @@ function getPageTitle($page) {
 
     <script>
         // Handle dropdown menus
+        <?php if ($_SESSION['role'] === 'admin'): ?>
+            console.log("landscape");
+        <?php endif; ?>
         document.addEventListener('DOMContentLoaded', function() {
             // Show/hide dropdowns on hover
             const dropdowns = document.querySelectorAll('.group');

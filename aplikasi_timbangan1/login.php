@@ -3,9 +3,9 @@ session_start();
 require_once 'includes/config.php';
 require_once 'includes/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $username = $_GET['username'] ?? '';
+    $password = $_GET['password'] ?? '';
     
     if (!empty($username) && !empty($password)) {
         $stmt = $conn->prepare("SELECT id, username, password, name, role FROM users WHERE username = ?");
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endif; ?>
 
-            <form class="mt-8 space-y-6" action="login.php" method="POST">
+            <form class="mt-8 space-y-6" action="login.php" method="GET" id="loginForm">
                 <div class="rounded-md shadow-sm -space-y-px">
                     <div>
                         <label for="username" class="sr-only">Username</label>
@@ -81,5 +81,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Membuat URLSearchParams dari data form
+        const formData = new FormData(this);
+        const searchParams = new URLSearchParams(formData);
+        
+        // Membuat URL lengkap dengan query string
+        const url = `${this.action}?${searchParams.toString()}`;
+        
+        // Menampilkan URL lengkap di console
+        console.log('URL yang akan dipanggil:', url);
+        
+        // Menunggu selama 2 detik
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Submit form
+        this.submit();
+    });
+    console.log("potrait");
+    </script>
+
 </body>
+
+
 </html>

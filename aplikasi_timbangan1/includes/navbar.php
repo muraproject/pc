@@ -46,6 +46,7 @@
             </div>
 
             <!-- Kwitansi -->
+             
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" 
                         class="flex flex-col items-center text-center group <?php echo in_array($page, ['receipt_in', 'receipt_out']) ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'; ?>">
