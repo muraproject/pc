@@ -1,6 +1,6 @@
 <?php
 // Default filter values
-$start_date = $_GET['start_date'] ?? date('Y-m-d', strtotime('-7 days'));
+$start_date = $_GET['start_date'] ?? date('Y-m-d', strtotime('-30 days'));
 $end_date = $_GET['end_date'] ?? date('Y-m-d');
 $supplier_id = $_GET['supplier_id'] ?? '';
 $search = $_GET['search'] ?? '';
@@ -110,12 +110,12 @@ $suppliers = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-medium text-gray-900">Daftar Kwitansi Masuk</h2>
                 <div class="flex space-x-2">
-                    <button onclick="exportToExcel()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
+                    <!-- <button onclick="exportToExcel()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
                         Export Excel
-                    </button>
+                    </button> -->
                 </div>
             </div>
 
@@ -156,11 +156,13 @@ $suppliers = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
                                     </button>
-                                    <button onclick="printReceipt('<?php echo $row['receipt_id']; ?>')" class="text-gray-600 hover:text-gray-900">
+                                    <?php if ($_SESSION['role'] === 'admin'): ?>
+                                    <button onclick="deleteReceipt('<?php echo $row['receipt_id']; ?>')" class="text-red-600 hover:text-red-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                     </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -319,112 +321,131 @@ function updateTotals() {
     document.querySelector('tfoot td:last-child').textContent = `${totalWeight.toFixed(2)} kg`;
 }
 
-// Print receipt
-function printReceipt(receiptId) {
-    fetch(`api/receipt_in.php?action=detail&receipt_id=${receiptId}`)
+function printDetail(receiptId) {
+    fetch(`api/generate_pdf.php?id=${receiptId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const printContent = document.createElement('div');
-                printContent.innerHTML = `
-                    <style>
-                        @media print {
-                            @page { 
-                                size: A4;
-                                margin: 10mm; 
-                            }
-                            .no-print { display: none; }
-                            table { 
-                                width: 100%; 
-                                border-collapse: collapse;
-                                margin: 10px 0;
-                            }
-                            th, td { 
-                                border: 1px solid black;
-                                padding: 5px;
-                                text-align: left;
-                            }
-                            .subtotal { background: #f0f0f0; }
-                        }
-                    </style>
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2>KWITANSI BARANG MASUK</h2>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <p>No: ${data.receipt_id}</p>
-                        <p>Tanggal: ${data.date}</p>
-                        <p>Supplier: ${data.supplier_name}</p>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Produk</th>
-                                <th>Berat (kg)</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                // Group items
-                const groupedItems = {};
-                data.items.forEach(item => {
-                    if (!groupedItems[item.product_name]) {
-                        groupedItems[item.product_name] = {
-                            items: [],
-                            subtotal_weight: 0
-                        };
-                    }
-                    groupedItems[item.product_name].items.push(item);
-                    groupedItems[item.product_name].subtotal_weight += parseFloat(item.weight);
-                });
-
-                let no = 1;
-                let totalWeight = 0;
-
-                Object.entries(groupedItems).forEach(([product, group]) => {
-                    group.items.forEach(item => {
-                        printContent.innerHTML += `
-                            <tr>
-                                <td>${no++}</td>
-                                <td>${product}</td>
-                                <td style="text-align: right">${item.weight.toFixed(2)}</td>
-                                <td style="text-align: right">${item.weight.toFixed(2)} kg</td>
-                            </tr>
-                        `;
-                    });
-
-                    printContent.innerHTML += `
-                        <tr class="subtotal">
-                            <td colspan="2">Subtotal ${product}</td>
-                            <td style="text-align: right">${group.subtotal_weight.toFixed(2)}</td>
-                            <td style="text-align: right">${group.subtotal_weight.toFixed(2)} kg</td>
-                        </tr>
-                    `;
-                    totalWeight += group.subtotal_weight;
-                });
-
-                printContent.innerHTML += `
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="3" style="text-align: right"><strong>Total Berat:</strong></td>
-                                <td style="text-align: right"><strong>${totalWeight.toFixed(2)} kg</strong></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                `;
-
-                const printWindow = window.open('', '', 'height=600,width=800');
-                printWindow.document.write(printContent.innerHTML);
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-                printWindow.close();
+                console.log('Download URL:', data.download_url);
+                // Trigger download
+                // window.location.href = data.download_url;
+            } else {
+                console.error('Error generating PDF:', data.message);
+                alert('Gagal membuat PDF: ' + data.message);
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan sistem');
         });
 }
+
+// Print receipt
+// function printReceipt(receiptId) {
+//     fetch(`api/receipt_in.php?action=detail&receipt_id=${receiptId}`)
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.success) {
+//                 const printContent = document.createElement('div');
+//                 printContent.innerHTML = `
+//                     <style>
+//                         @media print {
+//                             @page { 
+//                                 size: A4;
+//                                 margin: 10mm; 
+//                             }
+//                             .no-print { display: none; }
+//                             table { 
+//                                 width: 100%; 
+//                                 border-collapse: collapse;
+//                                 margin: 10px 0;
+//                             }
+//                             th, td { 
+//                                 border: 1px solid black;
+//                                 padding: 5px;
+//                                 text-align: left;
+//                             }
+//                             .subtotal { background: #f0f0f0; }
+//                         }
+//                     </style>
+//                     <div style="text-align: center; margin-bottom: 20px;">
+//                         <h2>KWITANSI BARANG MASUK</h2>
+//                     </div>
+//                     <div style="margin-bottom: 20px;">
+//                         <p>No: ${data.receipt_id}</p>
+//                         <p>Tanggal: ${data.date}</p>
+//                         <p>Supplier: ${data.supplier_name}</p>
+//                     </div>
+//                     <table>
+//                         <thead>
+//                             <tr>
+//                                 <th>No</th>
+//                                 <th>Produk</th>
+//                                 <th>Berat (kg)</th>
+//                                 <th>Total</th>
+//                             </tr>
+//                         </thead>
+//                         <tbody>
+//                 `;
+
+//                 // Group items
+//                 const groupedItems = {};
+//                 data.items.forEach(item => {
+//                     if (!groupedItems[item.product_name]) {
+//                         groupedItems[item.product_name] = {
+//                             items: [],
+//                             subtotal_weight: 0
+//                         };
+//                     }
+//                     groupedItems[item.product_name].items.push(item);
+//                     groupedItems[item.product_name].subtotal_weight += parseFloat(item.weight);
+//                 });
+
+//                 let no = 1;
+//                 let totalWeight = 0;
+
+//                 Object.entries(groupedItems).forEach(([product, group]) => {
+//                     group.items.forEach(item => {
+//                         printContent.innerHTML += `
+//                             <tr>
+//                                 <td>${no++}</td>
+//                                 <td>${product}</td>
+//                                 <td style="text-align: right">${item.weight.toFixed(2)}</td>
+//                                 <td style="text-align: right">${item.weight.toFixed(2)} kg</td>
+//                             </tr>
+//                         `;
+//                     });
+
+//                     printContent.innerHTML += `
+//                         <tr class="subtotal">
+//                             <td colspan="2">Subtotal ${product}</td>
+//                             <td style="text-align: right">${group.subtotal_weight.toFixed(2)}</td>
+//                             <td style="text-align: right">${group.subtotal_weight.toFixed(2)} kg</td>
+//                         </tr>
+//                     `;
+//                     totalWeight += group.subtotal_weight;
+//                 });
+
+//                 printContent.innerHTML += `
+//                         </tbody>
+//                         <tfoot>
+//                             <tr>
+//                                 <td colspan="3" style="text-align: right"><strong>Total Berat:</strong></td>
+//                                 <td style="text-align: right"><strong>${totalWeight.toFixed(2)} kg</strong></td>
+//                             </tr>
+//                         </tfoot>
+//                     </table>
+//                 `;
+
+//                 const printWindow = window.open('', '', 'height=600,width=800');
+//                 printWindow.document.write(printContent.innerHTML);
+//                 printWindow.document.close();
+//                 printWindow.focus();
+//                 printWindow.print();
+//                 printWindow.close();
+//             }
+//         });
+// }
 
 // Export to excel
 function exportToExcel() {
@@ -473,4 +494,31 @@ function saveChanges(receiptId) {
         }
     });
 }
+
+
+// Fungsi untuk menghapus kwitansi
+function deleteReceipt(receiptId) {
+    if (confirm('Apakah Anda yakin ingin menghapus kwitansi ini?')) {
+        fetch('api/receipt_in.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=delete&receipt_id=${receiptId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Gagal menghapus kwitansi: ' + data.message);
+            }
+        });
+    }
+}
+
+// function printDetail(receiptId) {
+//     // Arahkan ke file print terpisah seperti di receipt_out
+//     window.open(`api/print_receipt_in.php?id=${receiptId}`, '_blank');
+// }
 </script>

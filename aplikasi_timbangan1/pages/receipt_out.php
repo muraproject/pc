@@ -1,6 +1,6 @@
 <?php
 // Default filter values
-$start_date = $_GET['start_date'] ?? date('Y-m-d', strtotime('-7 days'));
+$start_date = $_GET['start_date'] ?? date('Y-m-d', strtotime('-30 days'));
 $end_date = $_GET['end_date'] ?? date('Y-m-d');
 $search = $_GET['search'] ?? '';
 
@@ -89,12 +89,12 @@ $result = $stmt->get_result();
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold text-gray-900">Daftar Kwitansi Barang Keluar</h2>
                 <div class="flex">
-                    <button onclick="exportToExcel()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 mr-2">
+                    <!-- <button onclick="exportToExcel()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 mr-2">
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
                         Export Excel
-                    </button>
+                    </button> -->
                 </div>
             </div>
 
@@ -139,11 +139,7 @@ $result = $stmt->get_result();
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
                                     </button>
-                                    <button onclick="printReceipt('<?php echo $row['receipt_id']; ?>')" class="text-gray-600 hover:text-gray-900 mr-3">
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                                        </svg>
-                                    </button>
+                                    
                                     <?php if ($_SESSION['role'] === 'admin'): ?>
                                     <button onclick="deleteReceipt('<?php echo $row['receipt_id']; ?>')" class="text-red-600 hover:text-red-900">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -413,10 +409,28 @@ function saveChanges(receiptId) {
    });
 }
 
-function printDetail(receiptId) {
-    window.open(`api/print_receipt_out.php?id=${receiptId}`, '_blank');
-}
+// function printDetail(receiptId) {
+//     window.open(`api/print_receipt_out.php?id=${receiptId}`, '_blank');
+// }
 
+function printDetail(receiptId) {
+    fetch(`api/generate_pdf_out.php?id=${receiptId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Download URL:', data.download_url);
+                // Trigger download
+                // window.location.href = data.download_url;
+            } else {
+                console.error('Error generating PDF:', data.message);
+                alert('Gagal membuat PDF: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan sistem');
+        });
+}
 function closeDetailModal() {
     document.getElementById('detailModal').classList.add('hidden');
 }
@@ -460,13 +474,25 @@ function exportToExcel() {
 }
 
 // Handle filter form submission
+// document.querySelector('form').addEventListener('submit', function(e) {
+//     e.preventDefault();
+//     const formData = new FormData(this);
+//     const params = new URLSearchParams();
+//     for (const [key, value] of formData.entries()) {
+//         if (value) params.append(key, value);
+//     }
+//     window.location.href = `?${params.toString()}`;
+// });
+
 document.querySelector('form').addEventListener('submit', function(e) {
     e.preventDefault();
     const formData = new FormData(this);
     const params = new URLSearchParams();
-    for (const [key, value] of formData.entries()) {
+    
+    for (let [key, value] of formData.entries()) {
         if (value) params.append(key, value);
     }
-    window.location.href = `?${params.toString()}`;
+    
+    window.location.href = `?page=receipt_out&${params.toString()}`;
 });
 </script>
