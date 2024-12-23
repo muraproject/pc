@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 18 Des 2024 pada 03.37
+-- Waktu pembuatan: 23 Des 2024 pada 09.18
 -- Versi server: 10.4.32-MariaDB
--- Versi PHP: 8.2.12
+-- Versi PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -65,7 +65,7 @@ CREATE TABLE `buyers` (
 
 INSERT INTO `buyers` (`id`, `name`, `address`, `phone`, `created_at`, `updated_at`) VALUES
 (1, 'PT Daur Ulang Indonesia', 'Jl. Industri No. 123, Jakarta', '08123456789', '2024-12-10 13:10:52', '2024-12-10 13:10:52'),
-(2, 'CV Plastik Jaya', 'Jl. Raya Bogor No. 45, Bogor', '08234567890', '2024-12-10 13:10:52', '2024-12-10 13:10:52'),
+(2, 'CV Plastik Jaya', 'Jl. Raya Bogor No. 45, Bogor', '08234567890', '2024-12-10 13:10:52', '2024-12-19 08:18:37'),
 (3, 'UD Recycle Sejahtera', 'Jl. Pemuda No. 67, Bekasi', '08345678901', '2024-12-10 13:10:52', '2024-12-10 13:10:52');
 
 -- --------------------------------------------------------
@@ -89,7 +89,8 @@ INSERT INTO `categories` (`id`, `name`, `created_at`, `updated_at`) VALUES
 (1, 'Plastik', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
 (2, 'Kertas', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
 (3, 'Logam', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
-(4, 'Botol', '2024-12-10 12:46:49', '2024-12-10 12:46:49');
+(4, 'Botol', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
+(5, 'Pipa', '2024-12-18 03:08:31', '2024-12-18 03:08:31');
 
 -- --------------------------------------------------------
 
@@ -117,10 +118,11 @@ INSERT INTO `products` (`id`, `category_id`, `name`, `created_at`, `updated_at`)
 (5, 2, 'Kardus', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
 (6, 2, 'Koran', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
 (7, 3, 'Besi', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
-(8, 3, 'Aluminium', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
+(8, 3, 'Aluminium1', '2024-12-10 12:46:49', '2024-12-19 07:42:03'),
 (9, 3, 'Tembaga', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
 (10, 4, 'Botol Plastik', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
-(11, 4, 'Botol Kaca', '2024-12-10 12:46:49', '2024-12-10 12:46:49');
+(11, 4, 'Botol Kaca', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
+(12, 5, 'Pipa GAS', '2024-12-18 03:08:45', '2024-12-18 03:44:15');
 
 -- --------------------------------------------------------
 
@@ -172,8 +174,8 @@ CREATE TABLE `suppliers` (
 --
 
 INSERT INTO `suppliers` (`id`, `name`, `address`, `phone`, `created_at`, `updated_at`) VALUES
-(1, 'PT Maju Jaya', 'Jl. Raya No. 123, Jakarta', '08123456789', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
-(2, 'CV Berkah', 'Jl. Industri No. 45, Bekasi', '08234567890', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
+(1, 'PT Maju Jaya', 'Jl. Raya No. 124, Jakarta', '08123456789', '2024-12-10 12:46:49', '2024-12-18 03:41:29'),
+(2, 'CV Berkah', 'Jl. Industri No. 45, Bekasi', '08234567890', '2024-12-10 12:46:49', '2024-12-19 07:42:18'),
 (3, 'UD Sejahtera', 'Jl. Pasar Baru No. 67, Tangerang', '08345678901', '2024-12-10 12:46:49', '2024-12-10 12:46:49');
 
 -- --------------------------------------------------------
@@ -201,7 +203,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `username`, `password`, `name`, `role`, `wage_per_kg`, `avatar`, `created_at`, `updated_at`) VALUES
 (1, 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', 'admin', 0.00, NULL, '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
 (2, 'operator1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'John Operator', 'user', 500.00, NULL, '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
-(3, 'operator2', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jane Operator', 'user', 500.00, NULL, '2024-12-10 12:46:49', '2024-12-10 12:46:49');
+(3, 'operator2', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jane Operator', 'user', 600.00, NULL, '2024-12-10 12:46:49', '2024-12-19 08:17:17');
 
 -- --------------------------------------------------------
 
@@ -347,19 +349,19 @@ ALTER TABLE `activity_logs`
 -- AUTO_INCREMENT untuk tabel `buyers`
 --
 ALTER TABLE `buyers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT untuk tabel `product_prices`
@@ -371,13 +373,13 @@ ALTER TABLE `product_prices`
 -- AUTO_INCREMENT untuk tabel `suppliers`
 --
 ALTER TABLE `suppliers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `weighing_in`
