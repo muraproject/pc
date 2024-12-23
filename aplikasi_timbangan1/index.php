@@ -98,6 +98,19 @@ function getPageTitle($page) {
 .main-content {
     padding-top: 56px;
 }
+
+nav .overflow-x-auto {
+    -ms-overflow-style: none;  /* untuk Internet Explorer dan Edge */
+    scrollbar-width: none;     /* untuk Firefox */
+}
+
+nav .overflow-x-auto::-webkit-scrollbar { 
+    display: none;  /* untuk Chrome, Safari dan Opera */
+}
+.hishis {
+    z-index: 500; /* Pastikan popup di atas navbar */
+}
+
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
@@ -132,9 +145,9 @@ function getPageTitle($page) {
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="bg-white fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-around">
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200">
+        <div class="px-2 overflow-x-auto"> <!-- Hapus max-w-7xl dan tambahkan overflow-x-auto -->
+            <div class="flex whitespace-nowrap py-2">
                 <!-- Dashboard -->
                 <a href="?page=dashboard" class="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-blue-500 <?php echo $page === 'dashboard' ? 'text-blue-500' : ''; ?>">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,13 +174,13 @@ function getPageTitle($page) {
 
                 <!-- History -->
                 <div class="relative group">
-                    <a href="#" class="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-blue-500">
+                    <a href="#" onclick="toggleHistoryDropdown()" class="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-blue-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <span class="text-xs">History</span>
                     </a>
-                    <div class="absolute bottom-full left-0 mb-1 hidden group-hover:block">
+                    <div id="historyDropdown" style="display:none;" class="fixed left-0 right-0 bottom-16 mx-auto w-48 bg-white rounded-lg shadow-lg py-1">
                         <div class="bg-white rounded-lg shadow-lg">
                             <a href="?page=history_in" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History Masuk</a>
                             <a href="?page=history_out" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History Keluar</a>
@@ -178,13 +191,13 @@ function getPageTitle($page) {
                 <!-- Kwitansi -->
                 <?php if ($_SESSION['role'] === 'admin'): ?>
                 <div class="relative group">
-                    <a href="#" class="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-blue-500">
+                    <a href="#" onclick="toggleKwitansiDropdown()" class="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-blue-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                         <span class="text-xs">Kwitansi</span>
                     </a>
-                    <div class="absolute bottom-full left-0 mb-1 hidden group-hover:block">
+                    <div id="kwitansiDropdown" style="display:none;" class="fixed left-0 right-0 bottom-16 mx-auto w-48 bg-white rounded-lg shadow-lg py-1">
                         <div class="bg-white rounded-lg shadow-lg">
                             <a href="?page=receipt_in" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kwitansi Masuk</a>
                             <a href="?page=receipt_out" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kwitansi Keluar</a>
@@ -237,7 +250,7 @@ function getPageTitle($page) {
     <script>
         // Handle dropdown menus
         <?php if ($_SESSION['role'] === 'admin'): ?>
-            console.log("landscape");
+            //console.log("landscape");
         <?php endif; ?>
         document.addEventListener('DOMContentLoaded', function() {
             // Show/hide dropdowns on hover
@@ -263,7 +276,19 @@ function getPageTitle($page) {
                 });
             }
         });
-
+        
+        function toggleHistoryDropdown() {
+            // Tutup semua dropdown dulu
+           document.getElementById("historyDropdown").style.display = "block";
+           document.getElementById("kwitansiDropdown").style.display = "none";
+            
+        }
+        function toggleKwitansiDropdown() {
+            // Tutup semua dropdown dulu
+           document.getElementById("kwitansiDropdown").style.display = "block";
+           document.getElementById("historyDropdown").style.display = "none";
+            
+        }
         // Bluetooth connection status handler
         let isBluetoothConnected = false;
 

@@ -130,5 +130,5 @@ $pdf->Output('F', $filepath);
 // Return download URL
 echo json_encode([
     'success' => true,
-    'download_url' => 'api/download.php?filename=' . $filename
+    'download_url' => '/pc/aplikasi_timbangan1/api/download.php?filename=' . $filename
 ]);
