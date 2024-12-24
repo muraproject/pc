@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 23 Des 2024 pada 09.18
+-- Waktu pembuatan: 24 Des 2024 pada 10.05
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.0.30
 
@@ -43,6 +43,19 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `action`, `details`, `created_at`)
 (1, 1, 'LOGIN', '{\"ip\": \"127.0.0.1\", \"user_agent\": \"Mozilla/5.0\"}', '2024-12-10 12:46:49'),
 (2, 2, 'WEIGHING_IN', '{\"receipt_id\": \"IN202312100001\", \"total_weight\": 175.75}', '2024-12-10 12:46:49'),
 (3, 3, 'WEIGHING_OUT', '{\"receipt_id\": \"OUT202312100002\", \"total_amount\": 403800}', '2024-12-10 12:46:49');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `assembly_components`
+--
+
+CREATE TABLE `assembly_components` (
+  `id` int(11) NOT NULL,
+  `assembly_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -123,6 +136,19 @@ INSERT INTO `products` (`id`, `category_id`, `name`, `created_at`, `updated_at`)
 (10, 4, 'Botol Plastik', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
 (11, 4, 'Botol Kaca', '2024-12-10 12:46:49', '2024-12-10 12:46:49'),
 (12, 5, 'Pipa GAS', '2024-12-18 03:08:45', '2024-12-18 03:44:15');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `product_assemblies`
+--
+
+CREATE TABLE `product_assemblies` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -208,6 +234,32 @@ INSERT INTO `users` (`id`, `username`, `password`, `name`, `role`, `wage_per_kg`
 -- --------------------------------------------------------
 
 --
+-- Struktur dari tabel `wages_data`
+--
+
+CREATE TABLE `wages_data` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `shift` enum('pagi','sore','malam') NOT NULL,
+  `weight` decimal(10,2) NOT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `wages_data`
+--
+
+INSERT INTO `wages_data` (`id`, `user_id`, `category_id`, `product_id`, `shift`, `weight`, `notes`, `created_at`) VALUES
+(1, 3, 4, 11, 'pagi', 0.00, NULL, '2024-12-24 06:58:15'),
+(2, 3, 2, 4, 'pagi', 101.00, NULL, '2024-12-24 06:59:11'),
+(3, 2, 2, 4, 'pagi', 101.00, NULL, '2024-12-24 07:07:23');
+
+-- --------------------------------------------------------
+
+--
 -- Struktur dari tabel `weighing_in`
 --
 
@@ -274,6 +326,14 @@ ALTER TABLE `activity_logs`
   ADD KEY `idx_activity_logs_date` (`created_at`);
 
 --
+-- Indeks untuk tabel `assembly_components`
+--
+ALTER TABLE `assembly_components`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `assembly_id` (`assembly_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
 -- Indeks untuk tabel `buyers`
 --
 ALTER TABLE `buyers`
@@ -289,6 +349,13 @@ ALTER TABLE `categories`
 -- Indeks untuk tabel `products`
 --
 ALTER TABLE `products`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `category_id` (`category_id`);
+
+--
+-- Indeks untuk tabel `product_assemblies`
+--
+ALTER TABLE `product_assemblies`
   ADD PRIMARY KEY (`id`),
   ADD KEY `category_id` (`category_id`);
 
@@ -312,6 +379,16 @@ ALTER TABLE `suppliers`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`);
+
+--
+-- Indeks untuk tabel `wages_data`
+--
+ALTER TABLE `wages_data`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user` (`user_id`),
+  ADD KEY `idx_category` (`category_id`),
+  ADD KEY `idx_product` (`product_id`),
+  ADD KEY `idx_created` (`created_at`);
 
 --
 -- Indeks untuk tabel `weighing_in`
@@ -346,6 +423,12 @@ ALTER TABLE `activity_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT untuk tabel `assembly_components`
+--
+ALTER TABLE `assembly_components`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT untuk tabel `buyers`
 --
 ALTER TABLE `buyers`
@@ -364,6 +447,12 @@ ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
+-- AUTO_INCREMENT untuk tabel `product_assemblies`
+--
+ALTER TABLE `product_assemblies`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT untuk tabel `product_prices`
 --
 ALTER TABLE `product_prices`
@@ -380,6 +469,12 @@ ALTER TABLE `suppliers`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT untuk tabel `wages_data`
+--
+ALTER TABLE `wages_data`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT untuk tabel `weighing_in`
@@ -404,16 +499,37 @@ ALTER TABLE `activity_logs`
   ADD CONSTRAINT `activity_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
+-- Ketidakleluasaan untuk tabel `assembly_components`
+--
+ALTER TABLE `assembly_components`
+  ADD CONSTRAINT `assembly_components_ibfk_1` FOREIGN KEY (`assembly_id`) REFERENCES `product_assemblies` (`id`),
+  ADD CONSTRAINT `assembly_components_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+
+--
 -- Ketidakleluasaan untuk tabel `products`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
 
 --
+-- Ketidakleluasaan untuk tabel `product_assemblies`
+--
+ALTER TABLE `product_assemblies`
+  ADD CONSTRAINT `product_assemblies_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
+
+--
 -- Ketidakleluasaan untuk tabel `product_prices`
 --
 ALTER TABLE `product_prices`
   ADD CONSTRAINT `product_prices_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+
+--
+-- Ketidakleluasaan untuk tabel `wages_data`
+--
+ALTER TABLE `wages_data`
+  ADD CONSTRAINT `wages_data_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `wages_data_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
+  ADD CONSTRAINT `wages_data_ibfk_3` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 --
 -- Ketidakleluasaan untuk tabel `weighing_in`
