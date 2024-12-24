@@ -1,127 +1,206 @@
 <?php
+header('Content-Type: application/json');
 require_once '../includes/db.php';
 require_once '../includes/functions.php';
 
-// Set headers for Excel download
-header('Content-Type: application/vnd.ms-excel');
-header('Content-Disposition: attachment;filename="wages_export.xls"');
-header('Cache-Control: max-age=0');
+session_start();
 
-// Get filter parameters
-$start_date = $_GET['start_date'] ?? date('Y-m-d', strtotime('-7 days'));
-$end_date = $_GET['end_date'] ?? date('Y-m-d');
-$user_id = $_GET['user_id'] ?? '';
-$category_id = $_GET['category_id'] ?? '';
-$product_id = $_GET['product_id'] ?? '';
-$search = $_GET['search'] ?? '';
-
-// Build query
-$query = "
-    SELECT 
-        w.created_at,
-        u.name as user_name,
-        c.name as category_name,
-        p.name as product_name,
-        w.weight,
-        u.wage_per_kg,
-        (w.weight * u.wage_per_kg) as total_wage
-    FROM wages_data w
-    LEFT JOIN users u ON w.user_id = u.id
-    LEFT JOIN categories c ON w.category_id = c.id
-    LEFT JOIN products p ON w.product_id = p.id
-    WHERE 1=1
-";
-
-$params = [];
-$types = "";
-
-if ($start_date) {
-    $query .= " AND DATE(w.created_at) >= ?";
-    $params[] = $start_date;
-    $types .= "s";
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    echo json_encode(['success' => false, 'message' => 'Permission denied']);
+    exit;
 }
 
-if ($end_date) {
-    $query .= " AND DATE(w.created_at) <= ?";
-    $params[] = $end_date;
-    $types .= "s";
+$action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+switch ($action) {
+    case 'get':
+        getWageData();
+        break;
+    case 'update':
+        updateWageData();
+        break;
+    case 'delete':
+        deleteWageData();
+        break;
+    default:
+        echo json_encode(['success' => false, 'message' => 'Invalid action']);
 }
 
-if ($user_id) {
-    $query .= " AND w.user_id = ?";
-    $params[] = $user_id;
-    $types .= "i";
-}
-
-if ($category_id) {
-    $query .= " AND w.category_id = ?";
-    $params[] = $category_id;
-    $types .= "i";
-}
-
-if ($product_id) {
-    $query .= " AND w.product_id = ?";
-    $params[] = $product_id;
-    $types .= "i";
-}
-
-if ($search) {
-    $search = "%$search%";
-    $query .= " AND (u.name LIKE ?)";
-    $params[] = $search;
-    $types .= "s";
-}
-
-$query .= " ORDER BY w.created_at DESC";
-
-// Execute query
-$stmt = $conn->prepare($query);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
-$stmt->execute();
-$result = $stmt->get_result();
-
-// Create Excel content
-echo "
-<table border='1'>
-    <tr>
-        <th>Tanggal</th>
-        <th>Penimbang</th>
-        <th>Kategori</th>
-        <th>Produk</th>
-        <th>Berat (kg)</th>
-        <th>Upah/kg</th>
-        <th>Total Upah</th>
-    </tr>
-";
-
-$total_weight = 0;
-$total_wages = 0;
-
-while ($row = $result->fetch_assoc()) {
-    $total_weight += $row['weight'];
-    $total_wages += $row['total_wage'];
+function getWageData() {
+    global $conn;
+    $id = $_GET['id'] ?? 0;
     
-    echo "
-    <tr>
-        <td>" . date('d/m/Y H:i', strtotime($row['created_at'])) . "</td>
-        <td>" . htmlspecialchars($row['user_name']) . "</td>
-        <td>" . htmlspecialchars($row['category_name']) . "</td>
-        <td>" . htmlspecialchars($row['product_name']) . "</td>
-        <td>" . number_format($row['weight'], 2) . "</td>
-        <td>Rp " . number_format($row['wage_per_kg']) . "</td>
-        <td>Rp " . number_format($row['total_wage']) . "</td>
-    </tr>
-    ";
+    $stmt = $conn->prepare("
+        SELECT 
+            w.id,
+            w.user_id,
+            w.category_id,
+            w.product_id,
+            w.shift,
+            w.weight,
+            w.notes,
+            u.name as user_name,
+            c.name as category_name,
+            p.name as product_name
+        FROM wages_data w
+        LEFT JOIN users u ON w.user_id = u.id
+        LEFT JOIN categories c ON w.category_id = c.id
+        LEFT JOIN products p ON w.product_id = p.id
+        WHERE w.id = ?
+    ");
+    
+    if (!$stmt) {
+        error_log("Prepare failed: " . $conn->error);
+        echo json_encode(['success' => false, 'message' => 'Database error']);
+        return;
+    }
+    
+    $stmt->bind_param("i", $id);
+    
+    if (!$stmt->execute()) {
+        error_log("Execute failed: " . $stmt->error);
+        echo json_encode(['success' => false, 'message' => 'Database error']);
+        return;
+    }
+    
+    $result = $stmt->get_result();
+    
+    if ($row = $result->fetch_assoc()) {
+        echo json_encode(['success' => true] + $row);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Data not found']);
+    }
 }
 
-echo "
-    <tr>
-        <td colspan='4'><strong>Total</strong></td>
-        <td><strong>" . number_format($total_weight, 2) . "</strong></td>
-        <td></td>
-        <td><strong>Rp " . number_format($total_wages) . "</strong></td>
-    </tr>
-</table>";
+function updateWageData() {
+    global $conn;
+    
+    // Get POST data
+    $id = $_POST['id'] ?? 0;
+    $user_id = $_POST['user_id'] ?? 0;
+    $category_id = $_POST['category_id'] ?? 0;
+    $product_id = $_POST['product_id'] ?? 0;
+    $shift = $_POST['shift'] ?? '';
+    $weight = $_POST['weight'] ?? 0;
+    $notes = $_POST['notes'] ?? '';
+    
+    // Validate required fields
+    if (!$id || !$user_id || !$category_id || !$product_id || !$shift || !$weight) {
+        echo json_encode(['success' => false, 'message' => 'Semua field wajib diisi kecuali keterangan']);
+        return;
+    }
+
+    // Start transaction
+    $conn->begin_transaction();
+
+    try {
+        // Update wages_data record
+        $stmt = $conn->prepare("
+            UPDATE wages_data 
+            SET user_id = ?,
+                category_id = ?,
+                product_id = ?,
+                shift = ?,
+                weight = ?,
+                notes = ?
+            WHERE id = ?
+        ");
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+
+        $stmt->bind_param("iiisdsi", 
+            $user_id, 
+            $category_id, 
+            $product_id, 
+            $shift, 
+            $weight, 
+            $notes,
+            $id
+        );
+
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        if ($stmt->affected_rows === 0) {
+            throw new Exception("No data was updated");
+        }
+
+        $conn->commit();
+        echo json_encode(['success' => true]);
+
+    } catch (Exception $e) {
+        $conn->rollback();
+        error_log("Error updating wage data: " . $e->getMessage());
+        echo json_encode([
+            'success' => false,
+            'message' => 'Gagal mengupdate data: ' . $e->getMessage()
+        ]);
+    }
+}
+
+function deleteWageData() {
+    global $conn;
+    
+    $id = $_POST['id'] ?? 0;
+    
+    if (!$id) {
+        echo json_encode(['success' => false, 'message' => 'ID tidak valid']);
+        return;
+    }
+    
+    $conn->begin_transaction();
+
+    try {
+        // First check if record exists
+        $check = $conn->prepare("SELECT id FROM wages_data WHERE id = ?");
+        $check->bind_param("i", $id);
+        $check->execute();
+        
+        if ($check->get_result()->num_rows === 0) {
+            throw new Exception("Data tidak ditemukan");
+        }
+
+        // Delete record
+        $stmt = $conn->prepare("DELETE FROM wages_data WHERE id = ?");
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+
+        $stmt->bind_param("i", $id);
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        $conn->commit();
+        echo json_encode(['success' => true]);
+
+    } catch (Exception $e) {
+        $conn->rollback();
+        error_log("Error deleting wage data: " . $e->getMessage());
+        echo json_encode([
+            'success' => false,
+            'message' => 'Gagal menghapus data: ' . $e->getMessage()
+        ]);
+    }
+}
+
+// Helper function to validate numeric input
+function validateNumeric($value, $field_name) {
+    if (!is_numeric($value) || $value <= 0) {
+        throw new Exception("$field_name harus berupa angka positif");
+    }
+    return true;
+}
+
+// Helper function to validate string input
+function validateString($value, $field_name, $required = true) {
+    if ($required && empty(trim($value))) {
+        throw new Exception("$field_name tidak boleh kosong");
+    }
+    return true;
+}
 ?>
