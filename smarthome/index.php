@@ -17,13 +17,30 @@
 
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
+
+        <!-- Tambahkan di header index.php -->
         <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Smart Home Monitoring System</h1>
+            <div class="flex gap-4">
+                <a href="log.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    Lihat Log
+                </a>
+                <button onclick="openAddModal()" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    Tambah Sensor
+                </button>
+            </div>
+        </div>
+
+        <!-- <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Smart Home Monitoring System</h1>
             <button onclick="openAddModal()" 
                     class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
                 Tambah Sensor
             </button>
-        </div>
+        </div> -->
+
+        
 
         <!-- CCTV Section -->
         <div class="mb-8">

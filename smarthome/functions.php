@@ -122,49 +122,56 @@ class HomeAutomation {
        }
    }
 
-   // Toggle status device
-   public function toggleDevice($device_name, $type) {
-       try {
-           switch ($type) {
-               case 'light':
-                   $query = "UPDATE control_points 
-                            SET status = CASE 
-                                WHEN status = 'Mati' THEN 'Nyala' 
-                                ELSE 'Mati' 
-                            END 
-                            WHERE name = ? AND type = ?";
-                   break;
-                   
-               case 'door':
-                   $query = "UPDATE control_points 
-                            SET status = CASE 
-                                WHEN status = 'Terkunci' THEN 'Terbuka' 
-                                ELSE 'Terkunci' 
-                            END 
-                            WHERE name = ? AND type = ?";
-                   break;
-                   
-               default:
-                   return ['success' => false, 'message' => 'Invalid device type'];
-           }
+   // Update fungsi toggleDevice di class HomeAutomation (functions.php)
+    public function toggleDevice($device_name, $type) {
+        try {
+            // Get current status first
+            $stmt = $this->db->prepare("SELECT status FROM control_points WHERE name = ? AND type = ?");
+            $stmt->execute([$device_name, $type]);
+            $current = $stmt->fetch(PDO::FETCH_ASSOC);
 
-           $stmt = $this->db->prepare($query);
-           $result = $stmt->execute([$device_name, $type]);
-           
-           if ($result) {
-               // Get updated status
-               $stmt = $this->db->prepare("SELECT status FROM control_points WHERE name = ? AND type = ?");
-               $stmt->execute([$device_name, $type]);
-               $newStatus = $stmt->fetch(PDO::FETCH_ASSOC);
-               return ['success' => true, 'status' => $newStatus['status']];
-           }
-           return ['success' => false, 'message' => 'Failed to update status'];
-           
-       } catch (PDOException $e) {
-           error_log("Error toggling device: " . $e->getMessage());
-           return ['success' => false, 'message' => $e->getMessage()];
-       }
-   }
+            if (!$current) {
+                return ['success' => false, 'message' => 'Device not found'];
+            }
+
+            $old_status = $current['status'];
+            $new_status = '';
+
+            switch ($type) {
+                case 'light':
+                    $new_status = ($old_status == 'Mati') ? 'Nyala' : 'Mati';
+                    break;
+                    
+                case 'door':
+                    $new_status = ($old_status == 'Terkunci') ? 'Terbuka' : 'Terkunci';
+                    break;
+                    
+                default:
+                    return ['success' => false, 'message' => 'Invalid device type'];
+            }
+
+            // Update status
+            $stmt = $this->db->prepare("UPDATE control_points SET status = ? WHERE name = ? AND type = ?");
+            $result = $stmt->execute([$new_status, $device_name, $type]);
+            
+            if ($result) {
+                // Log the change
+                $stmt = $this->db->prepare("INSERT INTO logs (device_name, type, old_status, new_status) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$device_name, $type, $old_status, $new_status]);
+
+                return [
+                    'success' => true, 
+                    'status' => $new_status,
+                    'message' => "Updated $device_name from $old_status to $new_status"
+                ];
+            }
+            return ['success' => false, 'message' => 'Failed to update status'];
+            
+        } catch (PDOException $e) {
+            error_log("Error toggling device: " . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
 
    // Update nilai sensor
    public function updateSensorValue($sensor_name, $value) {
